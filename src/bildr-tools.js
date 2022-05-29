@@ -531,19 +531,19 @@ var BildrTools = {
     },
 
     Debug: {
-        Tracer: {
+        Trace: {
             Start: debugStartFlowTracer,
             Stop: debugStopFlowTracer,
             TraceFlowsOnly: function () { debugZettingShowAllActions = false },
             TraceFlowsAndActions: function () { debugZettingShowAllActions = true },
+            BreakBeforeActionID: debugBreakBeforeActionID,
             StepMode: {
-                OnBeforeActionID: debugBreakBeforeActionID,
                 On: debugTurnStepModeOn,
                 Off: debugTurnStepModeOff
             },
         },
 
-        ShowAllVariable: debugShowAllVariables,
+        ShowAllVariables: debugShowAllVariables,
 
         Settings: {
             get AutoShowVariables() { return debugZettingAutoShowVariables },
@@ -555,3 +555,72 @@ var BildrTools = {
     }
 }
 var U = BildrTools;
+
+BildrTools["ActionTypes"] = {
+    findUsage: function (actionTypeId) {
+        let logToConsole = true;
+        function ConsoleLog(text) {
+            if (logToConsole) { console.log(text); }
+        }
+
+        let theActions = BildrDBCacheGet(1).actions.recs;
+        let theForms = BildrDBCacheGet(1).forms.recs;
+        let actionTypes = BildrDBCacheGet(1).actionsTypes.recs;
+        let activeForms = theForms.filter(item => { return (item.deleted == 0) });
+
+        // for easy reference
+        const flowsGroupedByFormID = theActions.filter(action => { return (action.type == "68" && action.deleted == 0) }).groupBy("formID");
+
+        // Create "Header" for the results
+        let theActionType = actionTypes.find(acT => { return (acT.id == actionTypeId) })
+        // found it
+        if (theActionType) {
+            ConsoleLog(`Action Type "${theActionType.name}" is called by:`);
+            ConsoleLog("");
+        } else {
+            ConsoleLog(`Couldn't find Action Type ${actionTypeId} in project!`);
+            return false;
+        }
+
+        // check flow usage per active form
+        activeForms.forEach(form => {
+
+            if (!form.actions) { return; }
+
+            // actions in form.actions are not marked as deleted
+            let activeFlows = flowsGroupedByFormID[form.id];
+            if (!activeFlows) { return }
+
+            let formNameLogged = false;
+            // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
+            activeFlows.nameSort().forEach(flow => {
+                let actionsArrayValue = [];
+                if (flow.opts && flow.opts.arguments) {
+                    let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray" });
+                    if (actionsArray && actionsArray.value) {
+                        actionsArrayValue = actionsArray.value;
+                    }
+                };
+
+                if (actionsArrayValue) {
+                    actionsArrayValue.forEach(actionRef => {
+                        // Used in an argument of an action type?
+                        let action = theActions.find(item => { return (item.id == actionRef.id) });
+
+                        if (action && action.type && action.type == actionTypeId) {
+                            isUsed = true;
+                            if (!formNameLogged) {
+                                formNameLogged = true;
+                                ConsoleLog("Form : " + form.name);
+                            }
+                            ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                            ConsoleLog("    Action : " + action.name);
+                        }
+                    })
+                }
+            });
+        })
+        ConsoleLog("");
+        ConsoleLog("THAT'S IT!");    
+    }
+}
