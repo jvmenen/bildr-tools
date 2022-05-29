@@ -100,6 +100,7 @@ BildrTools
         
     .Debug
         .ShowAllVariables()
+        
         .Trace
             .Start()
             .Stop()
@@ -109,10 +110,11 @@ BildrTools
             .StepMode
                 .On()
                 .Off()
-
+                
         .Settings
             .AutoShowVariables(boolean) 
-            .ShowBildrActions(boolean) 
+            .ShowBildrActions(boolean)
+            
     .Flows
         .findUnused()
         .findUsage(flowId),
