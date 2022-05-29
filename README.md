@@ -91,3 +91,32 @@ Done debugging?
 
 ## Feedback? Questions?
 
+
+## BildrTools functionality
+```
+BildrTools
+    .ActionTypes
+        .findUsage(actionTypeId)
+        
+    .Debug
+        .ShowAllVariables()
+        .Trace
+            .Start()
+            .Stop()
+            .TraceFlowsOnly()
+            .TraceFlowsAndActions()
+            .BreakBeforeActionID(flowId or actionId)
+            .StepMode
+                .On()
+                .Off()
+
+        .Settings
+            .AutoShowVariables(boolean) 
+            .ShowBildrActions(boolean) 
+    .Flows
+        .findUnused()
+        .findUsage(flowId),
+        .findUsageOfDeletedFlows()
+        .getFlowAndActions(flowId)
+
+```
