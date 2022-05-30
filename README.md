@@ -15,7 +15,7 @@ BildrTools will be available as long as you don't refresh the Studio browser tab
 Have it always available when you open your project:
 - in Bildr Studio open the Page Headers (from left menubar)
 - add a new Page Header
-- Name it 'Bildr Tools' and add this script tag as the value `<script src='https://jeroenvanmenen.synology.me/bildr-tools.js'/>`
+- Name it 'Bildr Tools' and add this script tag as the value `<script src='https://jeroenvanmenen.synology.me/bildr-tools.js'/></script>`
 - save and reopen it.
 - set 'Load this page header in the studio?' to Yes
 - set 'Load on all root pages (pages with routes)' to Yes if you want to use BildrTools.Debug in your preview site
