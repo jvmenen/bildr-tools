@@ -2,7 +2,7 @@
 The place for Bildr scripts to enhance the already awesome functionality of the low-code https://bildr.com developement Studio
 
 ## Installing BildrTools
-you can find production script here : [bildr-tools.js](./dist/bildr-tools.js)
+you can find production script here : [bildr-tools.js](./dist/)
 
 ### Use it one session only:
 - open the bildr-tools.js script file in notepad or another viewer and copy the content
