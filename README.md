@@ -2,7 +2,9 @@
 The place for Bildr scripts to enhance the already awesome functionality of the low-code https://bildr.com developement Studio
 
 ## Installing BildrTools
-Use it one session only:
+you can find production script here : [bildr-tools.js](./dist/)
+
+### Use it one session only:
 - open the bildr-tools.js script file in notepad or another viewer and copy the content
 - in Bildr Studio right click on the left menubar
 - select "Inspect", the developer tools window will open
@@ -11,8 +13,7 @@ Use it one session only:
  
 BildrTools will be available as long as you don't refresh the Studio browser tab (or close it).
 
-### or
-Have it always available when you open your project:
+### or have it always available when you open your project:
 - in Bildr Studio open the Page Headers (from left menubar)
 - add a new Page Header
 - Name it 'Bildr Tools' and add this script tag as the value `<script src='https://jeroenvanmenen.synology.me/bildr-tools.js'/></script>`
