@@ -1,5 +1,3 @@
-import { action, BildrDBCache, nameId} from "./bildr/BildrInterfaces";
-import { BildrDBCacheGet } from "./bildr/BildrStubs"
 
 const groupBy = <T, K extends keyof any>(list: T[], getKey: (item: T) => K) =>
     list.reduce((previous, currentItem) => {
@@ -19,11 +17,11 @@ export class BildrCacheHelper {
     public constructor(projectID: string, revisionID: string);
     public constructor(...myarray: any[]) {
         if (myarray.length === 1) {
-            this.cache = BildrDBCacheGet(myarray[0], "", "")!;
+            this.cache = BildrDBCacheGet(myarray[0], "", "","")!;
         } else if (myarray.length === 2) {
-            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1])!;
+            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1],"")!;
         } else {
-            this.cache = BildrDBCacheGet(true, "", "")!;
+            this.cache = BildrDBCacheGet(true, "", "","")!;
         }
     }
     get actions() {

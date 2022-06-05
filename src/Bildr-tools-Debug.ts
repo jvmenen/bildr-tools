@@ -1,5 +1,3 @@
-import { brwForm } from "./bildr/BildrInterfaces";
-import { brwFormRoot } from "./bildr/BildrStubs";
 
 export const BildrToolsDebug = {
     ShowAllVariables: () => {

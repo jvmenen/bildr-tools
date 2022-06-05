@@ -1,5 +1,4 @@
 import { BildrCacheHelper, nameSort } from "./Bildr-tools-utils";
-import { actId, actionArgumentActionsArray, actionArgumentStaticActions, actionRef, element } from "./bildr/BildrInterfaces";
 
 export const BildrToolsFlows = {
     findUnusedFlows: (skipAutoSave = true, bildrCache = new BildrCacheHelper(true)) => {
@@ -196,7 +195,7 @@ export const BildrToolsFlows = {
 
         return isUsed;
     },
-    findUsageOfDeletedFlows: (bildrCache = new BildrCacheHelper(false)) => {
+    findUsageOfDeletedFlows: (bildrCache = new BildrCacheHelper(true)) => {
         // for easy reference
 
         function isDeletedFlow(flowId: actId) {

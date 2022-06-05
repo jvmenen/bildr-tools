@@ -1,23 +1,23 @@
-export interface BildrDBCache {
+declare interface BildrDBCache {
     actions: group<action>,
     elements: group<element>,
     forms: group<form>,
     actionsTypes: group<actionType>
 }
 
-export interface group<T> extends nameId {
+declare interface group<T> extends nameId {
     projectID: string;
     recs: T[]
 }
-export interface actionType extends nameIdDeleted { }
+declare interface actionType extends nameIdDeleted { }
 
-export interface form extends nameIdDeleted {
+declare interface form extends nameIdDeleted {
     opts: formOpts;
     objsTree?: element[];
     actions: action[];
 }
 
-export interface formOpts {
+declare interface formOpts {
     resonanceDataListeners?: resonanceDataListener[];
     newRevisionActID?: actId | undefined;
     notAuthenticatedActID?: actId | undefined;
@@ -27,14 +27,14 @@ export interface formOpts {
     autoSaveActionID?: actId | undefined;
 }
 
-export type actId = string | number;
+declare type actId = string | number;
 
-export interface resonanceDataListener {
+declare interface resonanceDataListener {
     actID: actId | undefined;
 
 }
 
-export interface action extends nameIdDeleted {
+declare interface action extends nameIdDeleted {
     opts: {
         arguments: actionArgument[]
     };
@@ -42,20 +42,20 @@ export interface action extends nameIdDeleted {
     type: string;
 }
 
-export interface actionArgument {
+declare interface actionArgument {
     type?: string;
     name: string;
 }
 
-export interface actionArgumentActionsArray extends actionArgument {
+declare interface actionArgumentActionsArray extends actionArgument {
     value: actionRef[] | null;
 }
 
-export interface actionArgumentStaticActions extends actionArgument {
+declare interface actionArgumentStaticActions extends actionArgument {
     value: string;
 }
 
-export interface element extends nameIdDeleted {
+declare interface element extends nameIdDeleted {
     items: element[] | undefined;
     opts: {
         arguments: actionArgument[];
@@ -65,31 +65,31 @@ export interface element extends nameIdDeleted {
     type: string;
 }
 
-export interface event {
+declare interface event {
     actID: string | null;
     code: string;
     eventID: number;
     _arrayIndex: number;
 }
 
-export interface nameIdDeleted extends nameId {
+declare interface nameIdDeleted extends nameId {
     deleted: number;
 }
 
-export interface nameId {
+declare interface nameId {
     name: string;
     id: string | number;
 }
 
-export interface actionsArray {
+declare interface actionsArray {
     value: actionRef[];
 }
 
-export interface actionRef extends nameId { }
+declare interface actionRef extends nameId { }
 
-export interface formInstance extends nameIdDeleted { }
+declare interface formInstance extends nameIdDeleted { }
 
-export interface brwForm {
+declare interface brwForm {
     name: any;
     form: formInstance;
     cBrwForms: brwForm[];

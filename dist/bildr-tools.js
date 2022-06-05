@@ -1,1 +1,608 @@
-(()=>{"use strict";var o={d:(e,t)=>{for(var n in t)o.o(t,n)&&!o.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:t[n]})},o:(o,e)=>Object.prototype.hasOwnProperty.call(o,e),r:o=>{"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(o,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(o,"__esModule",{value:!0})}},e={};function t(o,e,t){let n=window.BildrDBCacheGet;return null!=n?n(o,e,t):null}o.r(e),o.d(e,{ActionTypes:()=>l,Debug:()=>a,Flows:()=>r});const n=o=>o.sort(((o,e)=>(""+o.name).localeCompare(e.name)));class s{constructor(...o){1===o.length?this.cache=t(o[0],"",""):2===o.length?this.cache=t(!1,o[0],o[1]):this.cache=t(!0,"","")}get actions(){return this.cache.actions.recs}get forms(){return this.cache.forms.recs}get actionTypes(){return this.cache.actionsTypes.recs}get activeForms(){return this.forms.filter((o=>0==o.deleted))}get activeFlows(){return this.actions.filter((o=>"68"==o.type&&0==o.deleted))}get deletedFlows(){return this.actions.filter((o=>"68"==o.type&&0!=o.deleted))}get activeFlowsGroupedByFormID(){return o=this.activeFlows,e=o=>o.formID,o.reduce(((o,t)=>{const n=e(t);return o[n]||(o[n]=[]),o[n].push(t),o}),{});var o,e}get activeElements(){return this.cache.elements.recs.filter((o=>0==o.deleted))}}const i={findUnusedFlows:(o=!0,e=new s(!0))=>{const t=n(e.forms);console.log(`Check ${e.actions.length} flows. This might take a few seconds...`),console.log("You'll see a mesage when checking is finished."),console.log(""),o?console.log("Looking for Unused flows (skipping unused 'Auto Save')"):console.log("Looking for All unused flows"),console.log(""),t.forEach((t=>{if(!t.actions)return;let s=e.activeFlowsGroupedByFormID[t.id];if(s){let l=!1;n(s).forEach((n=>{o&&n.name.includes("Auto Save")||0==i.findUsageOfFlow(n.id,!1,e)&&(l||(l=!0,console.log("Form : "+t.name)),console.log("  Flow : "+n.name))}))}})),console.log(""),console.log("THAT'S IT!")},findUsageOfFlow:(o,e,t=new s(!0))=>{const i=o.toString();let l=!1;function r(o){e&&console.log(o)}let a=t.activeFlows.find((e=>e.id==o));if(!a)return r(`Couldn't find flowID ${o} in project!`),!1;{let e=t.forms.find((o=>a&&o.id==a.formID));r(e?`Flow "${a.name}" on form "${e.name}" is called by:`:`Couldn't find form for flowID ${o} in project!`),r("")}return t.activeForms.forEach((o=>{if(!o.actions)return;let e=t.activeFlowsGroupedByFormID[o.id];if(!e)return;let s=!1;n(e).forEach((e=>{var n;if(new Array,e.opts&&e.opts.arguments){let a=e.opts.arguments.find((o=>"actionsArray"==o.name));a&&(null===(n=a.value)||void 0===n||n.forEach((n=>{let a=n.id&&n.id.toString().endsWith(i);if(a&&(l=!0,s||(s=!0,r("Form : "+o.name)),r(`  Flow : ${e.name} (id: ${e.id})`),r("    as nested flow")),!a){let a=t.actions.find((o=>o.id==n.id));if(a&&a.opts&&a.opts.arguments&&Array.isArray(a.opts.arguments)){let t=a.opts.arguments.find((o=>o.type&&"static.actions"==o.type));t&&t.value.endsWith(i)&&(l=!0,s||(s=!0,r("Form : "+o.name)),r(`  Flow : ${e.name} (id: ${e.id})`),r("    Action : "+(null==a?void 0:a.name)))}}})))}}));let a=Array();!function o(e){null!=e&&e.forEach((e=>{o(e.items),a.push(e)}))}(o.objsTree),n(a).forEach((e=>{e.opts&&e.opts.events&&e.opts.events.filter((o=>o.actID&&o.actID.toString().endsWith(i))).forEach((t=>{l=!0,s||(s=!0,r("Form : "+o.name)),r("  Element : "+e.name),r("    Event : "+t.code)}))}));let c=[];if(o.opts&&(o.opts.autoSaveActionID&&o.opts.autoSaveActionID.toString().endsWith(i)&&c.push("Auto-Save Flow"),o.opts.onLoadAct&&o.opts.onLoadAct.toString().endsWith(i)&&c.push("Page Load Flow"),o.opts.notConnectedActID&&o.opts.notConnectedActID.toString().endsWith(i)&&c.push("Flow to run when connection is lost"),o.opts.reConnectedActID&&o.opts.reConnectedActID.toString().endsWith(i)&&c.push("Flow to run when connection is re-established"),o.opts.notAuthenticatedActID&&o.opts.notAuthenticatedActID.toString().endsWith(i)&&c.push("Flow to run when authentication is lost"),o.opts.newRevisionActID&&o.opts.newRevisionActID.toString().endsWith(i)&&c.push("Flow to Run When Revision is Out of Date"),c.length>0&&(l=!0,r("Form : "+o.name),r("  Element : Page Body"),c.forEach((o=>{r("    Event : "+o)}))),o.opts.resonanceDataListeners)){let e=o.opts.resonanceDataListeners.filter((o=>o.actID&&o.actID.toString().endsWith(i)));e.length>0&&(l=!0,r("Form : "+o.name),r("  Element : Page Body"),r(`    Used by ${e.length} Data Listener(s)`))}})),r(""),r("THAT'S IT!"),l},findUsageOfDeletedFlows:(o=new s(!1))=>{function e(e){return null!=o.deletedFlows.find((o=>o.id.toString().endsWith(e.toString())))}o.activeFlows.forEach((t=>{var n;if(t.opts&&t.opts.arguments){let s=t.opts.arguments.find((o=>"actionsArray"==o.name));s&&(null===(n=s.value)||void 0===n||n.forEach((n=>{if(n.id&&e(n.id)){let e=o.forms.find((o=>o.id==t.formID));if(e){console.log(`Form : ${e.name}`),console.log(`  Flow : ${t.name} (id: ${t.id})`);const s=o.deletedFlows.find((o=>o&&o.id.toString().endsWith(n.id.toString())));console.log(s)}}else{let s=o.actions.find((o=>o.id==n.id));if(s&&s.opts&&s.opts.arguments&&s.opts.arguments.find((o=>o.type&&"static.actions"==o.type&&o.value&&e(o.value)))){let e=o.forms.find((o=>o.id==t.formID));e&&(console.log(`Form : ${e.name}`),console.log(`  Flow : ${t.name} (id: ${t.id})`),console.log(`    Action : ${s.name}`))}}})))}})),o.activeForms.forEach((t=>{var s=Array();!function o(e){null!=e&&e.forEach((e=>{o(e.items),s.push(e)}))}(t.objsTree),n(s).forEach((t=>{t.opts&&t.opts.events&&t.opts.events.filter((o=>o.actID&&e(o.actID))).forEach((e=>{let n=o.forms.find((o=>o.id==t.formID));n&&(console.log("Form : "+n.name),console.log("  Element : "+t.name),console.log("    Event : "+e.code))}))}));let i=[];if(t.opts&&(t.opts.autoSaveActionID&&e(t.opts.autoSaveActionID)&&i.push("Auto-Save Flow"),t.opts.onLoadAct&&e(t.opts.onLoadAct)&&i.push("Page Load Flow"),t.opts.notConnectedActID&&e(t.opts.notConnectedActID)&&i.push("Flow to run when connection is lost"),t.opts.reConnectedActID&&e(t.opts.reConnectedActID)&&i.push("Flow to run when connection is re-established"),t.opts.notAuthenticatedActID&&e(t.opts.notAuthenticatedActID)&&i.push("Flow to run when authentication is lost"),t.opts.newRevisionActID&&e(t.opts.newRevisionActID)&&i.push("Flow to Run When Revision is Out of Date"),i.length>0&&(console.log("Form : "+t.name),console.log("  Element : Page Body"),i.forEach((o=>{console.log("    Event : "+o)}))),t.opts.resonanceDataListeners)){let o=t.opts.resonanceDataListeners.filter((o=>o.actID&&e(o.actID)));o.length>0&&(console.log("Form : "+t.name),console.log("  Element : Page Body"),console.log(`    Used by ${o.length} Data Listener(s)`))}})),console.log(""),console.log("THAT'S IT!")},getFlowWithActions:(o,e=new s(!0))=>{var t;let n=e.activeFlows.find((e=>e.id&&e.id.toString()==o));if(null==n)return console.log("flow not found"),!1;if(console.log("Flow found:"),console.log(n),console.log("Actions:"),n.opts&&n.opts.arguments){let o=n.opts.arguments.find((o=>"actionsArray"==o.name));o&&(null===(t=o.value)||void 0===t||t.forEach((o=>{let t=e.actions.find((e=>e.id.toString()==o.id.toString()));t&&console.log(t)})))}}};let l={findUsage:(o,e=new s(!0))=>{function t(o){console.log(o)}let i=e.actionTypes.find((e=>e.id==o));if(!i)return t(`Couldn't find Action Type ${o} in project!`),!1;t(`Action Type "${i.name}" is called by:`),t(""),e.activeForms.forEach((s=>{if(!s.actions)return;let i=e.activeFlowsGroupedByFormID[s.id];if(!i)return;let l=!1;n(i).forEach((n=>{var i;if(n.opts&&n.opts.arguments){let r=n.opts.arguments.find((o=>"actionsArray"==o.name));if(!r)return;null===(i=r.value)||void 0===i||i.forEach((i=>{let r=e.actions.find((o=>o.id==i.id));r&&r.type&&r.type==o&&(l||(l=!0,t("Form : "+s.name)),t(`  Flow : ${n.name} (id: ${n.id})`),t("    Action : "+r.name))}))}}))})),t(""),t("THAT'S IT!")}},r=i,a={ShowAllVariables:()=>{!function o(e){e&&e.form&&e.form.name&&console.log(`Variables of Page: ${e.form.name}`);let t=e._vars;t&&(console.log(t),e.cBrwForms&&e.cBrwForms.forEach((e=>{o(e)})))}(void 0)}};window.BildrTools=e})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./src/Bildr-tools-ActionTypes.ts":
+/*!****************************************!*\
+  !*** ./src/Bildr-tools-ActionTypes.ts ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BildrToolsActionTypes": () => (/* binding */ BildrToolsActionTypes)
+/* harmony export */ });
+/* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
+
+const BildrToolsActionTypes = {
+    findUsage: (actionTypeId, bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+        let logToConsole = true;
+        function ConsoleLog(text) {
+            if (logToConsole) {
+                console.log(text);
+            }
+        }
+        // Create "Header" for the results
+        let theActionType = bildrCache.actionTypes.find(acT => { return (acT.id == actionTypeId); });
+        // found it
+        if (theActionType) {
+            ConsoleLog(`Action Type "${theActionType.name}" is called by:`);
+            ConsoleLog("");
+        }
+        else {
+            ConsoleLog(`Couldn't find Action Type ${actionTypeId} in project!`);
+            return false;
+        }
+        // check flow usage per active form
+        bildrCache.activeForms.forEach(form => {
+            if (!form.actions) {
+                return;
+            }
+            // actions in form.actions are not marked as deleted
+            let activeFlows = bildrCache.activeFlowsGroupedByFormID[form.id];
+            if (!activeFlows) {
+                return;
+            }
+            let formNameLogged = false;
+            // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
+            (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(activeFlows).forEach((flow) => {
+                var _a;
+                if (flow.opts && flow.opts.arguments) {
+                    let actionsArray = flow.opts.arguments.find((item) => { return item.name == "actionsArray"; });
+                    if (!actionsArray) {
+                        return;
+                    }
+                    let argActionArray = actionsArray;
+                    (_a = argActionArray.value) === null || _a === void 0 ? void 0 : _a.forEach(actionRef => {
+                        // Used in an argument of an action type?
+                        let action = bildrCache.actions.find(item => { return (item.id == actionRef.id); });
+                        if (action && action.type && action.type == actionTypeId) {
+                            if (!formNameLogged) {
+                                formNameLogged = true;
+                                ConsoleLog("Form : " + form.name);
+                            }
+                            ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                            ConsoleLog("    Action : " + action.name);
+                        }
+                    });
+                }
+            });
+        });
+        ConsoleLog("");
+        ConsoleLog("THAT'S IT!");
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/Bildr-tools-Debug.ts":
+/*!**********************************!*\
+  !*** ./src/Bildr-tools-Debug.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BildrToolsDebug": () => (/* binding */ BildrToolsDebug)
+/* harmony export */ });
+const BildrToolsDebug = {
+    ShowAllVariables: () => {
+        function frmsRecursive(brwFrm) {
+            if (brwFrm && brwFrm.form && brwFrm.form.name) {
+                console.log(`Variables of Page: ${brwFrm.form.name}`);
+            }
+            let brwFrmVars = brwFrm._vars;
+            if (brwFrmVars) {
+                console.log(brwFrmVars);
+                if (brwFrm.cBrwForms) {
+                    brwFrm.cBrwForms.forEach(frm => {
+                        frmsRecursive(frm);
+                    });
+                }
+            }
+        }
+        frmsRecursive(brwFormRoot);
+    }
+};
+
+
+/***/ }),
+
+/***/ "./src/Bildr-tools-Flows.ts":
+/*!**********************************!*\
+  !*** ./src/Bildr-tools-Flows.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BildrToolsFlows": () => (/* binding */ BildrToolsFlows)
+/* harmony export */ });
+/* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
+
+const BildrToolsFlows = {
+    findUnusedFlows: (skipAutoSave = true, bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+        const activeForms = (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(bildrCache.forms);
+        // create "header" for the results
+        console.log(`Check ${bildrCache.actions.length} flows. This might take a few seconds...`);
+        console.log("You'll see a mesage when checking is finished.");
+        console.log("");
+        if (skipAutoSave) {
+            console.log("Looking for Unused flows (skipping unused 'Auto Save')");
+        }
+        else {
+            console.log("Looking for All unused flows");
+        }
+        console.log("");
+        activeForms.forEach(form => {
+            if (!form.actions) {
+                return;
+            }
+            // actions in form.actions are not marked as deleted
+            let activeFlows = bildrCache.activeFlowsGroupedByFormID[form.id];
+            if (activeFlows) {
+                let formNameLogged = false;
+                (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(activeFlows).forEach(flow => {
+                    if (skipAutoSave && flow.name.includes("Auto Save")) {
+                        return;
+                    }
+                    if (BildrToolsFlows.findUsageOfFlow(flow.id, false, bildrCache) == false) {
+                        if (!formNameLogged) {
+                            formNameLogged = true;
+                            console.log("Form : " + form.name);
+                        }
+                        console.log("  Flow : " + flow.name);
+                    }
+                });
+            }
+        });
+        console.log("");
+        console.log("THAT'S IT!");
+    },
+    findUsageOfFlow: (flowId, logToConsole, bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+        const strFlowId = flowId.toString();
+        // for easy reference
+        let isUsed = false;
+        function ConsoleLog(text) {
+            if (logToConsole) {
+                console.log(text);
+            }
+        }
+        // Create "Header" for the results
+        let theFlow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
+        // found it
+        if (theFlow) {
+            let form = bildrCache.forms.find(item => { return theFlow && item.id == theFlow.formID; });
+            if (form) {
+                ConsoleLog(`Flow "${theFlow.name}" on form "${form.name}" is called by:`);
+            }
+            else {
+                ConsoleLog(`Couldn't find form for flowID ${flowId} in project!`);
+            }
+            ConsoleLog("");
+        }
+        else {
+            ConsoleLog(`Couldn't find flowID ${flowId} in project!`);
+            return false;
+        }
+        // check flow usage per active form
+        bildrCache.activeForms.forEach(form => {
+            if (!form.actions) {
+                return;
+            }
+            // actions in form.actions are not marked as deleted
+            let activeFlows = bildrCache.activeFlowsGroupedByFormID[form.id];
+            if (!activeFlows) {
+                return;
+            }
+            let formNameLogged = false;
+            // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
+            (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(activeFlows).forEach(flow => {
+                var _a;
+                let actionsArrayValue = new Array();
+                if (flow.opts && flow.opts.arguments) {
+                    let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray"; });
+                    if (actionsArray) {
+                        let argumentStaticArray = actionsArray;
+                        (_a = argumentStaticArray.value) === null || _a === void 0 ? void 0 : _a.forEach(actionRef => {
+                            // Nested flow?
+                            let asNestedFlow = actionRef.id && actionRef.id.toString().endsWith(strFlowId);
+                            if (asNestedFlow) {
+                                isUsed = true;
+                                if (!formNameLogged) {
+                                    formNameLogged = true;
+                                    ConsoleLog("Form : " + form.name);
+                                }
+                                ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                ConsoleLog("    as nested flow");
+                            }
+                            if (!asNestedFlow) {
+                                // Used in an argument of an action type?
+                                let action = bildrCache.actions.find(item => { return (item.id == actionRef.id); });
+                                if (action && action.opts && action.opts.arguments && Array.isArray(action.opts.arguments)) {
+                                    let flowActionRefs = action.opts.arguments.find(arg => arg.type && arg.type == "static.actions");
+                                    if (flowActionRefs) {
+                                        let argumetStatic = flowActionRefs;
+                                        let hasFlowRef = argumetStatic.value.endsWith(strFlowId);
+                                        if (hasFlowRef) {
+                                            isUsed = true;
+                                            if (!formNameLogged) {
+                                                formNameLogged = true;
+                                                ConsoleLog("Form : " + form.name);
+                                            }
+                                            ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                            ConsoleLog("    Action : " + (action === null || action === void 0 ? void 0 : action.name));
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+            // Check usage of flow in Elements Events
+            let formObjsTreeFlattend = Array();
+            function flattenElements(items) {
+                if (items != undefined) {
+                    items.forEach(item => {
+                        flattenElements(item.items);
+                        formObjsTreeFlattend.push(item);
+                    });
+                }
+            }
+            flattenElements(form.objsTree);
+            (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(formObjsTreeFlattend).forEach(element => {
+                if (element.opts && element.opts.events) {
+                    let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
+                    eventsUsingFlow.forEach(theEvent => {
+                        isUsed = true;
+                        if (!formNameLogged) {
+                            formNameLogged = true;
+                            ConsoleLog("Form : " + form.name);
+                        }
+                        ConsoleLog("  Element : " + element.name);
+                        ConsoleLog("    Event : " + theEvent.code);
+                    });
+                }
+            });
+            // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
+            let inPageEvents = [];
+            if (form.opts) {
+                // Page Flows
+                if (form.opts.autoSaveActionID && form.opts.autoSaveActionID.toString().endsWith(strFlowId)) {
+                    inPageEvents.push("Auto-Save Flow");
+                }
+                if (form.opts.onLoadAct && form.opts.onLoadAct.toString().endsWith(strFlowId)) {
+                    inPageEvents.push("Page Load Flow");
+                }
+                // Root Page Flows
+                if (form.opts.notConnectedActID && form.opts.notConnectedActID.toString().endsWith(strFlowId)) {
+                    inPageEvents.push("Flow to run when connection is lost");
+                }
+                if (form.opts.reConnectedActID && form.opts.reConnectedActID.toString().endsWith(strFlowId)) {
+                    inPageEvents.push("Flow to run when connection is re-established");
+                }
+                if (form.opts.notAuthenticatedActID && form.opts.notAuthenticatedActID.toString().endsWith(strFlowId)) {
+                    inPageEvents.push("Flow to run when authentication is lost");
+                }
+                if (form.opts.newRevisionActID && form.opts.newRevisionActID.toString().endsWith(strFlowId)) {
+                    inPageEvents.push("Flow to Run When Revision is Out of Date");
+                }
+                if (inPageEvents.length > 0) {
+                    isUsed = true;
+                    ConsoleLog("Form : " + form.name);
+                    ConsoleLog("  Element : Page Body");
+                    inPageEvents.forEach(theEvent => {
+                        ConsoleLog("    Event : " + theEvent);
+                    });
+                }
+                if (form.opts.resonanceDataListeners) {
+                    let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
+                    if (dataListenersUsingFlow.length > 0) {
+                        isUsed = true;
+                        ConsoleLog("Form : " + form.name);
+                        ConsoleLog("  Element : Page Body");
+                        ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
+                    }
+                }
+            }
+        });
+        ConsoleLog("");
+        ConsoleLog("THAT'S IT!");
+        return isUsed;
+    },
+    findUsageOfDeletedFlows: (bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+        // for easy reference
+        function isDeletedFlow(flowId) {
+            return bildrCache.deletedFlows.find(item => item.id.toString().endsWith(flowId.toString())) != undefined;
+        }
+        // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument
+        bildrCache.activeFlows.forEach(flow => {
+            var _a;
+            if (flow.opts && flow.opts.arguments) {
+                let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray"; });
+                if (actionsArray) {
+                    let argumentStaticArray = actionsArray;
+                    (_a = argumentStaticArray.value) === null || _a === void 0 ? void 0 : _a.forEach(actionRef => {
+                        // Nested flow?
+                        if (actionRef.id && isDeletedFlow(actionRef.id)) {
+                            let form = bildrCache.forms.find(item => { return item.id == flow.formID; });
+                            if (form) {
+                                console.log(`Form : ${form.name}`);
+                                console.log(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                const deletedFlowName = bildrCache.deletedFlows.find(item => item && item.id.toString().endsWith(actionRef.id.toString()));
+                                console.log("    as nested flow : " + deletedFlowName ? deletedFlowName : 0);
+                            }
+                        }
+                        else {
+                            let action = bildrCache.actions.find(item => { return (item.id == actionRef.id); });
+                            if (action && action.opts && action.opts.arguments) {
+                                let hasFlowRef = action.opts.arguments.find(arg => {
+                                    return (arg.type && arg.type == "static.actions" && arg.value && isDeletedFlow(arg.value));
+                                });
+                                if (hasFlowRef) {
+                                    let form = bildrCache.forms.find(item => { return item.id == flow.formID; });
+                                    if (form) {
+                                        console.log(`Form : ${form.name}`);
+                                        console.log(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                        console.log(`    Action : ${action.name}`);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                ;
+            }
+            ;
+        });
+        // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
+        bildrCache.activeForms.forEach(form => {
+            // Flatten active elements because the elements don't get flagged as deleted although 
+            // they are nog part of the form any more. Checks should only be done on active
+            // elements.
+            var objsTreeFlattend = Array();
+            function flattenElements(items) {
+                if (items != undefined) {
+                    items.forEach(item => {
+                        flattenElements(item.items);
+                        objsTreeFlattend.push(item);
+                    });
+                }
+            }
+            flattenElements(form.objsTree);
+            // Check usage of flow in Elements Events
+            (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(objsTreeFlattend).forEach(element => {
+                if (element.opts && element.opts.events) {
+                    let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && isDeletedFlow(item.actID); });
+                    eventsUsingFlow.forEach(theEvent => {
+                        let form = bildrCache.forms.find(item => { return item.id == element.formID; });
+                        if (form) {
+                            console.log("Form : " + form.name);
+                            console.log("  Element : " + element.name);
+                            console.log("    Event : " + theEvent.code);
+                        }
+                    });
+                }
+            });
+            let inPageEvents = [];
+            if (form.opts) {
+                // Page Flows
+                if (form.opts.autoSaveActionID && isDeletedFlow(form.opts.autoSaveActionID)) {
+                    inPageEvents.push("Auto-Save Flow");
+                }
+                if (form.opts.onLoadAct && isDeletedFlow(form.opts.onLoadAct)) {
+                    inPageEvents.push("Page Load Flow");
+                }
+                // Root Page Flows
+                if (form.opts.notConnectedActID && isDeletedFlow(form.opts.notConnectedActID)) {
+                    inPageEvents.push("Flow to run when connection is lost");
+                }
+                if (form.opts.reConnectedActID && isDeletedFlow(form.opts.reConnectedActID)) {
+                    inPageEvents.push("Flow to run when connection is re-established");
+                }
+                if (form.opts.notAuthenticatedActID && isDeletedFlow(form.opts.notAuthenticatedActID)) {
+                    inPageEvents.push("Flow to run when authentication is lost");
+                }
+                if (form.opts.newRevisionActID && isDeletedFlow(form.opts.newRevisionActID)) {
+                    inPageEvents.push("Flow to Run When Revision is Out of Date");
+                }
+                if (inPageEvents.length > 0) {
+                    console.log("Form : " + form.name);
+                    console.log("  Element : Page Body");
+                    inPageEvents.forEach(theEvent => {
+                        console.log("    Event : " + theEvent);
+                    });
+                }
+                if (form.opts.resonanceDataListeners) {
+                    let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && isDeletedFlow(item.actID); });
+                    if (dataListenersUsingFlow.length > 0) {
+                        console.log("Form : " + form.name);
+                        console.log("  Element : Page Body");
+                        console.log(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
+                    }
+                }
+            }
+        });
+        console.log("");
+        console.log("THAT'S IT!");
+    },
+    getFlowWithActions: (flowId, cache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+        var _a;
+        let flow = cache.activeFlows.find(flow => {
+            return (flow.id && flow.id.toString() == flowId);
+        });
+        if (flow == undefined) {
+            console.log("flow not found");
+            return false;
+        }
+        console.log("Flow found:");
+        console.log(flow);
+        console.log("Actions:");
+        if (flow.opts && flow.opts.arguments) {
+            let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray"; });
+            if (actionsArray) {
+                let argumentActionsArray = actionsArray;
+                (_a = argumentActionsArray.value) === null || _a === void 0 ? void 0 : _a.forEach(actionRef => {
+                    // Used in an argument of an action type?
+                    let action = cache.actions.find(item => { return (item.id.toString() == actionRef.id.toString()); });
+                    if (action) {
+                        console.log(action);
+                    }
+                });
+            }
+            ;
+        }
+    },
+};
+
+
+/***/ }),
+
+/***/ "./src/Bildr-tools-utils.ts":
+/*!**********************************!*\
+  !*** ./src/Bildr-tools-utils.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BildrCacheHelper": () => (/* binding */ BildrCacheHelper),
+/* harmony export */   "nameSort": () => (/* binding */ nameSort)
+/* harmony export */ });
+const groupBy = (list, getKey) => list.reduce((previous, currentItem) => {
+    const group = getKey(currentItem);
+    if (!previous[group])
+        previous[group] = [];
+    previous[group].push(currentItem);
+    return previous;
+}, {});
+const nameSort = (list) => {
+    return list.sort((a, b) => { return ('' + a.name).localeCompare(b.name); });
+};
+class BildrCacheHelper {
+    constructor(...myarray) {
+        if (myarray.length === 1) {
+            this.cache = BildrDBCacheGet(myarray[0], "", "", "");
+        }
+        else if (myarray.length === 2) {
+            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1], "");
+        }
+        else {
+            this.cache = BildrDBCacheGet(true, "", "", "");
+        }
+    }
+    get actions() {
+        return this.cache.actions.recs;
+    }
+    get forms() {
+        return this.cache.forms.recs;
+    }
+    get actionTypes() {
+        return this.cache.actionsTypes.recs;
+    }
+    get activeForms() {
+        return this.forms.filter(item => item.deleted == 0);
+    }
+    get activeFlows() {
+        return this.actions.filter(action => action.type == "68" && action.deleted == 0);
+    }
+    get deletedFlows() {
+        return this.actions.filter(action => action.type == "68" && action.deleted != 0);
+    }
+    get activeFlowsGroupedByFormID() {
+        return groupBy(this.activeFlows, f => f.formID);
+    }
+    get activeElements() {
+        return this.cache.elements.recs.filter(item => item.deleted == 0);
+    }
+}
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+/*!****************************!*\
+  !*** ./src/Bildr-tools.ts ***!
+  \****************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ActionTypes": () => (/* binding */ ActionTypes),
+/* harmony export */   "Debug": () => (/* binding */ Debug),
+/* harmony export */   "Flows": () => (/* binding */ Flows)
+/* harmony export */ });
+/* harmony import */ var _Bildr_tools_ActionTypes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-ActionTypes */ "./src/Bildr-tools-ActionTypes.ts");
+/* harmony import */ var _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Bildr-tools-Debug */ "./src/Bildr-tools-Debug.ts");
+/* harmony import */ var _Bildr_tools_Flows__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Bildr-tools-Flows */ "./src/Bildr-tools-Flows.ts");
+
+
+
+let ActionTypes = _Bildr_tools_ActionTypes__WEBPACK_IMPORTED_MODULE_0__.BildrToolsActionTypes;
+let Flows = _Bildr_tools_Flows__WEBPACK_IMPORTED_MODULE_2__.BildrToolsFlows;
+let Debug = _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__.BildrToolsDebug;
+
+
+})();
+
+window.BildrTools = __webpack_exports__;
+/******/ })()
+;

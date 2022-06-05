@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    mode: 'production',
+    mode: 'development',
     devtool: false, //"source-map", //false or "source-map"
     entry: "./src/Bildr-tools.ts",
     target: ['web', 'es6'],
