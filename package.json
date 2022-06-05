@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/jvmenen/bildr-utils#readme",
   "devDependencies": {
-    "process": "^0.11.10",
     "ts-loader": "^9.3.0",
     "typescript": "^4.7.3",
     "webpack": "^5.73.0",

@@ -1,3 +1,10 @@
+import { BildrCacheHelper } from "./Bildr-tools-utils";
+
+// Stubs which will not be part of the output javascript
+declare var window: {
+    orgQAFunc: any,
+    QueueAction: any
+}
 
 export const BildrToolsDebug = {
     ShowAllVariables: () => {
@@ -18,5 +25,64 @@ export const BildrToolsDebug = {
         }
 
         frmsRecursive(brwFormRoot);
+    },
+    Start: () => {
+        if (!window.orgQAFunc) { window.orgQAFunc = QueueAction; }
+        let debugZettingShowAllActions = false;
+        let debugZettingShowBildrActions = false;
+        let debugZettingActionIdBreakpoint = "";
+        let debugZettingStepMode = false;
+        let debugZettingAutoShowVariables = false;
+
+        window.QueueAction = function (a: action, wait: boolean, parentQAction: any, brwObj: any, params: any, isThread: boolean, qName: string, bildrCache: BildrDBCache, addToQueue: boolean) {
+            let ignoreCanvasMouseEvents = true;
+            debugZettingActionIdBreakpoint = debugZettingActionIdBreakpoint.trim();
+
+            if (a) {
+                let isMouseEvent = false;
+                let isFlow = (a.type && a.type == "68");
+
+                if (ignoreCanvasMouseEvents) {
+                    // V3gKt5FZRECIDMudjBbi3g = Action - Mouseenter - Element
+                    // AGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                    // CAGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                    isMouseEvent = (a.id == "V3gKt5FZRECIDMudjBbi3g" || a.id == "AGTUwIokUuQgXEgNW6mnA" || a.id == "CAGTUwIokUuQgXEgNW6mnA")
+                }
+                // Show only flows
+                if (!isMouseEvent && (isFlow || debugZettingShowAllActions)) {
+                    let type = "Flow";
+                    if (!isFlow) {
+                        type = "Action";
+                    }
+
+                    // is it a project action?
+                    let actionInProject = false;
+                    if (a.id && !debugZettingShowBildrActions) {
+                        let cache = new BildrCacheHelper(true);
+                        let act = cache.actions.find(act => { return act.id == a.id })
+                        actionInProject = (act != undefined);
+                    }
+
+                    if (actionInProject || debugZettingShowBildrActions) {
+                        console.log(`${Date.now()} ${type} ${a.id} = ${a.name}`);
+
+                        if (debugZettingStepMode || a.id == debugZettingActionIdBreakpoint) {
+                            debugZettingStepMode = true;
+                            if (debugZettingAutoShowVariables) {
+                                BildrToolsDebug.ShowAllVariables();
+                            }
+                            debugger;
+                        }
+                    }
+                }
+            }
+            window.orgQAFunc.call(this, a, wait, parentQAction, brwObj, params, isThread, qName, bildrCache, addToQueue);
+        }
+        window.QueueAction.prototype = window.orgQAFunc.prototype;
+        window.QueueAction.prototype.constructor = QueueAction;
+    },
+    Stop: () => {
+        if (window.orgQAFunc) { window.QueueAction = window.orgQAFunc; }
     }
+
 }

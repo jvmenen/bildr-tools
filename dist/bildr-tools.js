@@ -86,6 +86,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "BildrToolsDebug": () => (/* binding */ BildrToolsDebug)
 /* harmony export */ });
+/* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
+
 const BildrToolsDebug = {
     ShowAllVariables: () => {
         function frmsRecursive(brwFrm) {
@@ -103,6 +105,62 @@ const BildrToolsDebug = {
             }
         }
         frmsRecursive(brwFormRoot);
+    },
+    Start: () => {
+        if (!window.orgQAFunc) {
+            window.orgQAFunc = QueueAction;
+        }
+        let debugZettingShowAllActions = false;
+        let debugZettingShowBildrActions = false;
+        let debugZettingActionIdBreakpoint = "";
+        let debugZettingStepMode = false;
+        let debugZettingAutoShowVariables = false;
+        window.QueueAction = function (a, wait, parentQAction, brwObj, params, isThread, qName, bildrCache, addToQueue) {
+            let ignoreCanvasMouseEvents = true;
+            debugZettingActionIdBreakpoint = debugZettingActionIdBreakpoint.trim();
+            if (a) {
+                let isMouseEvent = false;
+                let isFlow = (a.type && a.type == "68");
+                if (ignoreCanvasMouseEvents) {
+                    // V3gKt5FZRECIDMudjBbi3g = Action - Mouseenter - Element
+                    // AGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                    // CAGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                    isMouseEvent = (a.id == "V3gKt5FZRECIDMudjBbi3g" || a.id == "AGTUwIokUuQgXEgNW6mnA" || a.id == "CAGTUwIokUuQgXEgNW6mnA");
+                }
+                // Show only flows
+                if (!isMouseEvent && (isFlow || debugZettingShowAllActions)) {
+                    let type = "Flow";
+                    if (!isFlow) {
+                        type = "Action";
+                    }
+                    // is it a project action?
+                    let actionInProject = false;
+                    if (a.id && !debugZettingShowBildrActions) {
+                        let cache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true);
+                        let act = cache.actions.find(act => { return act.id == a.id; });
+                        actionInProject = (act != undefined);
+                    }
+                    if (actionInProject || debugZettingShowBildrActions) {
+                        console.log(`${Date.now()} ${type} ${a.id} = ${a.name}`);
+                        if (debugZettingStepMode || a.id == debugZettingActionIdBreakpoint) {
+                            debugZettingStepMode = true;
+                            if (debugZettingAutoShowVariables) {
+                                BildrToolsDebug.ShowAllVariables();
+                            }
+                            debugger;
+                        }
+                    }
+                }
+            }
+            window.orgQAFunc.call(this, a, wait, parentQAction, brwObj, params, isThread, qName, bildrCache, addToQueue);
+        };
+        window.QueueAction.prototype = window.orgQAFunc.prototype;
+        window.QueueAction.prototype.constructor = QueueAction;
+    },
+    Stop: () => {
+        if (window.orgQAFunc) {
+            window.QueueAction = window.orgQAFunc;
+        }
     }
 };
 
