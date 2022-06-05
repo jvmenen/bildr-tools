@@ -25,8 +25,8 @@ if (!Array.prototype.nameSort) {
 }
 
 findUnusedFlows = function (skipAutoSave = true) {
-    const theActions = BildrDBCacheGet(1).actions.recs;
-    const theForms = BildrDBCacheGet(1).forms.recs;
+    const theActions = BildrDBCacheGet({ arg0: 1 }).actions.recs;
+    const theForms = BildrDBCacheGet({ arg0: 1 }).forms.recs;
     const activeForms = theForms.filter(item => { return (item.deleted == 0) }).nameSort();
     const activeFlows = theActions.filter(action => { return (action.type == "68" && action.deleted == 0) });
     const flowsGroupedByFormID = theActions.filter(action => { return (action.type == "68" && action.deleted == 0) }).groupBy("formID");
@@ -34,7 +34,7 @@ findUnusedFlows = function (skipAutoSave = true) {
     const theVars = {
         "theActions": theActions,
         "theForms": theForms,
-        "activeElements": BildrDBCacheGet(1).elements.recs.filter(item => { return (item.deleted == 0) }),
+        "activeElements": BildrDBCacheGet({ arg0: 1 }).elements.recs.filter(item => { return (item.deleted == 0) }),
         "activeForms": activeForms,
         "activeFlows": activeFlows
     }
@@ -76,13 +76,13 @@ findUnusedFlows = function (skipAutoSave = true) {
 
 findUsageOfFlow = function (flowId, logToConsole = true) {
     // init vars
-    let theActions = BildrDBCacheGet(1).actions.recs;
-    let theForms = BildrDBCacheGet(1).forms.recs;
+    let theActions = BildrDBCacheGet({ arg0: 1 }).actions.recs;
+    let theForms = BildrDBCacheGet({ arg0: 1 }).forms.recs;
 
     var theVars = {
         "theActions": theActions,
         "theForms": theForms,
-        "activeElements": BildrDBCacheGet(1).elements.recs.filter(item => { return (item.deleted == 0) }),
+        "activeElements": BildrDBCacheGet({ arg0: 1 }).elements.recs.filter(item => { return (item.deleted == 0) }),
         "activeForms": theForms.filter(item => { return (item.deleted == 0) }),
         "activeFlows": theActions.filter(action => { return (action.type == "68" && action.deleted == 0) })
     }
@@ -90,7 +90,7 @@ findUsageOfFlow = function (flowId, logToConsole = true) {
 }
 
 findFlowWithActions = function (flowId) {
-    let theActions = BildrDBCacheGet().actions.recs;
+    let theActions = BildrDBCacheGet(true).actions.recs;
     let activeFlows = theActions.filter(action => { return (action.type == "68" && action.deleted == 0) })
     let flow = activeFlows.find(flow => {
         return (flow.id && flow.id.toString() == flowId);
@@ -133,7 +133,7 @@ findBildrUsageOfFlow = function (flowId, logToConsole = true) {
     var theVars = {
         "theActions": theActions,
         "theForms": theForms,
-        "activeElements": BildrDBCacheGet(1).elements.recs.filter(item => { return (item.deleted == 0) }),
+        "activeElements": BildrDBCacheGet({ arg0: 1 }).elements.recs.filter(item => { return (item.deleted == 0) }),
         "activeForms": theForms.filter(item => { return (item.deleted == 0) }),
         "activeFlows": theActions.filter(action => { return (action.type == "68" && action.deleted == 0) })
     }
@@ -301,8 +301,8 @@ _findUsageOfFlow = function (flowId, logToConsole, theVars) {
 
 findUsageOfDeletedFlows = function () {
     // for easy reference
-    var theActions = BildrDBCacheGet(1).actions.recs;
-    var theForms = BildrDBCacheGet(1).forms.recs;
+    var theActions = BildrDBCacheGet({ arg0: 1 }).actions.recs;
+    var theForms = BildrDBCacheGet({ arg0: 1 }).forms.recs;
     var activeForms = theForms.filter(item => { return (item.deleted == 0) });
     let activeFlows = theActions.filter(action => { return (action.type == "68" && action.deleted == 0) });
     let deletedFlows = theActions.filter(action => { return (action.type == "68" && action.deleted != 0) });
@@ -475,7 +475,7 @@ debugStartFlowTracer = function () {
                 // is it a project action?
                 let actionInProject = false;
                 if (a.id && !debugZettingShowBildrActions) {
-                    let act = BildrDBCacheGet(1).actions.recs.find(act => { return act.id == a.id })
+                    let act = BildrDBCacheGet({ arg0: 1 }).actions.recs.find(act => { return act.id == a.id })
                     actionInProject = (act != undefined);
                 }
 
@@ -563,9 +563,9 @@ BildrTools["ActionTypes"] = {
             if (logToConsole) { console.log(text); }
         }
 
-        let theActions = BildrDBCacheGet(1).actions.recs;
-        let theForms = BildrDBCacheGet(1).forms.recs;
-        let actionTypes = BildrDBCacheGet(1).actionsTypes.recs;
+        let theActions = BildrDBCacheGet({ arg0: 1 }).actions.recs;
+        let theForms = BildrDBCacheGet({ arg0: 1 }).forms.recs;
+        let actionTypes = BildrDBCacheGet({ arg0: 1 }).actionsTypes.recs;
         let activeForms = theForms.filter(item => { return (item.deleted == 0) });
 
         // for easy reference
@@ -621,6 +621,6 @@ BildrTools["ActionTypes"] = {
             });
         })
         ConsoleLog("");
-        ConsoleLog("THAT'S IT!");    
+        ConsoleLog("THAT'S IT!");
     }
 }
