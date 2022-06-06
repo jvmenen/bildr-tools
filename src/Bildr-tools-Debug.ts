@@ -6,7 +6,17 @@ declare var window: {
     QueueAction: any
 }
 
+// If you want both Flows and actions use: Flows | Actions
+export enum ActionsToShowEnum {
+    Flows = 1 << 0,
+    Actions = 1 << 1,
+    BildrActions = 1 << 2,
+    MouseActions = 1 << 3,
+};
+
 export const BildrToolsDebug = {
+    _ActionIdBreakpoint: "" as actId,
+    ActionsToShow: ActionsToShowEnum.Flows,
     ShowAllVariables: () => {
 
         function frmsRecursive(brwFrm: brwForm) {
@@ -28,47 +38,37 @@ export const BildrToolsDebug = {
     },
     Start: () => {
         if (!window.orgQAFunc) { window.orgQAFunc = QueueAction; }
-        let debugZettingShowAllActions = false;
-        let debugZettingShowBildrActions = false;
         let debugZettingStepMode = false;
-        let debugZettingAutoShowVariables = false;
 
         window.QueueAction = function (a: action, wait: boolean, parentQAction: any, brwObj: any, params: any, isThread: boolean, qName: string, bildrCache: BildrDBCache, addToQueue: boolean) {
-            let ignoreCanvasMouseEvents = true;
+            let showFlows = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.Flows) === ActionsToShowEnum.Flows;
+            let showActions = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.Actions) === ActionsToShowEnum.Actions;
+            let showBildrActions = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.BildrActions) === ActionsToShowEnum.BildrActions;
+            let showMouseActions = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.MouseActions) === ActionsToShowEnum.MouseActions;
 
             if (a) {
-                let isMouseEvent = false;
-                let isFlow = (a.type && a.type == "68");
+                // V3gKt5FZRECIDMudjBbi3g = Action - Mouseenter - Element
+                // AGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                // CAGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                let isMouseEvent = (a.id == "V3gKt5FZRECIDMudjBbi3g" || a.id == "AGTUwIokUuQgXEgNW6mnA" || a.id == "CAGTUwIokUuQgXEgNW6mnA")
+                let isFlow = (a.type == "68");
 
-                if (ignoreCanvasMouseEvents) {
-                    // V3gKt5FZRECIDMudjBbi3g = Action - Mouseenter - Element
-                    // AGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
-                    // CAGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
-                    isMouseEvent = (a.id == "V3gKt5FZRECIDMudjBbi3g" || a.id == "AGTUwIokUuQgXEgNW6mnA" || a.id == "CAGTUwIokUuQgXEgNW6mnA")
-                }
                 // Show only flows
-                if (!isMouseEvent && (isFlow || debugZettingShowAllActions)) {
-                    let type = "Flow";
-                    if (!isFlow) {
-                        type = "Action";
-                    }
-
+                if ((isMouseEvent && showMouseActions) || (isFlow && showFlows) || (!isMouseEvent && !isFlow && showActions)) {
                     // is it a project action?
-                    let actionInProject = false;
-                    if (a.id && !debugZettingShowBildrActions) {
+                    let act = undefined;
+                    if (a.id && !showBildrActions) {
                         let cache = BildrCacheHelper.createInstance();
-                        let act = cache.actions.find(act => { return act.id == a.id })
-                        actionInProject = (act != undefined);
+                        act = cache.actions.find(act => { return act.id == a.id })
                     }
 
-                    if (actionInProject || debugZettingShowBildrActions) {
-                        console.log(`${Date.now()} ${type} ${a.id} = ${a.name}`);
+                    if (act != undefined || showBildrActions) {
+                        let type = isFlow ? "Flow  " : "Action";
+                        let indent = isFlow ? "" : "    ";
+                        console.log(`${type}: ${a.id} ${indent}  "${a.name}"`);
 
                         if (debugZettingStepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
                             debugZettingStepMode = true;
-                            if (debugZettingAutoShowVariables) {
-                                BildrToolsDebug.ShowAllVariables();
-                            }
                             debugger;
                         }
                     }
@@ -85,6 +85,4 @@ export const BildrToolsDebug = {
     BreakBeforeActionID: (actionId: actId) => {
         BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
     },
-    _ActionIdBreakpoint : "" as actId
-
 }

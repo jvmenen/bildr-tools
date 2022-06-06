@@ -85,11 +85,23 @@ const BildrToolsActionTypes = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ActionsToShowEnum": () => (/* binding */ ActionsToShowEnum),
 /* harmony export */   "BildrToolsDebug": () => (/* binding */ BildrToolsDebug)
 /* harmony export */ });
 /* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
 
+// If you want both Flows and actions use: Flows | Actions
+var ActionsToShowEnum;
+(function (ActionsToShowEnum) {
+    ActionsToShowEnum[ActionsToShowEnum["Flows"] = 1] = "Flows";
+    ActionsToShowEnum[ActionsToShowEnum["Actions"] = 2] = "Actions";
+    ActionsToShowEnum[ActionsToShowEnum["BildrActions"] = 4] = "BildrActions";
+    ActionsToShowEnum[ActionsToShowEnum["MouseActions"] = 8] = "MouseActions";
+})(ActionsToShowEnum || (ActionsToShowEnum = {}));
+;
 const BildrToolsDebug = {
+    _ActionIdBreakpoint: "",
+    ActionsToShow: ActionsToShowEnum.Flows,
     ShowAllVariables: () => {
         function frmsRecursive(brwFrm) {
             if (brwFrm && brwFrm.form && brwFrm.form.name) {
@@ -111,41 +123,32 @@ const BildrToolsDebug = {
         if (!window.orgQAFunc) {
             window.orgQAFunc = QueueAction;
         }
-        let debugZettingShowAllActions = false;
-        let debugZettingShowBildrActions = false;
         let debugZettingStepMode = false;
-        let debugZettingAutoShowVariables = false;
         window.QueueAction = function (a, wait, parentQAction, brwObj, params, isThread, qName, bildrCache, addToQueue) {
-            let ignoreCanvasMouseEvents = true;
+            let showFlows = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.Flows) === ActionsToShowEnum.Flows;
+            let showActions = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.Actions) === ActionsToShowEnum.Actions;
+            let showBildrActions = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.BildrActions) === ActionsToShowEnum.BildrActions;
+            let showMouseActions = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.MouseActions) === ActionsToShowEnum.MouseActions;
             if (a) {
-                let isMouseEvent = false;
-                let isFlow = (a.type && a.type == "68");
-                if (ignoreCanvasMouseEvents) {
-                    // V3gKt5FZRECIDMudjBbi3g = Action - Mouseenter - Element
-                    // AGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
-                    // CAGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
-                    isMouseEvent = (a.id == "V3gKt5FZRECIDMudjBbi3g" || a.id == "AGTUwIokUuQgXEgNW6mnA" || a.id == "CAGTUwIokUuQgXEgNW6mnA");
-                }
+                // V3gKt5FZRECIDMudjBbi3g = Action - Mouseenter - Element
+                // AGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                // CAGTUwIokUuQgXEgNW6mnA = Action - Mouse Leave Page
+                let isMouseEvent = (a.id == "V3gKt5FZRECIDMudjBbi3g" || a.id == "AGTUwIokUuQgXEgNW6mnA" || a.id == "CAGTUwIokUuQgXEgNW6mnA");
+                let isFlow = (a.type == "68");
                 // Show only flows
-                if (!isMouseEvent && (isFlow || debugZettingShowAllActions)) {
-                    let type = "Flow";
-                    if (!isFlow) {
-                        type = "Action";
-                    }
+                if ((isMouseEvent && showMouseActions) || (isFlow && showFlows) || (!isMouseEvent && !isFlow && showActions)) {
                     // is it a project action?
-                    let actionInProject = false;
-                    if (a.id && !debugZettingShowBildrActions) {
+                    let act = undefined;
+                    if (a.id && !showBildrActions) {
                         let cache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
-                        let act = cache.actions.find(act => { return act.id == a.id; });
-                        actionInProject = (act != undefined);
+                        act = cache.actions.find(act => { return act.id == a.id; });
                     }
-                    if (actionInProject || debugZettingShowBildrActions) {
-                        console.log(`${Date.now()} ${type} ${a.id} = ${a.name}`);
+                    if (act != undefined || showBildrActions) {
+                        let type = isFlow ? "Flow  " : "Action";
+                        let indent = isFlow ? "" : "    ";
+                        console.log(`${type}: ${a.id} ${indent}  "${a.name}"`);
                         if (debugZettingStepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
                             debugZettingStepMode = true;
-                            if (debugZettingAutoShowVariables) {
-                                BildrToolsDebug.ShowAllVariables();
-                            }
                             debugger;
                         }
                     }
@@ -164,7 +167,6 @@ const BildrToolsDebug = {
     BreakBeforeActionID: (actionId) => {
         BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
     },
-    _ActionIdBreakpoint: ""
 };
 
 
@@ -653,12 +655,14 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "ActionTypes": () => (/* binding */ ActionTypes),
+/* harmony export */   "ActionsToShowEnum": () => (/* reexport safe */ _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__.ActionsToShowEnum),
 /* harmony export */   "Debug": () => (/* binding */ Debug),
 /* harmony export */   "Flows": () => (/* binding */ Flows)
 /* harmony export */ });
 /* harmony import */ var _Bildr_tools_ActionTypes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-ActionTypes */ "./src/Bildr-tools-ActionTypes.ts");
 /* harmony import */ var _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Bildr-tools-Debug */ "./src/Bildr-tools-Debug.ts");
 /* harmony import */ var _Bildr_tools_Flows__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Bildr-tools-Flows */ "./src/Bildr-tools-Flows.ts");
+
 
 
 
