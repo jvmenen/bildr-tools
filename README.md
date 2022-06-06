@@ -59,14 +59,14 @@ Lets start by inspecting all the values of the variables you use on your current
 - the output will show you all your loaded pages and per page all the variables and their values. If you have a gridlist on your page you'll see the variables for all gridlist pages as well.
 
 Want to see the order in which you flows run?
-- type `BildrTools.Debug.Trace.Start()`
+- type `BildrTools.Debug.Start()`
 - hit enter
 - go to your preview site and do some actions to trigger flows
 - go back to the console view
 - the output shows you all the flows that have been executed
 
 you can go into more detail by turning on tracing of the actions as well
-- type `BildrTools.Debug.Trace.TraceFlowsAndActions()`
+- type `BildrTools.Debug.ActionsToShow = BildrTools.ActionsToShowEnum.Flows | BildrTools.ActionsToShowEnum.Actions`
 - hit enter
 - go to your preview site and do some actions to trigger flows and actions
 - go back to the console view
@@ -76,18 +76,17 @@ want to break before a flow or an action to inspect the values of the variables?
 - in Bildr Studio click the 3-dot menu next to a flow (or 3-dot menu on the action)
 - copy the id shown in the menu
 - goto the console view
-- type `BildrTools.Debug.Trace.Start()` (or don't if you are already in trace mode) and hit enter
-- type `BildrTools.Debug.Trace.BreakBeforeActionID('paste-flow-or-action-id-here')`
+- type `BildrTools.Debug.Start('paste-flow-or-action-id-here')` 
 - hit enter
 - go to your preview site and do some actions that should trigger your flow or action
 - the console view will popup just before the flow or action is triggered
 - now you can inspect variable values by using `BildrTools.Debug.ShowAllVariables()`
 - press the play button if you want to continu. You are now in step-mode which means execution will be stopped before the next flow or action is executed, giving you the option to again inspect the variable values.
-- to turn of step-mode but keep tracing flows and actions type `BildrTools.Debug.Trace.StepMode.Off()`
+- to turn of step-mode but keep tracing flows and actions type `BildrTools.Debug.StepModeOff()`
 - hit enter
 
 Done debugging?
-- type `BildrTools.Debug.Trace.Stop()`
+- type `BildrTools.Debug.Stop()`
 - hit enter to stop tracing
 
 ## Feedback? Questions?
@@ -101,21 +100,10 @@ BildrTools
         
     .Debug
         .ShowAllVariables()
-        
-        .Trace
-            .Start()
-            .Stop()
-            .TraceFlowsOnly()
-            .TraceFlowsAndActions()
-            .BreakBeforeActionID(flowId or actionId)
-            .StepMode
-                .On()
-                .Off()
-                
-        .Settings
-            .AutoShowVariables(boolean) 
-            .ShowBildrActions(boolean)
-            
+        .Start()
+        .Stop()
+        .StepModeOff()
+                            
     .Flows
         .findUnused()
         .findUsage(flowId),
