@@ -252,6 +252,7 @@ class BildrToolsFlows {
         }
         // check flow usage per active form
         bildrCache.activeForms.forEach(form => {
+            var _a, _b, _c, _d, _e, _f;
             if (!form.actions) {
                 return;
             }
@@ -332,43 +333,41 @@ class BildrToolsFlows {
             });
             // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
             let inPageEvents = [];
-            if (form.opts) {
-                // Page Flows
-                if (form.opts.autoSaveActionID && form.opts.autoSaveActionID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Auto-Save Flow");
-                }
-                if (form.opts.onLoadAct && form.opts.onLoadAct.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Page Load Flow");
-                }
-                // Root Page Flows
-                if (form.opts.notConnectedActID && form.opts.notConnectedActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to run when connection is lost");
-                }
-                if (form.opts.reConnectedActID && form.opts.reConnectedActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to run when connection is re-established");
-                }
-                if (form.opts.notAuthenticatedActID && form.opts.notAuthenticatedActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to run when authentication is lost");
-                }
-                if (form.opts.newRevisionActID && form.opts.newRevisionActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to Run When Revision is Out of Date");
-                }
-                if (inPageEvents.length > 0) {
+            // Page Flows
+            if ((_a = form.opts.autoSaveActionID) === null || _a === void 0 ? void 0 : _a.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Auto-Save Flow");
+            }
+            if ((_b = form.opts.onLoadAct) === null || _b === void 0 ? void 0 : _b.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Page Load Flow");
+            }
+            // Root Page Flows
+            if ((_c = form.opts.notConnectedActID) === null || _c === void 0 ? void 0 : _c.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to run when connection is lost");
+            }
+            if ((_d = form.opts.reConnectedActID) === null || _d === void 0 ? void 0 : _d.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to run when connection is re-established");
+            }
+            if ((_e = form.opts.notAuthenticatedActID) === null || _e === void 0 ? void 0 : _e.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to run when authentication is lost");
+            }
+            if ((_f = form.opts.newRevisionActID) === null || _f === void 0 ? void 0 : _f.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to Run When Revision is Out of Date");
+            }
+            if (inPageEvents.length > 0) {
+                isUsed = true;
+                ConsoleLog("Form : " + form.name);
+                ConsoleLog("  Element : Page Body");
+                inPageEvents.forEach(theEvent => {
+                    ConsoleLog("    Event : " + theEvent);
+                });
+            }
+            if (form.opts.resonanceDataListeners) {
+                let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
+                if (dataListenersUsingFlow.length > 0) {
                     isUsed = true;
                     ConsoleLog("Form : " + form.name);
                     ConsoleLog("  Element : Page Body");
-                    inPageEvents.forEach(theEvent => {
-                        ConsoleLog("    Event : " + theEvent);
-                    });
-                }
-                if (form.opts.resonanceDataListeners) {
-                    let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
-                    if (dataListenersUsingFlow.length > 0) {
-                        isUsed = true;
-                        ConsoleLog("Form : " + form.name);
-                        ConsoleLog("  Element : Page Body");
-                        ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
-                    }
+                    ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
                 }
             }
         });
