@@ -2,7 +2,7 @@ import { BildrCacheHelper } from "./Bildr-tools-utils";
 
 // Stubs which will not be part of the output javascript
 declare var window: {
-    orgQAFunc: any,
+    orgQAFunc: Function,
     QueueAction: any
 }
 
@@ -30,13 +30,11 @@ export const BildrToolsDebug = {
         if (!window.orgQAFunc) { window.orgQAFunc = QueueAction; }
         let debugZettingShowAllActions = false;
         let debugZettingShowBildrActions = false;
-        let debugZettingActionIdBreakpoint = "";
         let debugZettingStepMode = false;
         let debugZettingAutoShowVariables = false;
 
         window.QueueAction = function (a: action, wait: boolean, parentQAction: any, brwObj: any, params: any, isThread: boolean, qName: string, bildrCache: BildrDBCache, addToQueue: boolean) {
             let ignoreCanvasMouseEvents = true;
-            debugZettingActionIdBreakpoint = debugZettingActionIdBreakpoint.trim();
 
             if (a) {
                 let isMouseEvent = false;
@@ -66,7 +64,7 @@ export const BildrToolsDebug = {
                     if (actionInProject || debugZettingShowBildrActions) {
                         console.log(`${Date.now()} ${type} ${a.id} = ${a.name}`);
 
-                        if (debugZettingStepMode || a.id == debugZettingActionIdBreakpoint) {
+                        if (debugZettingStepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
                             debugZettingStepMode = true;
                             if (debugZettingAutoShowVariables) {
                                 BildrToolsDebug.ShowAllVariables();
@@ -83,6 +81,10 @@ export const BildrToolsDebug = {
     },
     Stop: () => {
         if (window.orgQAFunc) { window.QueueAction = window.orgQAFunc; }
-    }
+    },
+    BreakBeforeActionID: (actionId: actId) => {
+        BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
+    },
+    _ActionIdBreakpoint : "" as actId
 
 }

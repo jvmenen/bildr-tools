@@ -112,12 +112,10 @@ const BildrToolsDebug = {
         }
         let debugZettingShowAllActions = false;
         let debugZettingShowBildrActions = false;
-        let debugZettingActionIdBreakpoint = "";
         let debugZettingStepMode = false;
         let debugZettingAutoShowVariables = false;
         window.QueueAction = function (a, wait, parentQAction, brwObj, params, isThread, qName, bildrCache, addToQueue) {
             let ignoreCanvasMouseEvents = true;
-            debugZettingActionIdBreakpoint = debugZettingActionIdBreakpoint.trim();
             if (a) {
                 let isMouseEvent = false;
                 let isFlow = (a.type && a.type == "68");
@@ -142,7 +140,7 @@ const BildrToolsDebug = {
                     }
                     if (actionInProject || debugZettingShowBildrActions) {
                         console.log(`${Date.now()} ${type} ${a.id} = ${a.name}`);
-                        if (debugZettingStepMode || a.id == debugZettingActionIdBreakpoint) {
+                        if (debugZettingStepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
                             debugZettingStepMode = true;
                             if (debugZettingAutoShowVariables) {
                                 BildrToolsDebug.ShowAllVariables();
@@ -161,7 +159,11 @@ const BildrToolsDebug = {
         if (window.orgQAFunc) {
             window.QueueAction = window.orgQAFunc;
         }
-    }
+    },
+    BreakBeforeActionID: (actionId) => {
+        BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
+    },
+    _ActionIdBreakpoint: ""
 };
 
 
