@@ -152,44 +152,42 @@ export class BildrToolsFlows {
 
             // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
             let inPageEvents = [];
-            if (form.opts) {
-                // Page Flows
-                if (form.opts.autoSaveActionID && form.opts.autoSaveActionID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Auto-Save Flow");
-                }
-                if (form.opts.onLoadAct && form.opts.onLoadAct.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Page Load Flow");
-                }
-                // Root Page Flows
-                if (form.opts.notConnectedActID && form.opts.notConnectedActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to run when connection is lost");
-                }
-                if (form.opts.reConnectedActID && form.opts.reConnectedActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to run when connection is re-established");
-                }
-                if (form.opts.notAuthenticatedActID && form.opts.notAuthenticatedActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to run when authentication is lost");
-                }
-                if (form.opts.newRevisionActID && form.opts.newRevisionActID.toString().endsWith(strFlowId)) {
-                    inPageEvents.push("Flow to Run When Revision is Out of Date");
-                }
-                if (inPageEvents.length > 0) {
+            // Page Flows
+            if (form.opts.autoSaveActionID?.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Auto-Save Flow");
+            }
+            if (form.opts.onLoadAct?.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Page Load Flow");
+            }
+            // Root Page Flows
+            if (form.opts.notConnectedActID?.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to run when connection is lost");
+            }
+            if (form.opts.reConnectedActID?.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to run when connection is re-established");
+            }
+            if (form.opts.notAuthenticatedActID?.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to run when authentication is lost");
+            }
+            if (form.opts.newRevisionActID?.toString().endsWith(strFlowId)) {
+                inPageEvents.push("Flow to Run When Revision is Out of Date");
+            }
+            if (inPageEvents.length > 0) {
+                isUsed = true;
+                ConsoleLog("Form : " + form.name);
+                ConsoleLog("  Element : Page Body");
+                inPageEvents.forEach(theEvent => {
+                    ConsoleLog("    Event : " + theEvent);
+                });
+            }
+
+            if (form.opts.resonanceDataListeners) {
+                let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
+                if (dataListenersUsingFlow.length > 0) {
                     isUsed = true;
                     ConsoleLog("Form : " + form.name);
                     ConsoleLog("  Element : Page Body");
-                    inPageEvents.forEach(theEvent => {
-                        ConsoleLog("    Event : " + theEvent);
-                    });
-                }
-
-                if (form.opts.resonanceDataListeners) {
-                    let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
-                    if (dataListenersUsingFlow.length > 0) {
-                        isUsed = true;
-                        ConsoleLog("Form : " + form.name);
-                        ConsoleLog("  Element : Page Body");
-                        ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
-                    }
+                    ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
                 }
             }
         });
