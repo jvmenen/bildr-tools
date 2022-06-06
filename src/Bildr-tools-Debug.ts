@@ -14,11 +14,12 @@ export enum ActionsToShowEnum {
     MouseActions = 1 << 3,
 };
 
-export const BildrToolsDebug = {
-    _ActionIdBreakpoint: "" as actId,
-    _StepMode: false,
-    ActionsToShow: ActionsToShowEnum.Flows,
-    ShowAllVariables: () => {
+export class BildrToolsDebug {
+    private static _StepMode: boolean = false;
+
+    static ActionsToShow: ActionsToShowEnum = ActionsToShowEnum.Flows;
+
+    static ShowAllVariables(): void {
 
         function frmsRecursive(brwFrm: brwForm) {
             if (brwFrm && brwFrm.form && brwFrm.form.name) {
@@ -36,8 +37,10 @@ export const BildrToolsDebug = {
         }
 
         frmsRecursive(brwFormRoot);
-    },
-    Start: () => {
+    }
+
+    static Start(): void
+    static Start(breakBeforActionId?: actId): void {
         if (!window.orgQAFunc) { window.orgQAFunc = QueueAction; }
 
         window.QueueAction = function (a: action, wait: boolean, parentQAction: any, brwObj: any, params: any, isThread: boolean, qName: string, bildrCache: BildrDBCache, addToQueue: boolean) {
@@ -64,10 +67,10 @@ export const BildrToolsDebug = {
 
                     if (act != undefined || showBildrActions) {
                         let type = isFlow ? "Flow  " : "Action";
-                        let indent = isFlow ? "" : "    ";
+                        let indent = isFlow ? "" : "  --";
                         console.log(`${type}: ${a.id} ${indent}  "${a.name}"`);
 
-                        if (BildrToolsDebug._StepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
+                        if (BildrToolsDebug._StepMode || (breakBeforActionId && a.id == breakBeforActionId)) {
                             BildrToolsDebug._StepMode = true;
                             debugger;
                         }
@@ -78,14 +81,13 @@ export const BildrToolsDebug = {
         }
         window.QueueAction.prototype = window.orgQAFunc.prototype;
         window.QueueAction.prototype.constructor = QueueAction;
-    },
-    Stop: () => {
+    }
+
+    static Stop(): void {
         if (window.orgQAFunc) { window.QueueAction = window.orgQAFunc; }
-    },
-    BreakBeforeActionID: (actionId: actId) => {
-        BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
-    },
-    StepModeOff: () =>{
+    }
+
+    static StepModeOff(): void {
         BildrToolsDebug._StepMode = false;
     }
 }

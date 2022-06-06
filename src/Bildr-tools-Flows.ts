@@ -1,7 +1,8 @@
 import { BildrCacheHelper, nameSort } from "./Bildr-tools-utils";
 
-export const BildrToolsFlows = {
-    findUnusedFlows: (skipAutoSave = true) => {
+export class BildrToolsFlows {
+
+    static findUnusedFlows(skipAutoSave = true): void {
         let bildrCache = BildrCacheHelper.createInstance();
         const activeForms = nameSort(bildrCache.forms);
 
@@ -38,8 +39,9 @@ export const BildrToolsFlows = {
         });
         console.log("");
         console.log("THAT'S IT!");
-    },
-    findUsageOfFlow: (flowId: string | number, logToConsole: boolean) => {
+    }
+
+    static findUsageOfFlow(flowId: actId, logToConsole: boolean): boolean {
         let bildrCache = BildrCacheHelper.createInstance();
         const strFlowId = flowId.toString();
 
@@ -195,8 +197,9 @@ export const BildrToolsFlows = {
         ConsoleLog("THAT'S IT!");
 
         return isUsed;
-    },
-    findUsageOfDeletedFlows: () => {
+    }
+
+    static findUsageOfDeletedFlows(): void {
         let bildrCache = BildrCacheHelper.createInstance();
         // for easy reference
 
@@ -317,8 +320,9 @@ export const BildrToolsFlows = {
         })
         console.log("");
         console.log("THAT'S IT!");
-    },
-    getFlowWithActions: (flowId: string) => {
+    }
+
+    static getFlowWithActions(flowId: string): void {
         let cache = BildrCacheHelper.createInstance();
         let flow = cache.activeFlows.find(flow => {
             return (flow.id && flow.id.toString() == flowId);
@@ -326,7 +330,7 @@ export const BildrToolsFlows = {
 
         if (flow == undefined) {
             console.log("flow not found");
-            return false;
+            return;
         }
 
         console.log("Flow found:");
@@ -347,6 +351,5 @@ export const BildrToolsFlows = {
                 })
             };
         }
-    },
-
+    }
 }

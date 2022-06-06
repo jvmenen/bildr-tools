@@ -1,9 +1,10 @@
 import { BildrCacheHelper, nameSort } from "./Bildr-tools-utils";
 
-export const BildrToolsActionTypes = {
-    findUsage: (actionTypeId: string) => {
+export class BildrToolsActionTypes {
+    static findUsage(actionTypeId: string): void {
         let bildrCache = BildrCacheHelper.createInstance();
         let logToConsole = true;
+
         function ConsoleLog(text: string) {
             if (logToConsole) { console.log(text); }
         }
@@ -16,7 +17,7 @@ export const BildrToolsActionTypes = {
             ConsoleLog("");
         } else {
             ConsoleLog(`Couldn't find Action Type ${actionTypeId} in project!`);
-            return false;
+            return;
         }
 
         // check flow usage per active form
@@ -34,7 +35,7 @@ export const BildrToolsActionTypes = {
                 if (flow.opts && flow.opts.arguments) {
                     let actionsArray = flow.opts.arguments.find((item) => { return item.name == "actionsArray"; });
                     if (!actionsArray) { return }
-                    
+
                     let argActionArray = actionsArray as actionArgumentActionsArray
                     argActionArray.value?.forEach(actionRef => {
                         // Used in an argument of an action type?

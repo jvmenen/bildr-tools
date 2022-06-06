@@ -14,8 +14,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
 
-const BildrToolsActionTypes = {
-    findUsage: (actionTypeId) => {
+class BildrToolsActionTypes {
+    static findUsage(actionTypeId) {
         let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         let logToConsole = true;
         function ConsoleLog(text) {
@@ -32,7 +32,7 @@ const BildrToolsActionTypes = {
         }
         else {
             ConsoleLog(`Couldn't find Action Type ${actionTypeId} in project!`);
-            return false;
+            return;
         }
         // check flow usage per active form
         bildrCache.activeForms.forEach(form => {
@@ -72,7 +72,7 @@ const BildrToolsActionTypes = {
         ConsoleLog("");
         ConsoleLog("THAT'S IT!");
     }
-};
+}
 
 
 /***/ }),
@@ -99,11 +99,8 @@ var ActionsToShowEnum;
     ActionsToShowEnum[ActionsToShowEnum["MouseActions"] = 8] = "MouseActions";
 })(ActionsToShowEnum || (ActionsToShowEnum = {}));
 ;
-const BildrToolsDebug = {
-    _ActionIdBreakpoint: "",
-    _StepMode: false,
-    ActionsToShow: ActionsToShowEnum.Flows,
-    ShowAllVariables: () => {
+class BildrToolsDebug {
+    static ShowAllVariables() {
         function frmsRecursive(brwFrm) {
             if (brwFrm && brwFrm.form && brwFrm.form.name) {
                 console.log(`Variables of Page: ${brwFrm.form.name}`);
@@ -119,8 +116,8 @@ const BildrToolsDebug = {
             }
         }
         frmsRecursive(brwFormRoot);
-    },
-    Start: () => {
+    }
+    static Start(breakBeforActionId) {
         if (!window.orgQAFunc) {
             window.orgQAFunc = QueueAction;
         }
@@ -145,9 +142,9 @@ const BildrToolsDebug = {
                     }
                     if (act != undefined || showBildrActions) {
                         let type = isFlow ? "Flow  " : "Action";
-                        let indent = isFlow ? "" : "    ";
+                        let indent = isFlow ? "" : "  --";
                         console.log(`${type}: ${a.id} ${indent}  "${a.name}"`);
-                        if (BildrToolsDebug._StepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
+                        if (BildrToolsDebug._StepMode || (breakBeforActionId && a.id == breakBeforActionId)) {
                             BildrToolsDebug._StepMode = true;
                             debugger;
                         }
@@ -158,19 +155,18 @@ const BildrToolsDebug = {
         };
         window.QueueAction.prototype = window.orgQAFunc.prototype;
         window.QueueAction.prototype.constructor = QueueAction;
-    },
-    Stop: () => {
+    }
+    static Stop() {
         if (window.orgQAFunc) {
             window.QueueAction = window.orgQAFunc;
         }
-    },
-    BreakBeforeActionID: (actionId) => {
-        BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
-    },
-    StepModeOff: () => {
+    }
+    static StepModeOff() {
         BildrToolsDebug._StepMode = false;
     }
-};
+}
+BildrToolsDebug._StepMode = false;
+BildrToolsDebug.ActionsToShow = ActionsToShowEnum.Flows;
 
 
 /***/ }),
@@ -187,8 +183,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
 
-const BildrToolsFlows = {
-    findUnusedFlows: (skipAutoSave = true) => {
+class BildrToolsFlows {
+    static findUnusedFlows(skipAutoSave = true) {
         let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         const activeForms = (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(bildrCache.forms);
         // create "header" for the results
@@ -226,8 +222,8 @@ const BildrToolsFlows = {
         });
         console.log("");
         console.log("THAT'S IT!");
-    },
-    findUsageOfFlow: (flowId, logToConsole) => {
+    }
+    static findUsageOfFlow(flowId, logToConsole) {
         let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         const strFlowId = flowId.toString();
         // for easy reference
@@ -379,8 +375,8 @@ const BildrToolsFlows = {
         ConsoleLog("");
         ConsoleLog("THAT'S IT!");
         return isUsed;
-    },
-    findUsageOfDeletedFlows: () => {
+    }
+    static findUsageOfDeletedFlows() {
         let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         // for easy reference
         function isDeletedFlow(flowId) {
@@ -496,8 +492,8 @@ const BildrToolsFlows = {
         });
         console.log("");
         console.log("THAT'S IT!");
-    },
-    getFlowWithActions: (flowId) => {
+    }
+    static getFlowWithActions(flowId) {
         var _a;
         let cache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         let flow = cache.activeFlows.find(flow => {
@@ -505,7 +501,7 @@ const BildrToolsFlows = {
         });
         if (flow == undefined) {
             console.log("flow not found");
-            return false;
+            return;
         }
         console.log("Flow found:");
         console.log(flow);
@@ -524,8 +520,8 @@ const BildrToolsFlows = {
             }
             ;
         }
-    },
-};
+    }
+}
 
 
 /***/ }),
@@ -657,10 +653,10 @@ var __webpack_exports__ = {};
   \****************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ActionTypes": () => (/* binding */ ActionTypes),
+/* harmony export */   "ActionTypes": () => (/* reexport safe */ _Bildr_tools_ActionTypes__WEBPACK_IMPORTED_MODULE_0__.BildrToolsActionTypes),
 /* harmony export */   "ActionsToShowEnum": () => (/* reexport safe */ _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__.ActionsToShowEnum),
-/* harmony export */   "Debug": () => (/* binding */ Debug),
-/* harmony export */   "Flows": () => (/* binding */ Flows)
+/* harmony export */   "Debug": () => (/* reexport safe */ _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__.BildrToolsDebug),
+/* harmony export */   "Flows": () => (/* reexport safe */ _Bildr_tools_Flows__WEBPACK_IMPORTED_MODULE_2__.BildrToolsFlows)
 /* harmony export */ });
 /* harmony import */ var _Bildr_tools_ActionTypes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-ActionTypes */ "./src/Bildr-tools-ActionTypes.ts");
 /* harmony import */ var _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Bildr-tools-Debug */ "./src/Bildr-tools-Debug.ts");
@@ -669,9 +665,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-let ActionTypes = _Bildr_tools_ActionTypes__WEBPACK_IMPORTED_MODULE_0__.BildrToolsActionTypes;
-let Flows = _Bildr_tools_Flows__WEBPACK_IMPORTED_MODULE_2__.BildrToolsFlows;
-let Debug = _Bildr_tools_Debug__WEBPACK_IMPORTED_MODULE_1__.BildrToolsDebug;
 
 
 })();
