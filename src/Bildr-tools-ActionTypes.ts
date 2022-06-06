@@ -1,7 +1,8 @@
 import { BildrCacheHelper, nameSort } from "./Bildr-tools-utils";
 
 export const BildrToolsActionTypes = {
-    findUsage: (actionTypeId: string, bildrCache = new BildrCacheHelper(true)) => {
+    findUsage: (actionTypeId: string) => {
+        let bildrCache = BildrCacheHelper.createInstance();
         let logToConsole = true;
         function ConsoleLog(text: string) {
             if (logToConsole) { console.log(text); }

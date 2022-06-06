@@ -15,7 +15,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
 
 const BildrToolsActionTypes = {
-    findUsage: (actionTypeId, bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+    findUsage: (actionTypeId) => {
+        let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         let logToConsole = true;
         function ConsoleLog(text) {
             if (logToConsole) {
@@ -134,7 +135,7 @@ const BildrToolsDebug = {
                     // is it a project action?
                     let actionInProject = false;
                     if (a.id && !debugZettingShowBildrActions) {
-                        let cache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true);
+                        let cache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
                         let act = cache.actions.find(act => { return act.id == a.id; });
                         actionInProject = (act != undefined);
                     }
@@ -182,7 +183,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bildr-tools-utils */ "./src/Bildr-tools-utils.ts");
 
 const BildrToolsFlows = {
-    findUnusedFlows: (skipAutoSave = true, bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+    findUnusedFlows: (skipAutoSave = true) => {
+        let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         const activeForms = (0,_Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.nameSort)(bildrCache.forms);
         // create "header" for the results
         console.log(`Check ${bildrCache.actions.length} flows. This might take a few seconds...`);
@@ -207,7 +209,7 @@ const BildrToolsFlows = {
                     if (skipAutoSave && flow.name.includes("Auto Save")) {
                         return;
                     }
-                    if (BildrToolsFlows.findUsageOfFlow(flow.id, false, bildrCache) == false) {
+                    if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
                         if (!formNameLogged) {
                             formNameLogged = true;
                             console.log("Form : " + form.name);
@@ -220,7 +222,8 @@ const BildrToolsFlows = {
         console.log("");
         console.log("THAT'S IT!");
     },
-    findUsageOfFlow: (flowId, logToConsole, bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+    findUsageOfFlow: (flowId, logToConsole) => {
+        let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         const strFlowId = flowId.toString();
         // for easy reference
         let isUsed = false;
@@ -372,7 +375,8 @@ const BildrToolsFlows = {
         ConsoleLog("THAT'S IT!");
         return isUsed;
     },
-    findUsageOfDeletedFlows: (bildrCache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+    findUsageOfDeletedFlows: () => {
+        let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         // for easy reference
         function isDeletedFlow(flowId) {
             return bildrCache.deletedFlows.find(item => item.id.toString().endsWith(flowId.toString())) != undefined;
@@ -488,8 +492,9 @@ const BildrToolsFlows = {
         console.log("");
         console.log("THAT'S IT!");
     },
-    getFlowWithActions: (flowId, cache = new _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper(true)) => {
+    getFlowWithActions: (flowId) => {
         var _a;
+        let cache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         let flow = cache.activeFlows.find(flow => {
             return (flow.id && flow.id.toString() == flowId);
         });
@@ -544,13 +549,13 @@ const nameSort = (list) => {
 class BildrCacheHelper {
     constructor(...myarray) {
         if (myarray.length === 1) {
-            this.cache = BildrDBCacheGet(myarray[0], "", "", "");
+            this.cache = BildrDBCacheGet(myarray[0], "", "", null);
         }
         else if (myarray.length === 2) {
-            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1], "");
+            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1], null);
         }
         else {
-            this.cache = BildrDBCacheGet(true, "", "", "");
+            this.cache = BildrDBCacheGet(true, "", "", null);
         }
     }
     get actions() {
@@ -578,6 +583,7 @@ class BildrCacheHelper {
         return this.cache.elements.recs.filter(item => item.deleted == 0);
     }
 }
+BildrCacheHelper.createInstance = () => { return new BildrCacheHelper(true); };
 
 
 /***/ })

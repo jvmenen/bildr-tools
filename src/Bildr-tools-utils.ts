@@ -12,16 +12,18 @@ export const nameSort = <T extends nameId>(list: Array<T>) => {
 }
 
 export class BildrCacheHelper {
+    static createInstance = () => {return new BildrCacheHelper(true)};
+
     cache: BildrDBCache;
     public constructor(forSelectedBildr: boolean);
     public constructor(projectID: string, revisionID: string);
     public constructor(...myarray: any[]) {
         if (myarray.length === 1) {
-            this.cache = BildrDBCacheGet(myarray[0], "", "","")!;
+            this.cache = BildrDBCacheGet(myarray[0], "", "", null)!;
         } else if (myarray.length === 2) {
-            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1],"")!;
+            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1], null)!;
         } else {
-            this.cache = BildrDBCacheGet(true, "", "","")!;
+            this.cache = BildrDBCacheGet(true, "", "", null)!;
         }
     }
     get actions() {

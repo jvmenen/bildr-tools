@@ -56,7 +56,7 @@ export const BildrToolsDebug = {
                     // is it a project action?
                     let actionInProject = false;
                     if (a.id && !debugZettingShowBildrActions) {
-                        let cache = new BildrCacheHelper(true);
+                        let cache = BildrCacheHelper.createInstance();
                         let act = cache.actions.find(act => { return act.id == a.id })
                         actionInProject = (act != undefined);
                     }

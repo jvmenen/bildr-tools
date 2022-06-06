@@ -1,7 +1,8 @@
 import { BildrCacheHelper, nameSort } from "./Bildr-tools-utils";
 
 export const BildrToolsFlows = {
-    findUnusedFlows: (skipAutoSave = true, bildrCache = new BildrCacheHelper(true)) => {
+    findUnusedFlows: (skipAutoSave = true) => {
+        let bildrCache = BildrCacheHelper.createInstance();
         const activeForms = nameSort(bildrCache.forms);
 
         // create "header" for the results
@@ -25,7 +26,7 @@ export const BildrToolsFlows = {
                 nameSort(activeFlows).forEach(flow => {
                     if (skipAutoSave && flow.name.includes("Auto Save")) { return; }
 
-                    if (BildrToolsFlows.findUsageOfFlow(flow.id, false, bildrCache) == false) {
+                    if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
                         if (!formNameLogged) {
                             formNameLogged = true;
                             console.log("Form : " + form.name);
@@ -38,8 +39,8 @@ export const BildrToolsFlows = {
         console.log("");
         console.log("THAT'S IT!");
     },
-    findUsageOfFlow: (flowId: string | number, logToConsole: boolean, bildrCache = new BildrCacheHelper(true)) => {
-
+    findUsageOfFlow: (flowId: string | number, logToConsole: boolean) => {
+        let bildrCache = BildrCacheHelper.createInstance();
         const strFlowId = flowId.toString();
 
         // for easy reference
@@ -195,7 +196,8 @@ export const BildrToolsFlows = {
 
         return isUsed;
     },
-    findUsageOfDeletedFlows: (bildrCache = new BildrCacheHelper(true)) => {
+    findUsageOfDeletedFlows: () => {
+        let bildrCache = BildrCacheHelper.createInstance();
         // for easy reference
 
         function isDeletedFlow(flowId: actId) {
@@ -316,8 +318,8 @@ export const BildrToolsFlows = {
         console.log("");
         console.log("THAT'S IT!");
     },
-    getFlowWithActions: (flowId: string, cache = new BildrCacheHelper(true)) => {
-
+    getFlowWithActions: (flowId: string) => {
+        let cache = BildrCacheHelper.createInstance();
         let flow = cache.activeFlows.find(flow => {
             return (flow.id && flow.id.toString() == flowId);
         });
