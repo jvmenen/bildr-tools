@@ -101,6 +101,7 @@ var ActionsToShowEnum;
 ;
 const BildrToolsDebug = {
     _ActionIdBreakpoint: "",
+    _StepMode: false,
     ActionsToShow: ActionsToShowEnum.Flows,
     ShowAllVariables: () => {
         function frmsRecursive(brwFrm) {
@@ -123,7 +124,6 @@ const BildrToolsDebug = {
         if (!window.orgQAFunc) {
             window.orgQAFunc = QueueAction;
         }
-        let debugZettingStepMode = false;
         window.QueueAction = function (a, wait, parentQAction, brwObj, params, isThread, qName, bildrCache, addToQueue) {
             let showFlows = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.Flows) === ActionsToShowEnum.Flows;
             let showActions = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.Actions) === ActionsToShowEnum.Actions;
@@ -147,8 +147,8 @@ const BildrToolsDebug = {
                         let type = isFlow ? "Flow  " : "Action";
                         let indent = isFlow ? "" : "    ";
                         console.log(`${type}: ${a.id} ${indent}  "${a.name}"`);
-                        if (debugZettingStepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
-                            debugZettingStepMode = true;
+                        if (BildrToolsDebug._StepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
+                            BildrToolsDebug._StepMode = true;
                             debugger;
                         }
                     }
@@ -167,6 +167,9 @@ const BildrToolsDebug = {
     BreakBeforeActionID: (actionId) => {
         BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
     },
+    StepModeOff: () => {
+        BildrToolsDebug._StepMode = false;
+    }
 };
 
 

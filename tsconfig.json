@@ -2,7 +2,7 @@
     "compileOnSave": true,
     "compilerOptions": {
         "target": "es6",
-        "module": "es2015",
+        "module": "es6",
         "sourceMap": true,
         "outDir": "./out",
         "strict": true

@@ -16,6 +16,7 @@ export enum ActionsToShowEnum {
 
 export const BildrToolsDebug = {
     _ActionIdBreakpoint: "" as actId,
+    _StepMode: false,
     ActionsToShow: ActionsToShowEnum.Flows,
     ShowAllVariables: () => {
 
@@ -38,7 +39,6 @@ export const BildrToolsDebug = {
     },
     Start: () => {
         if (!window.orgQAFunc) { window.orgQAFunc = QueueAction; }
-        let debugZettingStepMode = false;
 
         window.QueueAction = function (a: action, wait: boolean, parentQAction: any, brwObj: any, params: any, isThread: boolean, qName: string, bildrCache: BildrDBCache, addToQueue: boolean) {
             let showFlows = (BildrToolsDebug.ActionsToShow & ActionsToShowEnum.Flows) === ActionsToShowEnum.Flows;
@@ -67,8 +67,8 @@ export const BildrToolsDebug = {
                         let indent = isFlow ? "" : "    ";
                         console.log(`${type}: ${a.id} ${indent}  "${a.name}"`);
 
-                        if (debugZettingStepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
-                            debugZettingStepMode = true;
+                        if (BildrToolsDebug._StepMode || a.id == BildrToolsDebug._ActionIdBreakpoint) {
+                            BildrToolsDebug._StepMode = true;
                             debugger;
                         }
                     }
@@ -85,4 +85,7 @@ export const BildrToolsDebug = {
     BreakBeforeActionID: (actionId: actId) => {
         BildrToolsDebug._ActionIdBreakpoint = actionId.toString().trim();
     },
+    StepModeOff: () =>{
+        BildrToolsDebug._StepMode = false;
+    }
 }
