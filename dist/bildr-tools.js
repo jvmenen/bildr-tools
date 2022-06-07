@@ -223,7 +223,7 @@ class BildrToolsFlows {
         console.log("");
         console.log("THAT'S IT!");
     }
-    static findUsageOfFlow(flowId, logToConsole) {
+    static findUsageOfFlow(flowId, logToConsole = true) {
         let bildrCache = _Bildr_tools_utils__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         const strFlowId = flowId.toString();
         // for easy reference
