@@ -66,6 +66,7 @@ class FormHelper implements form {
     name: string;
     id: string | number;
     bildrCache: BildrCacheHelper;
+
     public constructor(form: form, bildrCache: BildrCacheHelper) {
         this.opts = form.opts;
         this.objsTree = form.objsTree;
@@ -77,8 +78,8 @@ class FormHelper implements form {
     }
 
     public get activeFlows() {
-        const activeFlows = this.bildrCache.activeFlowsGroupedByFormID[this.id.toString()];
-        return activeFlows ?? []
+        let flows = this.bildrCache.activeFlowsGroupedByFormID[this.id.toString()];
+        return flows ? flows : Array<FlowHelper>();
     }
 }
 
@@ -118,7 +119,8 @@ class ActionArgumentActionsArrayHelper {
         if (!actArgActionsArray.value) return Array<action>();
 
         return bildrCache.actions.filter(item => {
-            return (actArgActionsArray.value?.find(actRef => actRef.id = item.id));
+            let found = actArgActionsArray.value?.find(actRef => actRef.id == item.id);
+            return found ? true: false;
         });
     }
 }

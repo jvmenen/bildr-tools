@@ -25,12 +25,9 @@ export class BildrToolsActionTypes {
             let formNameLogged = false;
 
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
-            nameSort(form.activeFlows).forEach((flow) => {
-                flow.actions.forEach(actionRef => {
-                    // Used in an argument of an action type?
-                    let action = bildrCache.actions.find(item => { return (item.id == actionRef.id); });
-
-                    if (action && action.type && action.type == actionTypeId) {
+            nameSort(form.activeFlows).forEach(flow => {
+                flow.actions.forEach(action => {
+                    if (action.type == actionTypeId) {
                         if (!formNameLogged) {
                             formNameLogged = true;
                             ConsoleLog("Form : " + form.name);
