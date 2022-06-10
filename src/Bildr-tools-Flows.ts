@@ -1,10 +1,10 @@
-import { BildrCacheHelper, nameSort } from "./Bildr-tools-utils";
+import { BildrCacheHelper, nameSort } from "./Bildr-tools-helpers";
 
 export class BildrToolsFlows {
 
     static findUnusedFlows(skipAutoSave = true): void {
         let bildrCache = BildrCacheHelper.createInstance();
-        const activeForms = nameSort(bildrCache.forms);
+        const activeForms = nameSort(bildrCache.activeForms);
 
         // create "header" for the results
         console.log(`Check ${bildrCache.actions.length} flows. This might take a few seconds...`);
