@@ -11,50 +11,156 @@ export const nameSort = <T extends nameId>(list: Array<T>) => {
     return list.sort((a, b) => { return ('' + a.name).localeCompare(b.name) });
 }
 
+class CacheItem {
+    name: string;
+    exec: Function;
+    value: any;
+    nullDefault: any;
+
+    public constructor(name: string, exec: Function, nullDefault: any) {
+        this.name = name;
+        this.exec = exec;
+        this.nullDefault = nullDefault;
+        this.clear();
+    }
+
+    clear(): void {
+        this.value == null;
+    }
+
+    getValue<T>() {
+        if (this.value == null) {
+            this.value = this.exec() as T;
+        }
+        return this.value ? this.value as T : this.nullDefault as T;
+    }
+}
+class CacheHelper {
+    cache: CacheItem[] = [];
+
+    public register<T>(variable: string, exec: () => T, nullDefault: T) {
+        this.cache.push(new CacheItem(variable, exec, nullDefault));
+    }
+
+    public getValue<T>(variableName: string) {
+        let cacheItem = this.cache.find(item => item.name == variableName);
+        if (cacheItem) {
+            return cacheItem.getValue<T>();
+        }
+        throw new Error("variableName is not defined");
+    }
+
+    public clear() {
+        this.cache.forEach(item => item.clear())
+    }
+}
+
 export class BildrCacheHelper {
     static createInstance = () => { return new BildrCacheHelper(true) };
 
-    cache: BildrDBCache;
+    bildrCache: BildrDBCache;
+    cache: CacheHelper;
+
     public constructor(forSelectedBildr: boolean);
     public constructor(projectID: string, revisionID: string);
     public constructor(...myarray: any[]) {
         if (myarray.length === 1) {
-            this.cache = BildrDBCacheGet(myarray[0], "", "", null)!;
+            this.bildrCache = BildrDBCacheGet(myarray[0], "", "", null)!;
         } else if (myarray.length === 2) {
-            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1], null)!;
+            this.bildrCache = BildrDBCacheGet(false, myarray[0], myarray[1], null)!;
         } else {
-            this.cache = BildrDBCacheGet(true, "", "", null)!;
+            this.bildrCache = BildrDBCacheGet(true, "", "", null)!;
         }
+
+        this.cache = new CacheHelper()
+        this.cache.register("actionsGroupedByFormID",
+            () => groupBy<ActionHelper, string>(this.actions, act => act.formID),
+            groupBy<ActionHelper, string>([], () => ""));
+
+        this.cache.register("actions",
+            () => this.bildrCache.actions.recs.map(act => new ActionHelper(act, this)),
+            Array<ActionHelper>());
+
+        this.cache.register("flows",
+            () => this.actions.filter(action => action.type == "68").map(flw => new FlowHelper(flw, this)),
+            Array<FlowHelper>());
+
+        this.cache.register("elements",
+            () => this.bildrCache.elements.recs,
+            Array<element>());
+
+        this.cache.register("forms",
+            () => this.bildrCache.forms.recs.map(frm => new FormHelper(frm, this)),
+            Array<FormHelper>());
+
+        this.cache.register("actionTypes",
+            () => this.bildrCache.actionsTypes.recs,
+            Array<FormHelper>());
+
+        this.cache.register("activeForms",
+            () => this.forms.filter(item => item.deleted == 0 && item.opts.archived != true),
+            Array<FormHelper>());
+
+        this.cache.register("activeFlows",
+            () => this.flows.filter(flow => flow.deleted == 0),
+            Array<FlowHelper>());
+
+        this.cache.register("deletedFlows",
+            () => this.flows.filter(flow => flow.deleted != 0),
+            Array<FlowHelper>());
+
+        this.cache.register("activeFlowsGroupedByFormID",
+            () => groupBy<FlowHelper, string>(this.activeFlows, f => f.formID),
+            groupBy<FlowHelper, string>([], () => ""));
+
+        this.cache.register("activeElements",
+            () => this.elements.filter(item => item.deleted == 0),
+            Array<element>());
+
     }
     get actions() {
-        return this.cache.actions.recs;
+        // return this.bildrCache.actions.recs.map(act => new ActionHelper(act, this));
+        return this.cache.getValue<ActionHelper[]>("actions")
     }
     get flows() {
-        return this.actions.filter(action => action.type == "68").map(flw => new FlowHelper(flw, this));
+        // return this.actions.filter(action => action.type == "68").map(flw => new FlowHelper(flw, this));
+        return this.cache.getValue<FlowHelper[]>("flows")
     }
     get elements() {
-        return this.cache.elements.recs;
+        // return this.bildrCache.elements.recs;
+        return this.cache.getValue<element[]>("elements")
     }
     get forms() {
-        return this.cache.forms.recs.map(frm => new FormHelper(frm, this));
+        // return this.bildrCache.forms.recs.map(frm => new FormHelper(frm, this));
+        return this.cache.getValue<FormHelper[]>("forms")
     }
     get actionTypes() {
-        return this.cache.actionsTypes.recs;
+        // return this.bildrCache.actionsTypes.recs;
+        return this.cache.getValue<actionType[]>("actionTypes")
     }
     get activeForms() {
-        return this.forms.filter(item => item.deleted == 0);
+        // return this.forms.filter(item => item.deleted == 0);
+        return this.cache.getValue<FormHelper[]>("activeForms")
     }
     get activeFlows() {
-        return this.flows.filter(flow => flow.deleted == 0);
+        // return this.flows.filter(flow => flow.deleted == 0);
+        return this.cache.getValue<FlowHelper[]>("activeFlows")
     }
     get deletedFlows() {
-        return this.flows.filter(flow => flow.deleted != 0);
+        // return this.flows.filter(flow => flow.deleted != 0);
+        return this.cache.getValue<FlowHelper[]>("deletedFlows")
     }
     get activeFlowsGroupedByFormID() {
-        return groupBy<FlowHelper, string>(this.activeFlows, f => f.formID);
+        // return groupBy<FlowHelper, string>(this.activeFlows, f => f.formID);
+        return this.cache.getValue<Record<string, FlowHelper[]>>("activeFlowsGroupedByFormID")
+    }
+    get actionsGroupedByFormID() {
+        // return groupBy<ActionHelper, string>(this.actions, f => f.formID);
+        return this.cache.getValue<Record<string, ActionHelper[]>>("actionsGroupedByFormID");
     }
     get activeElements() {
-        return this.elements.filter(item => item.deleted == 0);
+        // return this.elements.filter(item => item.deleted == 0);
+        return this.cache.getValue<element[]>("activeElements")
     }
 }
 
@@ -65,7 +171,8 @@ class FormHelper implements form {
     deleted: number;
     name: string;
     id: string | number;
-    bildrCache: BildrCacheHelper;
+
+    protected bildrCache: BildrCacheHelper;
 
     public constructor(form: form, bildrCache: BildrCacheHelper) {
         this.opts = form.opts;
@@ -77,20 +184,22 @@ class FormHelper implements form {
         this.bildrCache = bildrCache;
     }
 
-    public get activeFlows() {
+    public get ActiveFlows() {
         let flows = this.bildrCache.activeFlowsGroupedByFormID[this.id.toString()];
         return flows ? flows : Array<FlowHelper>();
     }
 }
 
-class FlowHelper implements action {
+class ActionHelper implements action {
     opts: { arguments: actionArgument[]; };
     formID: string;
     type: string;
     deleted: number;
     name: string;
     id: string | number;
-    bildrCache: BildrCacheHelper;
+
+    protected bildrCache: BildrCacheHelper;
+    private form: FormHelper | undefined;
 
     public constructor(action: action, bildrCache: BildrCacheHelper) {
         this.opts = action.opts;
@@ -101,26 +210,36 @@ class FlowHelper implements action {
         this.id = action.id
         this.bildrCache = bildrCache;
     }
-
-    public get actions() {
-        return ActionArgumentActionsArrayHelper.getActions(this.opts.arguments, this.bildrCache)
+    public get Form() {
+        if (!this.form) { this.form = this.bildrCache.forms.find(item => item.id == this.formID); }
+        return this.form;
     }
+    public get Arguments() {
+        //check nodig? Array.isArray(action.Arguments
+        return this.opts.arguments
+    }
+
 }
 
-class ActionArgumentActionsArrayHelper {
+class FlowHelper extends ActionHelper {
+    public constructor(action: action, bildrCache: BildrCacheHelper) {
+        super(action, bildrCache);
+    }
 
-    static getActions(args: actionArgument[], bildrCache: BildrCacheHelper) {
-        let actionsArray = args.find(item => item.name == "actionsArray");
+    public get Actions() {
+        let actionsArray = this.opts.arguments.find(item => item.name == "actionsArray");
+        let retValue = Array<ActionHelper>();
 
-        if (!actionsArray) return Array<action>();
+        if (!actionsArray) return retValue;
 
         let actArgActionsArray = actionsArray as actionArgumentActionsArray;
 
-        if (!actArgActionsArray.value) return Array<action>();
+        if (!actArgActionsArray.value) return retValue;
 
-        return bildrCache.actions.filter(item => {
-            let found = actArgActionsArray.value?.find(actRef => actRef.id == item.id);
-            return found ? true: false;
+        actArgActionsArray.value.forEach(actRef => {
+            let act = this.bildrCache.actionsGroupedByFormID[this.formID].find(act => act.id == actRef.id)
+            if (act) { retValue.push(act) }
         });
+        return retValue;
     }
 }

@@ -25,8 +25,8 @@ export class BildrToolsActionTypes {
             let formNameLogged = false;
 
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
-            nameSort(form.activeFlows).forEach(flow => {
-                flow.actions.forEach(action => {
+            nameSort(form.ActiveFlows).forEach(flow => {
+                flow.Actions.forEach(action => {
                     if (action.type == actionTypeId) {
                         if (!formNameLogged) {
                             formNameLogged = true;

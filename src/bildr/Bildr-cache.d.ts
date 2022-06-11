@@ -18,6 +18,7 @@ declare interface form extends nameIdDeleted {
 }
 
 declare interface formOpts {
+    archived: boolean;
     resonanceDataListeners?: resonanceDataListener[];
     newRevisionActID?: actId | undefined;
     notAuthenticatedActID?: actId | undefined;

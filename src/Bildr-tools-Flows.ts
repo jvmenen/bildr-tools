@@ -18,24 +18,19 @@ export class BildrToolsFlows {
         console.log("");
 
         activeForms.forEach(form => {
-            if (!form.actions) { return; }
-
             // actions in form.actions are not marked as deleted
-            let activeFlows = bildrCache.activeFlowsGroupedByFormID[form.id];
-            if (activeFlows) {
-                let formNameLogged = false;
-                nameSort(activeFlows).forEach(flow => {
-                    if (skipAutoSave && flow.name.includes("Auto Save")) { return; }
+            let formNameLogged = false;
+            nameSort(form.ActiveFlows).forEach(flow => {
+                if (skipAutoSave && flow.name.includes("Auto Save")) { return; }
 
-                    if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
-                        if (!formNameLogged) {
-                            formNameLogged = true;
-                            console.log("Form : " + form.name);
-                        }
-                        console.log("  Flow : " + flow.name);
+                if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
+                    if (!formNameLogged) {
+                        formNameLogged = true;
+                        console.log("Form : " + form.name);
                     }
-                });
-            }
+                    console.log("  Flow : " + flow.name);
+                }
+            });
         });
         console.log("");
         console.log("THAT'S IT!");
@@ -55,9 +50,8 @@ export class BildrToolsFlows {
         let theFlow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
         // found it
         if (theFlow) {
-            let form = bildrCache.forms.find(item => { return theFlow && item.id == theFlow.formID; });
-            if (form) {
-                ConsoleLog(`Flow "${theFlow.name}" on form "${form.name}" is called by:`);
+            if (theFlow.Form) {
+                ConsoleLog(`Flow "${theFlow.name}" on form "${theFlow.Form.name}" is called by:`);
             } else {
                 ConsoleLog(`Couldn't find form for flowID ${flowId} in project!`)
             }
@@ -69,57 +63,39 @@ export class BildrToolsFlows {
 
         // check flow usage per active form
         bildrCache.activeForms.forEach(form => {
-            if (!form.actions) { return; }
-
             // actions in form.actions are not marked as deleted
-            let activeFlows = bildrCache.activeFlowsGroupedByFormID[form.id];
-            if (!activeFlows) { return; }
-
             let formNameLogged = false;
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
-            nameSort(activeFlows).forEach(flow => {
-                let actionsArrayValue = new Array<actionRef>();
-                if (flow.opts && flow.opts.arguments) {
-                    let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray"; });
-                    if (actionsArray) {
-                        let argumentStaticArray = actionsArray as actionArgumentActionsArray
-                        argumentStaticArray.value?.forEach(actionRef => {
-                            // Nested flow?
-                            let asNestedFlow = actionRef.id && actionRef.id.toString().endsWith(strFlowId);
-                            if (asNestedFlow) {
-                                isUsed = true;
-                                if (!formNameLogged) {
-                                    formNameLogged = true;
-                                    ConsoleLog("Form : " + form.name);
-                                }
-                                ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                ConsoleLog("    as nested flow");
-                            }
-                            if (!asNestedFlow) {
-                                // Used in an argument of an action type?
-                                let action = bildrCache.actions.find(item => { return (item.id == actionRef.id); });
+            nameSort(form.ActiveFlows).forEach(flow => {
+                flow.Actions.forEach(action => {
+                    let asNestedFlow = action.id.toString().endsWith(strFlowId);
+                    if (asNestedFlow) {
+                        isUsed = true;
+                        if (!formNameLogged) {
+                            formNameLogged = true;
+                            ConsoleLog("Form : " + form.name);
+                        }
+                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                        ConsoleLog("    as nested flow");
+                    } else {
+                        action.Arguments.forEach(arg => {
+                            // Used in an argument of an action type?
+                            if (arg.type == "static.actions") {
+                                let argumentStatic = arg as actionArgumentStaticActions
 
-                                if (action && action.opts && action.opts.arguments && Array.isArray(action.opts.arguments)) {
-                                    let flowActionRefs = action.opts.arguments.find(arg => arg.type && arg.type == "static.actions")
-                                    if (flowActionRefs) {
-                                        let argumetStatic = flowActionRefs as actionArgumentStaticActions
-                                        let hasFlowRef = argumetStatic.value.endsWith(strFlowId);
-
-                                        if (hasFlowRef) {
-                                            isUsed = true;
-                                            if (!formNameLogged) {
-                                                formNameLogged = true;
-                                                ConsoleLog("Form : " + form.name);
-                                            }
-                                            ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                            ConsoleLog("    Action : " + action?.name);
-                                        }
+                                if (argumentStatic.value.endsWith(strFlowId)) {
+                                    isUsed = true;
+                                    if (!formNameLogged) {
+                                        formNameLogged = true;
+                                        ConsoleLog("Form : " + form.name);
                                     }
+                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                    ConsoleLog("    Action : " + action?.name);
                                 }
                             }
                         })
                     }
-                }
+                })
             })
             // Check usage of flow in Elements Events
             let formObjsTreeFlattend = Array<element>();
