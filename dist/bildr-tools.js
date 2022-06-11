@@ -38,8 +38,8 @@ class BildrToolsActionTypes {
         bildrCache.activeForms.forEach(form => {
             let formNameLogged = false;
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
-            (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(form.activeFlows).forEach(flow => {
-                flow.actions.forEach(action => {
+            (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(form.ActiveFlows).forEach(flow => {
+                flow.Actions.forEach(action => {
                     if (action.type == actionTypeId) {
                         if (!formNameLogged) {
                             formNameLogged = true;
@@ -170,8 +170,8 @@ class BildrToolsFlows {
         let bildrCache = _Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         const activeForms = (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(bildrCache.activeForms);
         // create "header" for the results
-        console.log(`Check ${bildrCache.actions.length} flows. This might take a few seconds...`);
-        console.log("You'll see a mesage when checking is finished.");
+        console.log(`Checking ${bildrCache.activeFlows.length} flows.`);
+        console.log("You'll see 'That's it!' when checking is finished.");
         console.log("");
         if (skipAutoSave) {
             console.log("Looking for Unused flows (skipping unused 'Auto Save')");
@@ -181,26 +181,20 @@ class BildrToolsFlows {
         }
         console.log("");
         activeForms.forEach(form => {
-            if (!form.actions) {
-                return;
-            }
             // actions in form.actions are not marked as deleted
-            let activeFlows = bildrCache.activeFlowsGroupedByFormID[form.id];
-            if (activeFlows) {
-                let formNameLogged = false;
-                (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(activeFlows).forEach(flow => {
-                    if (skipAutoSave && flow.name.includes("Auto Save")) {
-                        return;
+            let formNameLogged = false;
+            (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(form.ActiveFlows).forEach(flow => {
+                if (skipAutoSave && flow.name.includes("Auto Save")) {
+                    return;
+                }
+                if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
+                    if (!formNameLogged) {
+                        formNameLogged = true;
+                        console.log("Form : " + form.name);
                     }
-                    if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
-                        if (!formNameLogged) {
-                            formNameLogged = true;
-                            console.log("Form : " + form.name);
-                        }
-                        console.log("  Flow : " + flow.name);
-                    }
-                });
-            }
+                    console.log("  Flow : " + flow.name);
+                }
+            });
         });
         console.log("");
         console.log("THAT'S IT!");
@@ -216,12 +210,11 @@ class BildrToolsFlows {
             }
         }
         // Create "Header" for the results
-        let theFlow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
+        let flow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
         // found it
-        if (theFlow) {
-            let form = bildrCache.forms.find(item => { return theFlow && item.id == theFlow.formID; });
-            if (form) {
-                ConsoleLog(`Flow "${theFlow.name}" on form "${form.name}" is called by:`);
+        if (flow) {
+            if (flow.Form) {
+                ConsoleLog(`Flow "${flow.name}" on form "${flow.Form.name}" is called by:`);
             }
             else {
                 ConsoleLog(`Couldn't find form for flowID ${flowId} in project!`);
@@ -235,83 +228,52 @@ class BildrToolsFlows {
         // check flow usage per active form
         bildrCache.activeForms.forEach(form => {
             var _a, _b, _c, _d, _e, _f;
-            if (!form.actions) {
-                return;
-            }
-            // actions in form.actions are not marked as deleted
-            let activeFlows = bildrCache.activeFlowsGroupedByFormID[form.id];
-            if (!activeFlows) {
-                return;
-            }
             let formNameLogged = false;
-            // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
-            (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(activeFlows).forEach(flow => {
-                var _a;
-                let actionsArrayValue = new Array();
-                if (flow.opts && flow.opts.arguments) {
-                    let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray"; });
-                    if (actionsArray) {
-                        let argumentStaticArray = actionsArray;
-                        (_a = argumentStaticArray.value) === null || _a === void 0 ? void 0 : _a.forEach(actionRef => {
-                            // Nested flow?
-                            let asNestedFlow = actionRef.id && actionRef.id.toString().endsWith(strFlowId);
-                            if (asNestedFlow) {
-                                isUsed = true;
-                                if (!formNameLogged) {
-                                    formNameLogged = true;
-                                    ConsoleLog("Form : " + form.name);
-                                }
-                                ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                ConsoleLog("    as nested flow");
-                            }
-                            if (!asNestedFlow) {
-                                // Used in an argument of an action type?
-                                let action = bildrCache.actions.find(item => { return (item.id == actionRef.id); });
-                                if (action && action.opts && action.opts.arguments && Array.isArray(action.opts.arguments)) {
-                                    let flowActionRefs = action.opts.arguments.find(arg => arg.type && arg.type == "static.actions");
-                                    if (flowActionRefs) {
-                                        let argumetStatic = flowActionRefs;
-                                        let hasFlowRef = argumetStatic.value.endsWith(strFlowId);
-                                        if (hasFlowRef) {
-                                            isUsed = true;
-                                            if (!formNameLogged) {
-                                                formNameLogged = true;
-                                                ConsoleLog("Form : " + form.name);
-                                            }
-                                            ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                            ConsoleLog("    Action : " + (action === null || action === void 0 ? void 0 : action.name));
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }
-            });
-            // Check usage of flow in Elements Events
-            let formObjsTreeFlattend = Array();
-            function flattenElements(items) {
-                if (items != undefined) {
-                    items.forEach(item => {
-                        flattenElements(item.items);
-                        formObjsTreeFlattend.push(item);
-                    });
-                }
-            }
-            flattenElements(form.objsTree);
-            (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(formObjsTreeFlattend).forEach(element => {
-                if (element.opts && element.opts.events) {
-                    let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
-                    eventsUsingFlow.forEach(theEvent => {
+            // Check usage of Flow in Actions of Form.Flows         
+            (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(form.ActiveFlows).forEach(flow => {
+                flow.Actions.forEach(action => {
+                    // as nested flow?
+                    let asNestedFlow = action.id.toString().endsWith(strFlowId);
+                    if (asNestedFlow) {
                         isUsed = true;
                         if (!formNameLogged) {
                             formNameLogged = true;
                             ConsoleLog("Form : " + form.name);
                         }
-                        ConsoleLog("  Element : " + element.name);
-                        ConsoleLog("    Event : " + theEvent.code);
-                    });
-                }
+                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                        ConsoleLog("    as nested flow");
+                    }
+                    else 
+                    // or referenced by an action type argument
+                    {
+                        action.Arguments.forEach(arg => {
+                            if (arg.type == "static.actions") {
+                                let argumentStatic = arg;
+                                if (argumentStatic.value.endsWith(strFlowId)) {
+                                    isUsed = true;
+                                    if (!formNameLogged) {
+                                        formNameLogged = true;
+                                        ConsoleLog("Form : " + form.name);
+                                    }
+                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                    ConsoleLog("    Action : " + action.name);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            (0,_Bildr_tools_helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(form.ActiveElements).forEach(element => {
+                let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
+                eventsUsingFlow.forEach(theEvent => {
+                    isUsed = true;
+                    if (!formNameLogged) {
+                        formNameLogged = true;
+                        ConsoleLog("Form : " + form.name);
+                    }
+                    ConsoleLog("  Element : " + element.name);
+                    ConsoleLog("    Event : " + theEvent.code);
+                });
             });
             // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
             let inPageEvents = [];
@@ -528,47 +490,108 @@ const groupBy = (list, getKey) => list.reduce((previous, currentItem) => {
 const nameSort = (list) => {
     return list.sort((a, b) => { return ('' + a.name).localeCompare(b.name); });
 };
+class CacheItem {
+    constructor(name, exec, nullDefault) {
+        this.name = name;
+        this.exec = exec;
+        this.nullDefault = nullDefault;
+        this.clear();
+    }
+    clear() {
+        this.value == null;
+    }
+    getValue() {
+        if (this.value == null) {
+            this.value = this.exec();
+        }
+        return this.value ? this.value : this.nullDefault;
+    }
+}
+class CacheHelper {
+    constructor() {
+        this.cache = [];
+    }
+    register(variable, exec, nullDefault) {
+        this.cache.push(new CacheItem(variable, exec, nullDefault));
+    }
+    getValue(variableName) {
+        let cacheItem = this.cache.find(item => item.name == variableName);
+        if (cacheItem) {
+            return cacheItem.getValue();
+        }
+        throw new Error("variableName is not defined");
+    }
+    clear() {
+        this.cache.forEach(item => item.clear());
+    }
+}
 class BildrCacheHelper {
     constructor(...myarray) {
         if (myarray.length === 1) {
-            this.cache = BildrDBCacheGet(myarray[0], "", "", null);
+            this.bildrCache = BildrDBCacheGet(myarray[0], "", "", null);
         }
         else if (myarray.length === 2) {
-            this.cache = BildrDBCacheGet(false, myarray[0], myarray[1], null);
+            this.bildrCache = BildrDBCacheGet(false, myarray[0], myarray[1], null);
         }
         else {
-            this.cache = BildrDBCacheGet(true, "", "", null);
+            this.bildrCache = BildrDBCacheGet(true, "", "", null);
         }
+        this.cache = new CacheHelper();
+        this.cache.register("actionsGroupedByFormID", () => groupBy(this.actions, act => act.formID), groupBy([], () => ""));
+        this.cache.register("actions", () => this.bildrCache.actions.recs.map(act => new ActionHelper(act, this)), Array());
+        this.cache.register("flows", () => this.actions.filter(action => action.type == "68").map(flw => new FlowHelper(flw, this)), Array());
+        this.cache.register("elements", () => this.bildrCache.elements.recs, Array());
+        this.cache.register("forms", () => this.bildrCache.forms.recs.map(frm => new FormHelper(frm, this)), Array());
+        this.cache.register("actionTypes", () => this.bildrCache.actionsTypes.recs, Array());
+        this.cache.register("activeForms", () => this.forms.filter(item => item.deleted == 0 && item.opts.archived != true), Array());
+        this.cache.register("activeFlows", () => this.flows.filter(flow => flow.deleted == 0), Array());
+        this.cache.register("deletedFlows", () => this.flows.filter(flow => flow.deleted != 0), Array());
+        this.cache.register("activeFlowsGroupedByFormID", () => groupBy(this.activeFlows, f => f.formID), groupBy([], () => ""));
+        this.cache.register("activeElements", () => this.elements.filter(item => item.deleted == 0), Array());
     }
     get actions() {
-        return this.cache.actions.recs;
+        // return this.bildrCache.actions.recs.map(act => new ActionHelper(act, this));
+        return this.cache.getValue("actions");
     }
     get flows() {
-        return this.actions.filter(action => action.type == "68").map(flw => new FlowHelper(flw, this));
+        // return this.actions.filter(action => action.type == "68").map(flw => new FlowHelper(flw, this));
+        return this.cache.getValue("flows");
     }
     get elements() {
-        return this.cache.elements.recs;
+        // return this.bildrCache.elements.recs;
+        return this.cache.getValue("elements");
     }
     get forms() {
-        return this.cache.forms.recs.map(frm => new FormHelper(frm, this));
+        // return this.bildrCache.forms.recs.map(frm => new FormHelper(frm, this));
+        return this.cache.getValue("forms");
     }
     get actionTypes() {
-        return this.cache.actionsTypes.recs;
+        // return this.bildrCache.actionsTypes.recs;
+        return this.cache.getValue("actionTypes");
     }
     get activeForms() {
-        return this.forms.filter(item => item.deleted == 0);
+        // return this.forms.filter(item => item.deleted == 0);
+        return this.cache.getValue("activeForms");
     }
     get activeFlows() {
-        return this.flows.filter(flow => flow.deleted == 0);
+        // return this.flows.filter(flow => flow.deleted == 0);
+        return this.cache.getValue("activeFlows");
     }
     get deletedFlows() {
-        return this.flows.filter(flow => flow.deleted != 0);
+        // return this.flows.filter(flow => flow.deleted != 0);
+        return this.cache.getValue("deletedFlows");
     }
     get activeFlowsGroupedByFormID() {
-        return groupBy(this.activeFlows, f => f.formID);
+        // return groupBy<FlowHelper, string>(this.activeFlows, f => f.formID);
+        return this.cache.getValue("activeFlowsGroupedByFormID");
+    }
+    get actionsGroupedByFormID() {
+        // return groupBy<ActionHelper, string>(this.actions, f => f.formID);
+        return this.cache.getValue("actionsGroupedByFormID");
     }
     get activeElements() {
-        return this.elements.filter(item => item.deleted == 0);
+        // return this.elements.filter(item => item.deleted == 0);
+        return this.cache.getValue("activeElements");
     }
 }
 BildrCacheHelper.createInstance = () => { return new BildrCacheHelper(true); };
@@ -582,12 +605,25 @@ class FormHelper {
         this.id = form.id;
         this.bildrCache = bildrCache;
     }
-    get activeFlows() {
+    get ActiveFlows() {
         let flows = this.bildrCache.activeFlowsGroupedByFormID[this.id.toString()];
         return flows ? flows : Array();
     }
+    get ActiveElements() {
+        let formObjsTreeFlattend = Array();
+        function flattenElements(items) {
+            if (items != undefined) {
+                items.forEach(item => {
+                    flattenElements(item.items);
+                    formObjsTreeFlattend.push(item);
+                });
+            }
+        }
+        flattenElements(this.objsTree);
+        return formObjsTreeFlattend;
+    }
 }
-class FlowHelper {
+class ActionHelper {
     constructor(action, bildrCache) {
         this.opts = action.opts;
         this.formID = action.formID;
@@ -597,23 +633,36 @@ class FlowHelper {
         this.id = action.id;
         this.bildrCache = bildrCache;
     }
-    get actions() {
-        return ActionArgumentActionsArrayHelper.getActions(this.opts.arguments, this.bildrCache);
+    get Form() {
+        if (!this.form) {
+            this.form = this.bildrCache.forms.find(item => item.id == this.formID);
+        }
+        return this.form;
+    }
+    get Arguments() {
+        //check nodig? Array.isArray(action.Arguments
+        return this.opts.arguments;
     }
 }
-class ActionArgumentActionsArrayHelper {
-    static getActions(args, bildrCache) {
-        let actionsArray = args.find(item => item.name == "actionsArray");
+class FlowHelper extends ActionHelper {
+    constructor(action, bildrCache) {
+        super(action, bildrCache);
+    }
+    get Actions() {
+        let actionsArray = this.opts.arguments.find(item => item.name == "actionsArray");
+        let retValue = Array();
         if (!actionsArray)
-            return Array();
+            return retValue;
         let actArgActionsArray = actionsArray;
         if (!actArgActionsArray.value)
-            return Array();
-        return bildrCache.actions.filter(item => {
-            var _a;
-            let found = (_a = actArgActionsArray.value) === null || _a === void 0 ? void 0 : _a.find(actRef => actRef.id == item.id);
-            return found ? true : false;
+            return retValue;
+        actArgActionsArray.value.forEach(actRef => {
+            let act = this.bildrCache.actionsGroupedByFormID[this.formID].find(act => act.id == actRef.id);
+            if (act) {
+                retValue.push(act);
+            }
         });
+        return retValue;
     }
 }
 
