@@ -1,10 +1,10 @@
-declare var brwFormRoot: any, bildrCanvasEditMode: any;
-declare function BrwObject(of: any, brwForm: any, HTML: any): any;
+declare var brwFormRoot: brwForm, bildrCanvasEditMode: any;
+declare function BrwObject(of: any, brwForm: brwForm, HTML: any): any;
 declare function BrwFormObjsGarbageCollector(brwForm: any): void;
 declare function BrwFormGarbageCollector(brwForm: any, brwObj: any, notFromParent: any): void;
 declare var BrwFormAutoID: number;
-declare function BrwForm(form: any, pBrwObj: any): any;
-declare function Form(id: any, name: any): any;
+declare function BrwForm(form: formInstance, pBrwObj: any): any;
+declare function Form(id: string | number, name: string): any;
 declare function FormGet(formID: any, grpForms: any): any;
 declare function FormObjectsCreateTree(frm: any, withRefresh: any, types: any): void;
 declare function FormGetFromCache(formID: any, bildrCache: any, qAct: any, forcedRefresh: any, forcedRefreshDetails: any, formNew: any, isThread: any): any;
@@ -13,7 +13,7 @@ declare function FormGetFromWebServer(form: any, onQAction: any, bildrCache: any
 declare function StaticDocGetPath(bildrCache: any, postData: any, sf: any): void;
 declare function FormPreCache(pageIDs: any, qAct: any, forSelectedBildr: any): void;
 declare function FormStart(formID: any, pBrwObj: any, jsonInput: any, actId: any, displayOnly: any, forcedRefresh: any, forcedRefreshDetails: any, forSelectedBildr: any, parentQAction: any, isOwnThread: any): any;
-declare function getExtensionAction(msgId: any, messageData: any): any;
+declare function getExtensionAction(msgId: string, messageData: any): any;
 declare function FormParentApplyClassStyles(form: any, p: any): boolean;
 declare function SaticFilesInfoGet(bildrCache: any, postData: any, qAct: any, toWeb: any): void;
 declare function FormGetFunctions(bildrCache: any, qAct: any, isThread: any, forcedWait: any): boolean;

@@ -13,7 +13,7 @@ declare function RefreshSelectedBildr(): void;
 declare var baseProjID: number, baseRevID: number, baseSelProjID: number, baseSelRevID: number, baseProjDB: any, baseSelProjDB: any, baseSelProjDBOld: any;
 declare function BildrDBGetName(projectID: any, revisionID: any): any;
 declare function BildrDBCacheGet(forSelectedBildr: boolean, projectID: string, revisionID: string, type: any): any;
-declare function BildrCacheGetForFltSet(brwForm: any, oForProjRev: any): any;
+declare function BildrCacheGetForFltSet(brwForm: brwForm, oForProjRev: any): any;
 declare function BildrCacheGetForGroup(bildrCacheForFltSet: any, fltSet: any, oForProjRev: any): any;
 declare function BildrDBCreate(): void;
 declare function BildrDBPutBulk(typ: any, list: any, bildrCache: any, listPropsToDel: any, setDeleted: any): void;

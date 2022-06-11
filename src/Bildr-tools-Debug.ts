@@ -2,8 +2,8 @@ import { BildrCacheHelper } from "./Bildr-tools-helpers";
 
 // Stubs which will not be part of the output javascript
 declare var window: {
-    orgQAFunc: Function,
-    QueueAction: any
+    orgQAFunc: typeof QueueAction,
+    QueueAction: typeof QueueAction
 }
 
 // If you want both Flows and actions use: Flows | Actions
