@@ -7,8 +7,8 @@ export class BildrToolsFlows {
         const activeForms = nameSort(bildrCache.activeForms);
 
         // create "header" for the results
-        console.log(`Check ${bildrCache.actions.length} flows. This might take a few seconds...`);
-        console.log("You'll see a mesage when checking is finished.");
+        console.log(`Checking ${bildrCache.activeFlows.length} flows.`);
+        console.log("You'll see 'That's it!' when checking is finished.");
         console.log("");
         if (skipAutoSave) {
             console.log("Looking for Unused flows (skipping unused 'Auto Save')");
@@ -47,11 +47,11 @@ export class BildrToolsFlows {
         }
 
         // Create "Header" for the results
-        let theFlow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
+        let flow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
         // found it
-        if (theFlow) {
-            if (theFlow.Form) {
-                ConsoleLog(`Flow "${theFlow.name}" on form "${theFlow.Form.name}" is called by:`);
+        if (flow) {
+            if (flow.Form) {
+                ConsoleLog(`Flow "${flow.name}" on form "${flow.Form.name}" is called by:`);
             } else {
                 ConsoleLog(`Couldn't find form for flowID ${flowId} in project!`)
             }
@@ -63,11 +63,11 @@ export class BildrToolsFlows {
 
         // check flow usage per active form
         bildrCache.activeForms.forEach(form => {
-            // actions in form.actions are not marked as deleted
             let formNameLogged = false;
-            // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
+            // Check usage of Flow in Actions of Form.Flows         
             nameSort(form.ActiveFlows).forEach(flow => {
                 flow.Actions.forEach(action => {
+                    // as nested flow?
                     let asNestedFlow = action.id.toString().endsWith(strFlowId);
                     if (asNestedFlow) {
                         isUsed = true;
@@ -77,9 +77,10 @@ export class BildrToolsFlows {
                         }
                         ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
                         ConsoleLog("    as nested flow");
-                    } else {
+                    } else
+                    // or referenced by an action type argument
+                    {
                         action.Arguments.forEach(arg => {
-                            // Used in an argument of an action type?
                             if (arg.type == "static.actions") {
                                 let argumentStatic = arg as actionArgumentStaticActions
 
@@ -90,40 +91,25 @@ export class BildrToolsFlows {
                                         ConsoleLog("Form : " + form.name);
                                     }
                                     ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                    ConsoleLog("    Action : " + action?.name);
+                                    ConsoleLog("    Action : " + action.name);
                                 }
                             }
                         })
                     }
                 })
             })
-            // Check usage of flow in Elements Events
-            let formObjsTreeFlattend = Array<element>();
 
-            function flattenElements(items: element[] | undefined) {
-                if (items != undefined) {
-                    items.forEach(item => {
-                        flattenElements(item.items);
-                        formObjsTreeFlattend.push(item);
-                    });
-                }
-            }
-
-            flattenElements(form.objsTree);
-
-            nameSort(formObjsTreeFlattend).forEach(element => {
-                if (element.opts && element.opts.events) {
-                    let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
-                    eventsUsingFlow.forEach(theEvent => {
-                        isUsed = true;
-                        if (!formNameLogged) {
-                            formNameLogged = true;
-                            ConsoleLog("Form : " + form.name);
-                        }
-                        ConsoleLog("  Element : " + element.name);
-                        ConsoleLog("    Event : " + theEvent.code);
-                    });
-                }
+            nameSort(form.ActiveElements).forEach(element => {
+                let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
+                eventsUsingFlow.forEach(theEvent => {
+                    isUsed = true;
+                    if (!formNameLogged) {
+                        formNameLogged = true;
+                        ConsoleLog("Form : " + form.name);
+                    }
+                    ConsoleLog("  Element : " + element.name);
+                    ConsoleLog("    Event : " + theEvent.code);
+                });
             });
 
             // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)

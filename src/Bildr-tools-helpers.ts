@@ -188,6 +188,22 @@ class FormHelper implements form {
         let flows = this.bildrCache.activeFlowsGroupedByFormID[this.id.toString()];
         return flows ? flows : Array<FlowHelper>();
     }
+
+    public get ActiveElements() {
+        let formObjsTreeFlattend = Array<element>();
+
+        function flattenElements(items: element[] | undefined) {
+            if (items != undefined) {
+                items.forEach(item => {
+                    flattenElements(item.items);
+                    formObjsTreeFlattend.push(item);
+                });
+            }
+        }
+        flattenElements(this.objsTree);
+
+        return formObjsTreeFlattend;
+    }
 }
 
 class ActionHelper implements action {
