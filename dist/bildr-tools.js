@@ -86,7 +86,7 @@ class BildrToolsActions {
             matcher = (value) => value == path;
         }
         if (path == "*") {
-            matcher = (value) => true;
+            matcher = (value) => value.length > 0;
         }
         let ConsoleLog = (text) => console.log(text);
         // Create "Header" for the results
@@ -126,6 +126,8 @@ class BildrToolsActions {
                                 if (!path || path.length < 5)
                                     return;
                                 let stripTill = path.indexOf(".", 5);
+                                if (stripTill < 0)
+                                    return;
                                 path = path.slice(stripTill + 1);
                                 if (matcher(path)) {
                                     if (!pageNameLogged) {
@@ -138,7 +140,7 @@ class BildrToolsActions {
                                     }
                                     ConsoleLog("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
-                                        ConsoleLog("      Path : " + argVariable.value.slice(5));
+                                        ConsoleLog("      Path : " + path);
                                 }
                             }
                             if (arg.argumentType == "element") {

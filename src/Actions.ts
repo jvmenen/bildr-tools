@@ -16,7 +16,7 @@ export class BildrToolsActions {
             matcher = (value: string) => value == path;
         }
         if (path == "*") {
-            matcher = (value: string) => true;
+            matcher = (value: string) => value.length > 0;
         }
 
         let ConsoleLog = (text: string) => console.log(text);
@@ -59,7 +59,10 @@ export class BildrToolsActions {
                                 // the Bildr UI (can also be add the the variablename field)
                                 let path = argVariable.value;
                                 if (!path || path.length < 5) return;
+
                                 let stripTill = path.indexOf(".", 5)
+                                if (stripTill < 0) return;
+
                                 path = path.slice(stripTill + 1);
 
                                 if (matcher(path)) {
@@ -73,7 +76,7 @@ export class BildrToolsActions {
                                     }
                                     ConsoleLog("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
-                                        ConsoleLog("      Path : " + argVariable.value.slice(5));
+                                        ConsoleLog("      Path : " + path);
                                 }
                             }
                             if (arg.argumentType == "element") {
