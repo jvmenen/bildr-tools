@@ -22,7 +22,7 @@ BildrTools will be available as long as you don't refresh the Studio browser tab
 - set 'Load on all root pages (pages with routes)' to Yes if you want to use BildrTools.Debug in your preview site
 
 ## Using BildrTools in the Studio
-BildrTools is a functionality that is available through the developer console n the browser. Currently there is no UI integrated with Bildr Studio.
+BildrTools is a functionality that is available through the developer console in the browser. Currently there is no UI integrated with Bildr Studio.
 - in Bildr Studio right click on the left menubar
 - select "Inspect", the developer tools window will open
 - goto the console view
@@ -44,6 +44,7 @@ Want to check if you still have `console log` action types in your project befor
 - and ofcourse you can use this to check on the usage of any Action Type
 
 For more functionality that will help you during building in Bildr Studio explore:
+`BildrTools.Actions`
 `BildrTools.Flows`
 `BildrTools.ActionTypes`
 
@@ -95,12 +96,16 @@ Done debugging?
 ## BildrTools functionality
 ```
 BildrTools
+    .Actions
+        .findInPath(path, exactMatch)                                 // Use path = "*" to see all paths 
+        .findVariable(variableName, setValue, readValue, exactMatch)  // Use variableName = "*" to see all variables used 
+        
     .ActionTypes
         .findUsage(actionTypeId)
         
     .Debug
         .ShowAllVariables()
-        .Start()
+        .Start([flowId or actionId])
         .Stop()
         .StepModeOff()
                             
