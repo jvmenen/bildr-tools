@@ -153,7 +153,7 @@ export class BildrCacheHelper {
     }
 }
 
-class PageHelper implements form {
+export class PageHelper implements form {
     opts: formOpts;
     objsTree?: element[] | undefined;
     actions: action[];
@@ -195,7 +195,7 @@ class PageHelper implements form {
     }
 }
 
-class ActionHelper implements action {
+export class ActionHelper implements action {
     opts: { arguments: actionArgument[]; };
     formID: string;
     type: string;
@@ -226,7 +226,7 @@ class ActionHelper implements action {
 
 }
 
-class FlowHelper extends ActionHelper {
+export class FlowHelper extends ActionHelper {
     public constructor(action: action, bildrCache: BildrCacheHelper) {
         super(action, bildrCache);
     }

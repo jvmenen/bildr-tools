@@ -1,4 +1,4 @@
-import { BildrCacheHelper, nameSort } from "./Helpers";
+import { ActionHelper, BildrCacheHelper, FlowHelper, nameSort, PageHelper } from "./Helpers";
 
 export class BildrToolsActions {
     /**
@@ -8,13 +8,14 @@ export class BildrToolsActions {
      */
     static findInPath(path: string, exactMatch: boolean = false): void {
         let bildrCache = BildrCacheHelper.createInstance();
+        path = path.trim();
 
         // setup the matcher
         let matcher = (value: string) => value.includes(path);
         if (exactMatch) {
             matcher = (value: string) => value == path;
         }
-        if (path.trim() == "*") {
+        if (path == "*") {
             matcher = (value: string) => true;
         }
 
@@ -42,7 +43,7 @@ export class BildrToolsActions {
                             }
                             ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
                             ConsoleLog("    Action : " + action.name);
-                            ConsoleLog("      Path : " + argVariable.path);
+                            if (path == "*" || exactMatch == false) ConsoleLog("      Path : " + argVariable.path);
                         }
                     });
                 });
@@ -51,15 +52,23 @@ export class BildrToolsActions {
         ConsoleLog("");
         ConsoleLog("THAT'S IT!");
     }
-    static findVariable(variableName: string, exactMatch: boolean = false): void {
+    /**
+     * Find where variable(s) are used
+     * @param variableName The (partial) name of the variable. Use * to show all variable ussage
+     * @param setValue Show where the variable gets set
+     * @param readValue Show where the variable is read
+     * @param exactMatch Default true, if partial search is required set it to false
+     */
+    static findVariable(variableName: string, setValue: boolean = true, readValue: boolean = true, exactMatch: boolean = true): void {
         let bildrCache = BildrCacheHelper.createInstance();
+        variableName = variableName.trim();
 
         // setup the matcher
-        let matcher = (value: string) => value.includes(variableName);
+        let matcher = (value: string) => { return value.includes(variableName) };
         if (exactMatch) {
             matcher = (value: string) => value == variableName;
         }
-        if (variableName.trim() == "*") {
+        if (variableName == "*") {
             matcher = (value: string) => true;
         }
 
@@ -72,41 +81,40 @@ export class BildrToolsActions {
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
             let pageNameLogged = false;
-
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             nameSort(page.ActiveFlows).forEach(flow => {
-                let pageNameLogged = false;
+                let flowNameLogged = false;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
-                        if (arg.argumentType == "variable") {
-                            let argVariable = arg as actionArgumentVariable;
-                            if (matcher(argVariable.variableName)) {
-                                if (!pageNameLogged) {
-                                    pageNameLogged = true;
-                                    ConsoleLog("Page : " + page.name);
-                                }
-                                if (!pageNameLogged) {
-                                    pageNameLogged = true;
-                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                }
-                                ConsoleLog("    Used in Action : " + action.name);
-                                ConsoleLog("      Variable : " + argVariable.variableName);
-                            }
-                        }
-                        if (arg.argumentType == "static.text") {
+                        if (setValue && arg.argumentType == "static.text" && arg.thisIsAVariableName == true) {
                             let argVariable = arg as actionArgumentStaticText;
-                            if (matcher(argVariable.value)) {
+                            if (argVariable.value && matcher(argVariable.value)) {
                                 if (!pageNameLogged) {
                                     pageNameLogged = true;
                                     ConsoleLog("Page : " + page.name);
                                 }
-                                if (!pageNameLogged) {
-                                    pageNameLogged = true;
+                                if (!flowNameLogged) {
+                                    flowNameLogged = true;
                                     ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
                                 }
                                 ConsoleLog("    Set in Action : " + action.name);
-                                ConsoleLog("      Variable : " + argVariable.value);
+                                if (variableName == "*") ConsoleLog("      Variable : " + argVariable.value);
                             }
+                        }
+
+                        if (readValue) {
+                            ({ pageNameLogged, flowNameLogged } = handleArgVariable(arg, action, pageNameLogged, page, flowNameLogged, flow));
+                        }
+
+                        if (readValue && arg.argumentType == "filterset") {
+                            let argFilterset = arg as actionArgumentFilterset;
+                            argFilterset.filters?.forEach(filter => {
+                                filter.fieldsToFilterArray.forEach(field => {
+                                    field.valueToFilterWith.forEach(value => {
+                                        ({ pageNameLogged, flowNameLogged } = handleArgVariable(value, action, pageNameLogged, page, flowNameLogged, flow));
+                                    })
+                                })
+                            });
                         }
                     });
                 });
@@ -114,6 +122,26 @@ export class BildrToolsActions {
         })
         ConsoleLog("");
         ConsoleLog("THAT'S IT!");
+
+        function handleArgVariable(arg: actionArgument, action: ActionHelper, pageNameLogged: boolean, page: PageHelper, flowNameLogged: boolean, flow: FlowHelper) {
+            if (arg.argumentType == "variable") {
+                let argVariable = arg as actionArgumentVariable;
+                if (argVariable.variableName && matcher(argVariable.variableName)) {
+
+                    if (!pageNameLogged) {
+                        pageNameLogged = true;
+                        ConsoleLog("Page : " + page.name);
+                    }
+                    if (!flowNameLogged) {
+                        flowNameLogged = true;
+                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                    }
+                    ConsoleLog("    Used in Action : " + action.name);
+                    if (variableName == "*") ConsoleLog("      Variable : " + argVariable.variableName);
+                }
+            }
+            return { pageNameLogged, flowNameLogged };
+        }
     }
 }
 

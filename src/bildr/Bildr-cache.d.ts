@@ -55,6 +55,7 @@ declare interface actionArgument {
 declare interface actionArgumentActionsArray extends actionArgument {
     value: actionRef[] | null;
 }
+
 declare interface actionArgumentStaticText extends actionArgument {
     type: string
     value: string;
@@ -67,6 +68,14 @@ declare interface actionArgumentVariable extends actionArgument {
     partialValue?: string;
     path?: string;
     variableName: string;
+}
+
+declare interface actionArgumentFilterset extends actionArgument {
+    filters?: {
+        fieldsToFilterArray: {
+            valueToFilterWith: actionArgumentVariable[]
+        }[]
+    }[]
 }
 
 declare interface actionArgumentElement extends actionArgumentVariable {
