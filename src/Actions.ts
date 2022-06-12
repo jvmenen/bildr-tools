@@ -31,19 +31,67 @@ export class BildrToolsActions {
 
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             nameSort(page.ActiveFlows).forEach(flow => {
+                let flowNameLogged = false;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
-                        if (arg.argumentType != "variable" && arg.argumentType != "element") return;
+                        // check usage path on variable or element argument
+                        checkVariableOrElementPathUsage(arg);
 
-                        let argVariable = arg as actionArgumentVariable;
-                        if (argVariable.path && matcher(argVariable.path)) {
-                            if (!pageNameLogged) {
-                                pageNameLogged = true;
-                                ConsoleLog("Page : " + page.name);
+                        // Check usage of path in Data Collection filters
+                        if (arg.argumentType == "filterset") {
+                            let argFilterset = arg as actionArgumentFilterset;
+                            argFilterset.filters?.forEach(filter => {
+                                filter.fieldsToFilterArray.forEach(field => {
+                                    field.valueToFilterWith.forEach(value => {
+                                        checkVariableOrElementPathUsage(value)
+                                    })
+                                })
+                            });
+                        }
+
+                        function checkVariableOrElementPathUsage(arg: actionArgument): void {
+                            if (arg.argumentType == "variable") {
+                                let argVariable = arg as actionArgumentVariable;
+                                // "value": "vars.Test.name.reverseString()",
+                                // strip vars.Test. to have the whole path
+                                // value contains the combination of variablename and path
+                                // since there is no actual need to use path separately in
+                                // the Bildr UI (can also be add the the variablename field)
+                                let path = argVariable.value;
+                                if (!path || path.length < 5) return;
+                                let stripTill = path.indexOf(".", 5)
+                                path = path.slice(stripTill + 1);
+
+                                if (matcher(path)) {
+                                    if (!pageNameLogged) {
+                                        pageNameLogged = true;
+                                        ConsoleLog("Page : " + page.name);
+                                    }
+                                    if (!flowNameLogged) {
+                                        flowNameLogged = true;
+                                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                    }
+                                    ConsoleLog("    Action : " + action.name);
+                                    if (path == "*" || exactMatch == false)
+                                        ConsoleLog("      Path : " + argVariable.value.slice(5));
+                                }
                             }
-                            ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                            ConsoleLog("    Action : " + action.name);
-                            if (path == "*" || exactMatch == false) ConsoleLog("      Path : " + argVariable.path);
+                            if (arg.argumentType == "element") {
+                                let argVariable = arg as actionArgumentElement;
+                                if (argVariable.path && matcher(argVariable.path)) {
+                                    if (!pageNameLogged) {
+                                        pageNameLogged = true;
+                                        ConsoleLog("Page : " + page.name);
+                                    }
+                                    if (!flowNameLogged) {
+                                        flowNameLogged = true;
+                                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                                    }
+                                    ConsoleLog("    Action : " + action.name);
+                                    if (path == "*" || exactMatch == false)
+                                        ConsoleLog("      Path : " + argVariable.path);
+                                }
+                            }
                         }
                     });
                 });
@@ -106,6 +154,7 @@ export class BildrToolsActions {
                             ({ pageNameLogged, flowNameLogged } = handleArgVariable(arg, action, pageNameLogged, page, flowNameLogged, flow));
                         }
 
+                        // Check usage of variable in Data Collection filters
                         if (readValue && arg.argumentType == "filterset") {
                             let argFilterset = arg as actionArgumentFilterset;
                             argFilterset.filters?.forEach(filter => {
