@@ -44,16 +44,41 @@ declare interface action extends nameIdDeleted {
 }
 
 declare interface actionArgument {
-    type?: string;
     name: string;
+    displayName: string;
+    argumentType: string;
+    argumentTypeName: string;
+    argumentID: string;
+    thisIsAVariableName?: boolean
 }
 
 declare interface actionArgumentActionsArray extends actionArgument {
     value: actionRef[] | null;
 }
-
-declare interface actionArgumentStaticActions extends actionArgument {
+declare interface actionArgumentStaticText extends actionArgument {
+    type: string
     value: string;
+    thisIsAVariableName: boolean;
+}
+
+declare interface actionArgumentVariable extends actionArgument {
+    type: string
+    value: string;
+    partialValue?: string;
+    path?: string;
+    variableName: string;
+}
+
+declare interface actionArgumentElement extends actionArgumentVariable {
+}
+
+/**
+ * @param type Only exists if a value is set
+ * @param value Only exists if a value is set
+ */
+declare interface actionArgumentStaticActions extends actionArgument {
+    type?: string;
+    value?: string;
 }
 
 declare interface element extends nameIdDeleted {

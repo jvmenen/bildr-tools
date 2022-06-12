@@ -1,4 +1,4 @@
-import { BildrCacheHelper, nameSort } from "./Bildr-tools-helpers";
+import { BildrCacheHelper, nameSort } from "./Helpers";
 
 export class BildrToolsActionTypes {
     static findUsage(actionTypeId: string): void {
@@ -20,17 +20,17 @@ export class BildrToolsActionTypes {
             return;
         }
 
-        // check flow usage per active form
-        bildrCache.activeForms.forEach(form => {
-            let formNameLogged = false;
+        // check flow usage per active page
+        bildrCache.activePages.forEach(page => {
+            let pageNameLogged = false;
 
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
-            nameSort(form.ActiveFlows).forEach(flow => {
+            nameSort(page.ActiveFlows).forEach(flow => {
                 flow.Actions.forEach(action => {
                     if (action.type == actionTypeId) {
-                        if (!formNameLogged) {
-                            formNameLogged = true;
-                            ConsoleLog("Form : " + form.name);
+                        if (!pageNameLogged) {
+                            pageNameLogged = true;
+                            ConsoleLog("Page : " + page.name);
                         }
                         ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
                         ConsoleLog("    Action : " + action.name);

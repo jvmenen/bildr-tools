@@ -1,10 +1,10 @@
-import { BildrCacheHelper, nameSort } from "./Bildr-tools-helpers";
+import { BildrCacheHelper, nameSort } from "./Helpers";
 
 export class BildrToolsFlows {
 
     static findUnusedFlows(skipAutoSave = true): void {
         let bildrCache = BildrCacheHelper.createInstance();
-        const activeForms = nameSort(bildrCache.activeForms);
+        const activePages = nameSort(bildrCache.activePages);
 
         // create "header" for the results
         console.log(`Checking ${bildrCache.activeFlows.length} flows.`);
@@ -17,16 +17,15 @@ export class BildrToolsFlows {
         }
         console.log("");
 
-        activeForms.forEach(form => {
-            // actions in form.actions are not marked as deleted
-            let formNameLogged = false;
-            nameSort(form.ActiveFlows).forEach(flow => {
+        activePages.forEach(page => {
+            let pageNameLogged = false;
+            nameSort(page.ActiveFlows).forEach(flow => {
                 if (skipAutoSave && flow.name.includes("Auto Save")) { return; }
 
                 if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
-                    if (!formNameLogged) {
-                        formNameLogged = true;
-                        console.log("Form : " + form.name);
+                    if (!pageNameLogged) {
+                        pageNameLogged = true;
+                        console.log("Page : " + page.name);
                     }
                     console.log("  Flow : " + flow.name);
                 }
@@ -50,10 +49,10 @@ export class BildrToolsFlows {
         let flow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
         // found it
         if (flow) {
-            if (flow.Form) {
-                ConsoleLog(`Flow "${flow.name}" on form "${flow.Form.name}" is called by:`);
+            if (flow.Page) {
+                ConsoleLog(`Flow "${flow.name}" on page "${flow.Page.name}" is called by:`);
             } else {
-                ConsoleLog(`Couldn't find form for flowID ${flowId} in project!`)
+                ConsoleLog(`Couldn't find page for flowID ${flowId} in project!`)
             }
             ConsoleLog("");
         } else {
@@ -61,19 +60,19 @@ export class BildrToolsFlows {
             return false;
         }
 
-        // check flow usage per active form
-        bildrCache.activeForms.forEach(form => {
-            let formNameLogged = false;
-            // Check usage of Flow in Actions of Form.Flows         
-            nameSort(form.ActiveFlows).forEach(flow => {
+        // check flow usage per active page
+        bildrCache.activePages.forEach(page => {
+            let pageNameLogged = false;
+            // Check usage of Flow in Actions of page.Flows         
+            nameSort(page.ActiveFlows).forEach(flow => {
                 flow.Actions.forEach(action => {
                     // as nested flow?
                     let asNestedFlow = action.id.toString().endsWith(strFlowId);
                     if (asNestedFlow) {
                         isUsed = true;
-                        if (!formNameLogged) {
-                            formNameLogged = true;
-                            ConsoleLog("Form : " + form.name);
+                        if (!pageNameLogged) {
+                            pageNameLogged = true;
+                            ConsoleLog("Page : " + page.name);
                         }
                         ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
                         ConsoleLog("    as nested flow");
@@ -81,14 +80,13 @@ export class BildrToolsFlows {
                     // or referenced by an action type argument
                     {
                         action.Arguments.forEach(arg => {
-                            if (arg.type == "static.actions") {
+                            if (arg.argumentType == "static.actions") {
                                 let argumentStatic = arg as actionArgumentStaticActions
-
-                                if (argumentStatic.value.endsWith(strFlowId)) {
+                                if (argumentStatic.type == "static.actions" && argumentStatic.value?.endsWith(strFlowId)) {
                                     isUsed = true;
-                                    if (!formNameLogged) {
-                                        formNameLogged = true;
-                                        ConsoleLog("Form : " + form.name);
+                                    if (!pageNameLogged) {
+                                        pageNameLogged = true;
+                                        ConsoleLog("Page : " + page.name);
                                     }
                                     ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
                                     ConsoleLog("    Action : " + action.name);
@@ -99,13 +97,13 @@ export class BildrToolsFlows {
                 })
             })
 
-            nameSort(form.ActiveElements).forEach(element => {
+            nameSort(page.ActiveElements).forEach(element => {
                 let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
                 eventsUsingFlow.forEach(theEvent => {
                     isUsed = true;
-                    if (!formNameLogged) {
-                        formNameLogged = true;
-                        ConsoleLog("Form : " + form.name);
+                    if (!pageNameLogged) {
+                        pageNameLogged = true;
+                        ConsoleLog("Page : " + page.name);
                     }
                     ConsoleLog("  Element : " + element.name);
                     ConsoleLog("    Event : " + theEvent.code);
@@ -115,39 +113,39 @@ export class BildrToolsFlows {
             // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
             let inPageEvents = [];
             // Page Flows
-            if (form.opts.autoSaveActionID?.toString().endsWith(strFlowId)) {
+            if (page.opts.autoSaveActionID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Auto-Save Flow");
             }
-            if (form.opts.onLoadAct?.toString().endsWith(strFlowId)) {
+            if (page.opts.onLoadAct?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Page Load Flow");
             }
             // Root Page Flows
-            if (form.opts.notConnectedActID?.toString().endsWith(strFlowId)) {
+            if (page.opts.notConnectedActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to run when connection is lost");
             }
-            if (form.opts.reConnectedActID?.toString().endsWith(strFlowId)) {
+            if (page.opts.reConnectedActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to run when connection is re-established");
             }
-            if (form.opts.notAuthenticatedActID?.toString().endsWith(strFlowId)) {
+            if (page.opts.notAuthenticatedActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to run when authentication is lost");
             }
-            if (form.opts.newRevisionActID?.toString().endsWith(strFlowId)) {
+            if (page.opts.newRevisionActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to Run When Revision is Out of Date");
             }
             if (inPageEvents.length > 0) {
                 isUsed = true;
-                ConsoleLog("Form : " + form.name);
+                ConsoleLog("Page : " + page.name);
                 ConsoleLog("  Element : Page Body");
                 inPageEvents.forEach(theEvent => {
                     ConsoleLog("    Event : " + theEvent);
                 });
             }
 
-            if (form.opts.resonanceDataListeners) {
-                let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
+            if (page.opts.resonanceDataListeners) {
+                let dataListenersUsingFlow = page.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
                 if (dataListenersUsingFlow.length > 0) {
                     isUsed = true;
-                    ConsoleLog("Form : " + form.name);
+                    ConsoleLog("Page : " + page.name);
                     ConsoleLog("  Element : Page Body");
                     ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
                 }
@@ -176,9 +174,9 @@ export class BildrToolsFlows {
                     argumentStaticArray.value?.forEach(actionRef => {
                         // Nested flow?
                         if (actionRef.id && isDeletedFlow(actionRef.id)) {
-                            let form = bildrCache.forms.find(item => { return item.id == flow.formID });
-                            if (form) {
-                                console.log(`Form : ${form.name}`);
+                            let page = bildrCache.pages.find(item => { return item.id == flow.formID });
+                            if (page) {
+                                console.log(`Page : ${page.name}`);
                                 console.log(`  Flow : ${flow.name} (id: ${flow.id})`);
                                 const deletedFlowName = bildrCache.deletedFlows.find(item => item && item.id.toString().endsWith(actionRef.id.toString()))
                                 console.log("    as nested flow : " + deletedFlowName ? deletedFlowName : actionRef.id);
@@ -188,12 +186,12 @@ export class BildrToolsFlows {
 
                             if (action && action.opts && action.opts.arguments) {
                                 let hasFlowRef = action.opts.arguments.find(arg => {
-                                    return (arg.type && arg.type == "static.actions" && (arg as actionArgumentStaticActions).value && isDeletedFlow((arg as actionArgumentStaticActions).value));
+                                    return (arg.argumentType == "static.actions" && (arg as actionArgumentStaticActions).value && isDeletedFlow((arg as actionArgumentStaticActions).value!));
                                 })
                                 if (hasFlowRef) {
-                                    let form = bildrCache.forms.find(item => { return item.id == flow.formID });
-                                    if (form) {
-                                        console.log(`Form : ${form.name}`);
+                                    let page = bildrCache.pages.find(item => { return item.id == flow.formID });
+                                    if (page) {
+                                        console.log(`Page : ${page.name}`);
                                         console.log(`  Flow : ${flow.name} (id: ${flow.id})`);
                                         console.log(`    Action : ${action.name}`);
                                     }
@@ -205,9 +203,9 @@ export class BildrToolsFlows {
             };
         });
         // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
-        bildrCache.activeForms.forEach(form => {
+        bildrCache.activePages.forEach(page => {
             // Flatten active elements because the elements don't get flagged as deleted although 
-            // they are nog part of the form any more. Checks should only be done on active
+            // they are nog part of the page any more. Checks should only be done on active
             // elements.
             var objsTreeFlattend = Array<element>();
 
@@ -220,16 +218,16 @@ export class BildrToolsFlows {
                 }
             }
 
-            flattenElements(form.objsTree);
+            flattenElements(page.objsTree);
 
             // Check usage of flow in Elements Events
             nameSort(objsTreeFlattend).forEach(element => {
                 if (element.opts && element.opts.events) {
                     let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && isDeletedFlow(item.actID) });
                     eventsUsingFlow.forEach(theEvent => {
-                        let form = bildrCache.forms.find(item => { return item.id == element.formID });
-                        if (form) {
-                            console.log("Form : " + form.name);
+                        let page = bildrCache.pages.find(item => { return item.id == element.formID });
+                        if (page) {
+                            console.log("Page : " + page.name);
                             console.log("  Element : " + element.name);
                             console.log("    Event : " + theEvent.code);
                         }
@@ -239,39 +237,39 @@ export class BildrToolsFlows {
 
 
             let inPageEvents = []
-            if (form.opts) {
+            if (page.opts) {
                 // Page Flows
-                if (form.opts.autoSaveActionID && isDeletedFlow(form.opts.autoSaveActionID)) {
+                if (page.opts.autoSaveActionID && isDeletedFlow(page.opts.autoSaveActionID)) {
                     inPageEvents.push("Auto-Save Flow");
                 }
-                if (form.opts.onLoadAct && isDeletedFlow(form.opts.onLoadAct)) {
+                if (page.opts.onLoadAct && isDeletedFlow(page.opts.onLoadAct)) {
                     inPageEvents.push("Page Load Flow");
                 }
                 // Root Page Flows
-                if (form.opts.notConnectedActID && isDeletedFlow(form.opts.notConnectedActID)) {
+                if (page.opts.notConnectedActID && isDeletedFlow(page.opts.notConnectedActID)) {
                     inPageEvents.push("Flow to run when connection is lost");
                 }
-                if (form.opts.reConnectedActID && isDeletedFlow(form.opts.reConnectedActID)) {
+                if (page.opts.reConnectedActID && isDeletedFlow(page.opts.reConnectedActID)) {
                     inPageEvents.push("Flow to run when connection is re-established");
                 }
-                if (form.opts.notAuthenticatedActID && isDeletedFlow(form.opts.notAuthenticatedActID)) {
+                if (page.opts.notAuthenticatedActID && isDeletedFlow(page.opts.notAuthenticatedActID)) {
                     inPageEvents.push("Flow to run when authentication is lost");
                 }
-                if (form.opts.newRevisionActID && isDeletedFlow(form.opts.newRevisionActID)) {
+                if (page.opts.newRevisionActID && isDeletedFlow(page.opts.newRevisionActID)) {
                     inPageEvents.push("Flow to Run When Revision is Out of Date");
                 }
                 if (inPageEvents.length > 0) {
-                    console.log("Form : " + form.name);
+                    console.log("Page : " + page.name);
                     console.log("  Element : Page Body");
                     inPageEvents.forEach(theEvent => {
                         console.log("    Event : " + theEvent);
                     })
                 }
 
-                if (form.opts.resonanceDataListeners) {
-                    let dataListenersUsingFlow = form.opts.resonanceDataListeners.filter(item => { return item.actID && isDeletedFlow(item.actID) });
+                if (page.opts.resonanceDataListeners) {
+                    let dataListenersUsingFlow = page.opts.resonanceDataListeners.filter(item => { return item.actID && isDeletedFlow(item.actID) });
                     if (dataListenersUsingFlow.length > 0) {
-                        console.log("Form : " + form.name);
+                        console.log("Page : " + page.name);
                         console.log("  Element : Page Body");
                         console.log(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
                     }

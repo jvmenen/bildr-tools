@@ -1,4 +1,4 @@
-import { BildrCacheHelper } from "./Bildr-tools-helpers";
+import { BildrCacheHelper } from "./Helpers";
 
 // Stubs which will not be part of the output javascript
 declare var window: {

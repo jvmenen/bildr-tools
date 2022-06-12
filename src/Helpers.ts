@@ -89,17 +89,17 @@ export class BildrCacheHelper {
             () => this.bildrCache.elements.recs,
             Array<element>());
 
-        this.cache.register("forms",
-            () => this.bildrCache.forms.recs.map(frm => new FormHelper(frm, this)),
-            Array<FormHelper>());
+        this.cache.register("pages",
+            () => this.bildrCache.forms.recs.map(frm => new PageHelper(frm, this)),
+            Array<PageHelper>());
 
         this.cache.register("actionTypes",
             () => this.bildrCache.actionsTypes.recs,
-            Array<FormHelper>());
+            Array<PageHelper>());
 
-        this.cache.register("activeForms",
-            () => this.forms.filter(item => item.deleted == 0 && item.opts.archived != true),
-            Array<FormHelper>());
+        this.cache.register("activePages",
+            () => this.pages.filter(item => item.deleted == 0 && item.opts.archived != true),
+            Array<PageHelper>());
 
         this.cache.register("activeFlows",
             () => this.flows.filter(flow => flow.deleted == 0),
@@ -119,52 +119,41 @@ export class BildrCacheHelper {
 
     }
     get actions() {
-        // return this.bildrCache.actions.recs.map(act => new ActionHelper(act, this));
         return this.cache.getValue<ActionHelper[]>("actions")
     }
     get flows() {
-        // return this.actions.filter(action => action.type == "68").map(flw => new FlowHelper(flw, this));
         return this.cache.getValue<FlowHelper[]>("flows")
     }
     get elements() {
-        // return this.bildrCache.elements.recs;
         return this.cache.getValue<element[]>("elements")
     }
-    get forms() {
-        // return this.bildrCache.forms.recs.map(frm => new FormHelper(frm, this));
-        return this.cache.getValue<FormHelper[]>("forms")
+    get pages() {
+        return this.cache.getValue<PageHelper[]>("pages")
     }
     get actionTypes() {
-        // return this.bildrCache.actionsTypes.recs;
         return this.cache.getValue<actionType[]>("actionTypes")
     }
-    get activeForms() {
-        // return this.forms.filter(item => item.deleted == 0);
-        return this.cache.getValue<FormHelper[]>("activeForms")
+    get activePages() {
+        return this.cache.getValue<PageHelper[]>("activePages")
     }
     get activeFlows() {
-        // return this.flows.filter(flow => flow.deleted == 0);
         return this.cache.getValue<FlowHelper[]>("activeFlows")
     }
     get deletedFlows() {
-        // return this.flows.filter(flow => flow.deleted != 0);
         return this.cache.getValue<FlowHelper[]>("deletedFlows")
     }
     get activeFlowsGroupedByFormID() {
-        // return groupBy<FlowHelper, string>(this.activeFlows, f => f.formID);
         return this.cache.getValue<Record<string, FlowHelper[]>>("activeFlowsGroupedByFormID")
     }
     get actionsGroupedByFormID() {
-        // return groupBy<ActionHelper, string>(this.actions, f => f.formID);
         return this.cache.getValue<Record<string, ActionHelper[]>>("actionsGroupedByFormID");
     }
     get activeElements() {
-        // return this.elements.filter(item => item.deleted == 0);
         return this.cache.getValue<element[]>("activeElements")
     }
 }
 
-class FormHelper implements form {
+class PageHelper implements form {
     opts: formOpts;
     objsTree?: element[] | undefined;
     actions: action[];
@@ -215,7 +204,7 @@ class ActionHelper implements action {
     id: string | number;
 
     protected bildrCache: BildrCacheHelper;
-    private form: FormHelper | undefined;
+    private page: PageHelper | undefined;
 
     public constructor(action: action, bildrCache: BildrCacheHelper) {
         this.opts = action.opts;
@@ -226,9 +215,9 @@ class ActionHelper implements action {
         this.id = action.id
         this.bildrCache = bildrCache;
     }
-    public get Form() {
-        if (!this.form) { this.form = this.bildrCache.forms.find(item => item.id == this.formID); }
-        return this.form;
+    public get Page() {
+        if (!this.page) { this.page = this.bildrCache.pages.find(item => item.id == this.formID); }
+        return this.page;
     }
     public get Arguments() {
         //check nodig? Array.isArray(action.Arguments
