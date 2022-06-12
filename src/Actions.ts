@@ -19,7 +19,10 @@ export class BildrToolsActions {
             matcher = (value: string) => value.length > 0;
         }
 
-        let ConsoleLog = (text: string) => console.log(text);
+        let ConsoleLog = (text: string, logIt: boolean = true): boolean => {
+            if (logIt) console.log(text);
+            return true;
+        };
 
         // Create "Header" for the results
         ConsoleLog(`Path ${path} with exact match = ${exactMatch} is called by:`);
@@ -66,14 +69,8 @@ export class BildrToolsActions {
                                 path = path.slice(stripTill + 1);
 
                                 if (matcher(path)) {
-                                    if (!pageNameLogged) {
-                                        pageNameLogged = true;
-                                        ConsoleLog("Page : " + page.name);
-                                    }
-                                    if (!flowNameLogged) {
-                                        flowNameLogged = true;
-                                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                    }
+                                    pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
+                                    flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
                                     ConsoleLog("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
                                         ConsoleLog("      Path : " + path);
@@ -82,14 +79,8 @@ export class BildrToolsActions {
                             if (arg.argumentType == "element") {
                                 let argVariable = arg as actionArgumentElement;
                                 if (argVariable.path && matcher(argVariable.path)) {
-                                    if (!pageNameLogged) {
-                                        pageNameLogged = true;
-                                        ConsoleLog("Page : " + page.name);
-                                    }
-                                    if (!flowNameLogged) {
-                                        flowNameLogged = true;
-                                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                    }
+                                    pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
+                                    flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
                                     ConsoleLog("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
                                         ConsoleLog("      Path : " + argVariable.path);
@@ -123,7 +114,10 @@ export class BildrToolsActions {
             matcher = (value: string) => true;
         }
 
-        let ConsoleLog = (text: string) => console.log(text);
+        let ConsoleLog = (text: string, logIt: boolean = true): boolean => {
+            if (logIt) console.log(text);
+            return true;
+        };
 
         // Create "Header" for the results
         ConsoleLog(`Variable ${variableName} with exact match = ${exactMatch} is used here:`);
@@ -140,14 +134,8 @@ export class BildrToolsActions {
                         if (setValue && arg.argumentType == "static.text" && arg.thisIsAVariableName == true) {
                             let argVariable = arg as actionArgumentStaticText;
                             if (argVariable.value && matcher(argVariable.value)) {
-                                if (!pageNameLogged) {
-                                    pageNameLogged = true;
-                                    ConsoleLog("Page : " + page.name);
-                                }
-                                if (!flowNameLogged) {
-                                    flowNameLogged = true;
-                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                }
+                                pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
+                                flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
                                 ConsoleLog("    Set in Action : " + action.name);
                                 if (variableName == "*") ConsoleLog("      Variable : " + argVariable.value);
                             }
@@ -180,14 +168,8 @@ export class BildrToolsActions {
                 let argVariable = arg as actionArgumentVariable;
                 if (argVariable.variableName && matcher(argVariable.variableName)) {
 
-                    if (!pageNameLogged) {
-                        pageNameLogged = true;
-                        ConsoleLog("Page : " + page.name);
-                    }
-                    if (!flowNameLogged) {
-                        flowNameLogged = true;
-                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                    }
+                    pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
+                    flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
                     ConsoleLog("    Used in Action : " + action.name);
                     if (variableName == "*") ConsoleLog("      Variable : " + argVariable.variableName);
                 }
