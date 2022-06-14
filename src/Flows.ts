@@ -1,4 +1,4 @@
-import { BildrCacheHelper, nameSort } from "./Helpers";
+import { BildrCacheHelper, ConsoleLog, nameSort } from "./Helpers";
 
 export class BildrToolsFlows {
 
@@ -18,15 +18,12 @@ export class BildrToolsFlows {
         console.log("");
 
         activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
             nameSort(page.ActiveFlows).forEach(flow => {
                 if (skipAutoSave && flow.name.includes("Auto Save")) { return; }
 
                 if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
-                    if (!pageNameLogged) {
-                        pageNameLogged = true;
-                        console.log("Page : " + page.name);
-                    }
+                    logPageName = ConsoleLog("Page : " + page.name, logPageName);
                     console.log("  Flow : " + flow.name);
                 }
             });
@@ -41,28 +38,25 @@ export class BildrToolsFlows {
 
         // for easy reference
         let isUsed = false;
-        function ConsoleLog(text: string) {
-            if (logToConsole) { console.log(text); }
-        }
 
         // Create "Header" for the results
         let flow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
         // found it
         if (flow) {
             if (flow.Page) {
-                ConsoleLog(`Flow "${flow.name}" on page "${flow.Page.name}" is called by:`);
+                ConsoleLog(`Flow "${flow.name}" on page "${flow.Page.name}" is called by:`, logToConsole);
             } else {
-                ConsoleLog(`Couldn't find page for flowID ${flowId} in project!`)
+                ConsoleLog(`Couldn't find page for flowID ${flowId} in project!`, logToConsole)
             }
-            ConsoleLog("");
+            ConsoleLog("", logToConsole);
         } else {
-            ConsoleLog(`Couldn't find flowID ${flowId} in project!`);
+            ConsoleLog(`Couldn't find flowID ${flowId} in project!`, logToConsole);
             return false;
         }
 
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = logToConsole;
             // Check usage of Flow in Actions of page.Flows         
             nameSort(page.ActiveFlows).forEach(flow => {
                 flow.Actions.forEach(action => {
@@ -70,12 +64,9 @@ export class BildrToolsFlows {
                     let asNestedFlow = action.id.toString().endsWith(strFlowId);
                     if (asNestedFlow) {
                         isUsed = true;
-                        if (!pageNameLogged) {
-                            pageNameLogged = true;
-                            ConsoleLog("Page : " + page.name);
-                        }
-                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                        ConsoleLog("    as nested flow");
+                        logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, logToConsole);
+                        ConsoleLog("    as nested flow", logToConsole);
                     } else
                     // or referenced by an action type argument
                     {
@@ -84,12 +75,9 @@ export class BildrToolsFlows {
                                 let argumentStatic = arg as actionArgumentStaticActions
                                 if (argumentStatic.type == "static.actions" && argumentStatic.value?.endsWith(strFlowId)) {
                                     isUsed = true;
-                                    if (!pageNameLogged) {
-                                        pageNameLogged = true;
-                                        ConsoleLog("Page : " + page.name);
-                                    }
-                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                    ConsoleLog("    Action : " + action.name);
+                                    logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, logToConsole);
+                                    ConsoleLog("    Action : " + action.name, logToConsole);
                                 }
                             }
                         })
@@ -98,15 +86,14 @@ export class BildrToolsFlows {
             })
 
             nameSort(page.ActiveElements).forEach(element => {
+                let logElement = logToConsole;
                 let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
                 eventsUsingFlow.forEach(theEvent => {
                     isUsed = true;
-                    if (!pageNameLogged) {
-                        pageNameLogged = true;
-                        ConsoleLog("Page : " + page.name);
-                    }
-                    ConsoleLog("  Element : " + element.name);
-                    ConsoleLog("    Event : " + theEvent.code);
+                    logPageName = ConsoleLog("Page : " + page.name, logPageName);
+
+                    logElement = ConsoleLog("  Element : " + element.name, logElement);
+                    ConsoleLog("    Event : " + theEvent.code, logToConsole);
                 });
             });
 
@@ -134,10 +121,10 @@ export class BildrToolsFlows {
             }
             if (inPageEvents.length > 0) {
                 isUsed = true;
-                ConsoleLog("Page : " + page.name);
-                ConsoleLog("  Element : Page Body");
+                logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                ConsoleLog("  Element : Page Body", logToConsole);
                 inPageEvents.forEach(theEvent => {
-                    ConsoleLog("    Event : " + theEvent);
+                    ConsoleLog("    Event : " + theEvent, logToConsole);
                 });
             }
 
@@ -145,14 +132,14 @@ export class BildrToolsFlows {
                 let dataListenersUsingFlow = page.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
                 if (dataListenersUsingFlow.length > 0) {
                     isUsed = true;
-                    ConsoleLog("Page : " + page.name);
-                    ConsoleLog("  Element : Page Body");
-                    ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
+                    logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                    ConsoleLog("  Element : Page Body", logToConsole);
+                    ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`, logToConsole);
                 }
             }
         });
-        ConsoleLog("");
-        ConsoleLog("THAT'S IT!");
+        ConsoleLog("", logToConsole);
+        ConsoleLog("THAT'S IT!", logToConsole);
 
         return isUsed;
     }

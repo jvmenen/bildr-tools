@@ -1,13 +1,9 @@
-import { BildrCacheHelper, nameSort } from "./Helpers";
+import { BildrCacheHelper, ConsoleLog, nameSort } from "./Helpers";
 
 export class BildrToolsActionTypes {
     static findUsage(actionTypeId: string): void {
         let bildrCache = BildrCacheHelper.createInstance();
         let logToConsole = true;
-
-        function ConsoleLog(text: string) {
-            if (logToConsole) { console.log(text); }
-        }
 
         // Create "Header" for the results
         let theActionType = bildrCache.actionTypes.find(acT => { return (acT.id == actionTypeId); });
@@ -22,17 +18,15 @@ export class BildrToolsActionTypes {
 
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
 
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             nameSort(page.ActiveFlows).forEach(flow => {
                 flow.Actions.forEach(action => {
+                    let logFlowName = true
                     if (action.type == actionTypeId) {
-                        if (!pageNameLogged) {
-                            pageNameLogged = true;
-                            ConsoleLog("Page : " + page.name);
-                        }
-                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
+                        logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                        logFlowName = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
                         ConsoleLog("    Action : " + action.name);
                     }
                 });

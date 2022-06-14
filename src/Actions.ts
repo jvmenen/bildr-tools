@@ -1,4 +1,4 @@
-import { ActionHelper, BildrCacheHelper, FlowHelper, nameSort, PageHelper } from "./Helpers";
+import { ActionHelper, BildrCacheHelper, ConsoleLog, FlowHelper, nameSort, PageHelper } from "./Helpers";
 
 export class BildrToolsActions {
     /**
@@ -19,22 +19,17 @@ export class BildrToolsActions {
             matcher = (value: string) => value.length > 0;
         }
 
-        let ConsoleLog = (text: string, logIt: boolean = true): boolean => {
-            if (logIt) console.log(text);
-            return true;
-        };
-
         // Create "Header" for the results
         ConsoleLog(`Path ${path} with exact match = ${exactMatch} is called by:`);
         ConsoleLog("");
 
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
 
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             nameSort(page.ActiveFlows).forEach(flow => {
-                let flowNameLogged = false;
+                let logFlowName = true;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
                         // check usage path on variable or element argument
@@ -69,8 +64,8 @@ export class BildrToolsActions {
                                 path = path.slice(stripTill + 1);
 
                                 if (matcher(path)) {
-                                    pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
-                                    flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
+                                    logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                                    logFlowName = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
                                     ConsoleLog("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
                                         ConsoleLog("      Path : " + path);
@@ -79,8 +74,8 @@ export class BildrToolsActions {
                             if (arg.argumentType == "element") {
                                 let argVariable = arg as actionArgumentElement;
                                 if (argVariable.path && matcher(argVariable.path)) {
-                                    pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
-                                    flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
+                                    logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                                    logFlowName = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
                                     ConsoleLog("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
                                         ConsoleLog("      Path : " + argVariable.path);
@@ -125,24 +120,24 @@ export class BildrToolsActions {
 
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             nameSort(page.ActiveFlows).forEach(flow => {
-                let flowNameLogged = false;
+                let logFlowName = true;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
                         if (setValue && arg.argumentType == "static.text" && arg.thisIsAVariableName == true) {
                             let argVariable = arg as actionArgumentStaticText;
                             if (argVariable.value && matcher(argVariable.value)) {
-                                pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
-                                flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
+                                logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                                logFlowName = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
                                 ConsoleLog("    Set in Action : " + action.name);
                                 if (variableName == "*") ConsoleLog("      Variable : " + argVariable.value);
                             }
                         }
 
                         if (readValue) {
-                            ({ pageNameLogged, flowNameLogged } = handleArgVariable(arg, action, pageNameLogged, page, flowNameLogged, flow));
+                            ({ pageNameLogged: logPageName, flowNameLogged: logFlowName } = handleArgVariable(arg, action, logPageName, page, logFlowName, flow));
                         }
 
                         // Check usage of variable in Data Collection filters
@@ -151,7 +146,7 @@ export class BildrToolsActions {
                             argFilterset.filters?.forEach(filter => {
                                 filter.fieldsToFilterArray.forEach(field => {
                                     field.valueToFilterWith.forEach(value => {
-                                        ({ pageNameLogged, flowNameLogged } = handleArgVariable(value, action, pageNameLogged, page, flowNameLogged, flow));
+                                        ({ pageNameLogged: logPageName, flowNameLogged: logFlowName } = handleArgVariable(value, action, logPageName, page, logFlowName, flow));
                                     })
                                 })
                             });

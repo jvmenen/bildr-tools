@@ -7,9 +7,14 @@ const groupBy = <T, K extends keyof any>(list: T[], getKey: (item: T) => K) =>
         return previous;
     }, {} as Record<K, T[]>);
 
-export const nameSort = <T extends nameId>(list: Array<T>) => {
+export const nameSort = <T extends {name:string} >(list: Array<T>) => {
     return list.sort((a, b) => { return ('' + a.name).localeCompare(b.name) });
 }
+
+export const ConsoleLog = (text: string, logIt: boolean = true): boolean => {
+    if (logIt) console.log(text);
+    return false;
+};
 
 class CacheItem {
     name: string;
