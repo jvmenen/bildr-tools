@@ -4,7 +4,13 @@
         "target": "es6",
         "module": "es6",
         "sourceMap": true,
-        "outDir": "./out",
+        "outDir": "./dist/types",
         "strict": true
-    }
+    },
+    "esModuleInterop": true,
+    "exclude": [
+        "tests",
+        "node_modules",
+        "dist"
+    ]
 }

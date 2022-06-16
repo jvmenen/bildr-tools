@@ -1,13 +1,19 @@
 {
-  "name": "bildr-utils",
-  "version": "1.0.0",
+  "name": "bildr-tools",
+  "version": "0.4.3",
   "description": "The place for Bildr scripts to enhance the already awesome functionality of the low-code https://bildr.com developement Studio",
   "main": "./src/Bildr-tools.ts",
   "scripts": {
-    "build:types": "tsc ./src/bild_src/common.220224164006.ts --declaration",
+    "build:type": "tsc ./src/bild_src/common.220224164006.ts --declaration",
+    "build:types": "tsc --declaration --emitDeclarationOnly",
     "build:watch": "webpack --watch",
     "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    }
   },
   "repository": {
     "type": "git",
@@ -21,6 +27,10 @@
   },
   "homepage": "https://github.com/jvmenen/bildr-utils#readme",
   "devDependencies": {
+    "@types/jest": "^28.1.1",
+    "jest": "^28.1.1",
+    "terser-webpack-plugin": "^5.3.3",
+    "ts-jest": "^28.0.5",
     "ts-loader": "^9.3.0",
     "typescript": "^4.7.3",
     "webpack": "^5.73.0",

@@ -1,4 +1,3 @@
-
 const groupBy = <T, K extends keyof any>(list: T[], getKey: (item: T) => K) =>
     list.reduce((previous, currentItem) => {
         const group = getKey(currentItem);
@@ -7,7 +6,7 @@ const groupBy = <T, K extends keyof any>(list: T[], getKey: (item: T) => K) =>
         return previous;
     }, {} as Record<K, T[]>);
 
-export const nameSort = <T extends {name:string} >(list: Array<T>) => {
+export const nameSort = <T extends { name: string }>(list: Array<T>) => {
     return list.sort((a, b) => { return ('' + a.name).localeCompare(b.name) });
 }
 
@@ -22,10 +21,10 @@ class CacheItem {
     value: any;
     nullDefault: any;
 
-    public constructor(name: string, exec: Function, nullDefault: any) {
+    public constructor(name: string, execFn: Function, initValue: any) {
         this.name = name;
-        this.exec = exec;
-        this.nullDefault = nullDefault;
+        this.exec = execFn;
+        this.nullDefault = initValue;
         this.clear();
     }
 
@@ -40,11 +39,14 @@ class CacheItem {
         return this.value ? this.value as T : this.nullDefault as T;
     }
 }
-class CacheHelper {
+export class CacheHelper {
     cache: CacheItem[] = [];
 
-    public register<T>(variable: string, exec: () => T, nullDefault: T) {
-        this.cache.push(new CacheItem(variable, exec, nullDefault));
+    public register<T>(variableName: string, execFn: () => T, initValue: T) {
+        if (this.cache.find(item => item.name == variableName)) {
+            throw new Error(`VariableName '${variableName}' already registered.`);
+        }
+        this.cache.push(new CacheItem(variableName, execFn, initValue));
     }
 
     public getValue<T>(variableName: string) {
@@ -52,7 +54,7 @@ class CacheHelper {
         if (cacheItem) {
             return cacheItem.getValue<T>();
         }
-        throw new Error("variableName is not defined");
+        throw new Error(`VariableName '${variableName}' is not registered.`);
     }
 
     public clear() {

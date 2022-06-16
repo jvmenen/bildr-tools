@@ -1,9 +1,11 @@
 const path = require('path');
+const webpack = require('webpack'); //to access built-in plugins
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
-    mode: 'development',
-    devtool: false, //"source-map", //false or "source-map"
-    entry: "./src/Bildr-tools.ts",
+    mode: 'development', //"development", "production"
+    devtool: false, //false, "eval-source-map", "source-map"
+    entry: "./src/BildrTools.ts",
     target: ['web', 'es6'],
     module: {
         rules: [
@@ -11,7 +13,14 @@ module.exports = {
                 test: /\.ts$/,
                 exclude: /node-modules/,
                 include: [path.resolve(__dirname, 'src')],
-                use: 'ts-loader'
+                use: [
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            transpileOnly: true
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -19,12 +28,20 @@ module.exports = {
         extensions: ['.ts', '.js']
     },
     output: {
-        //        publicPath: "dist",
         filename: 'bildr-tools.js',
         path: path.resolve(__dirname, 'dist'),
         library: { name: "BildrTools", type: "window" }
     },
     stats: {
         errorDetails: true
+    },
+    optimization: {
+        minimizer: [new TerserPlugin({
+            terserOptions: {
+                format: {
+                    preamble: `/* Copyright ${new Date().getUTCFullYear()}, Jeroen van Menen. ${require('./package.json').name} ${require('./package.json').version} (${new Date().toUTCString()}) */`
+                }
+            }
+        })],
     }
 }
