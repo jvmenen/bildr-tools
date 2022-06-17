@@ -14,45 +14,41 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
 
+/**
+ * @public
+ */
 class BildrToolsActionTypes {
     static findUsage(actionTypeId) {
         let bildrCache = _Helpers__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         let logToConsole = true;
-        function ConsoleLog(text) {
-            if (logToConsole) {
-                console.log(text);
-            }
-        }
         // Create "Header" for the results
         let theActionType = bildrCache.actionTypes.find(acT => { return (acT.id == actionTypeId); });
         // found it
         if (theActionType) {
-            ConsoleLog(`Action Type "${theActionType.name}" is called by:`);
-            ConsoleLog("");
+            (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`Action Type "${theActionType.name}" is called by:`);
+            (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("");
         }
         else {
-            ConsoleLog(`Couldn't find Action Type ${actionTypeId} in project!`);
+            (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`Couldn't find Action Type ${actionTypeId} in project!`);
             return;
         }
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(page.ActiveFlows).forEach(flow => {
                 flow.Actions.forEach(action => {
+                    let logFlowName = true;
                     if (action.type == actionTypeId) {
-                        if (!pageNameLogged) {
-                            pageNameLogged = true;
-                            ConsoleLog("Page : " + page.name);
-                        }
-                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                        ConsoleLog("    Action : " + action.name);
+                        logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                        logFlowName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
+                        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("    Action : " + action.name);
                     }
                 });
             });
         });
-        ConsoleLog("");
-        ConsoleLog("THAT'S IT!");
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("");
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("THAT'S IT!");
     }
 }
 
@@ -71,11 +67,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
 
+/**
+ * @public
+ */
 class BildrToolsActions {
     /**
      * Search in the actions for use of path on Variables and Elements
-     * @param path any string text. Use * to list all actions that have a path
-     * @param exactMatch should it match exactly. default = false
+     *
+     * @param path - any string text. Use * to list all actions that have a path
+     * @param exactMatch - should it match exactly. default = false
      */
     static findInPath(path, exactMatch = false) {
         let bildrCache = _Helpers__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
@@ -88,16 +88,15 @@ class BildrToolsActions {
         if (path == "*") {
             matcher = (value) => value.length > 0;
         }
-        let ConsoleLog = (text) => console.log(text);
         // Create "Header" for the results
-        ConsoleLog(`Path ${path} with exact match = ${exactMatch} is called by:`);
-        ConsoleLog("");
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`Path ${path} with exact match = ${exactMatch} is called by:`);
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("");
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(page.ActiveFlows).forEach(flow => {
-                let flowNameLogged = false;
+                let logFlowName = true;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
                         var _a;
@@ -130,33 +129,21 @@ class BildrToolsActions {
                                     return;
                                 path = path.slice(stripTill + 1);
                                 if (matcher(path)) {
-                                    if (!pageNameLogged) {
-                                        pageNameLogged = true;
-                                        ConsoleLog("Page : " + page.name);
-                                    }
-                                    if (!flowNameLogged) {
-                                        flowNameLogged = true;
-                                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                    }
-                                    ConsoleLog("    Action : " + action.name);
+                                    logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                                    logFlowName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
+                                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
-                                        ConsoleLog("      Path : " + path);
+                                        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("      Path : " + path);
                                 }
                             }
                             if (arg.argumentType == "element") {
                                 let argVariable = arg;
                                 if (argVariable.path && matcher(argVariable.path)) {
-                                    if (!pageNameLogged) {
-                                        pageNameLogged = true;
-                                        ConsoleLog("Page : " + page.name);
-                                    }
-                                    if (!flowNameLogged) {
-                                        flowNameLogged = true;
-                                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                    }
-                                    ConsoleLog("    Action : " + action.name);
+                                    logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                                    logFlowName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
+                                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("    Action : " + action.name);
                                     if (path == "*" || exactMatch == false)
-                                        ConsoleLog("      Path : " + argVariable.path);
+                                        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("      Path : " + argVariable.path);
                                 }
                             }
                         }
@@ -164,15 +151,16 @@ class BildrToolsActions {
                 });
             });
         });
-        ConsoleLog("");
-        ConsoleLog("THAT'S IT!");
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("");
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("THAT'S IT!");
     }
     /**
      * Find where variable(s) are used
-     * @param variableName The (partial) name of the variable. Use * to show all variable ussage
-     * @param setValue Show where the variable gets set
-     * @param readValue Show where the variable is read
-     * @param exactMatch Default true, if partial search is required set it to false
+     *
+     * @param variableName - The (partial) name of the variable. Use * to show all variable ussage
+     * @param setValue - Show where the variable gets set
+     * @param readValue - Show where the variable is read
+     * @param exactMatch - Default true, if partial search is required set it to false
      */
     static findVariable(variableName, setValue = true, readValue = true, exactMatch = true) {
         let bildrCache = _Helpers__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
@@ -185,37 +173,35 @@ class BildrToolsActions {
         if (variableName == "*") {
             matcher = (value) => true;
         }
-        let ConsoleLog = (text) => console.log(text);
+        let ConsoleLog = (text, logIt = true) => {
+            if (logIt)
+                console.log(text);
+            return true;
+        };
         // Create "Header" for the results
         ConsoleLog(`Variable ${variableName} with exact match = ${exactMatch} is used here:`);
         ConsoleLog("");
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
             // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument       
             (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(page.ActiveFlows).forEach(flow => {
-                let flowNameLogged = false;
+                let logFlowName = true;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
                         var _a;
                         if (setValue && arg.argumentType == "static.text" && arg.thisIsAVariableName == true) {
                             let argVariable = arg;
                             if (argVariable.value && matcher(argVariable.value)) {
-                                if (!pageNameLogged) {
-                                    pageNameLogged = true;
-                                    ConsoleLog("Page : " + page.name);
-                                }
-                                if (!flowNameLogged) {
-                                    flowNameLogged = true;
-                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                }
+                                logPageName = ConsoleLog("Page : " + page.name, logPageName);
+                                logFlowName = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, logFlowName);
                                 ConsoleLog("    Set in Action : " + action.name);
                                 if (variableName == "*")
                                     ConsoleLog("      Variable : " + argVariable.value);
                             }
                         }
                         if (readValue) {
-                            ({ pageNameLogged, flowNameLogged } = handleArgVariable(arg, action, pageNameLogged, page, flowNameLogged, flow));
+                            ({ pageNameLogged: logPageName, flowNameLogged: logFlowName } = handleArgVariable(arg, action, logPageName, page, logFlowName, flow));
                         }
                         // Check usage of variable in Data Collection filters
                         if (readValue && arg.argumentType == "filterset") {
@@ -223,7 +209,7 @@ class BildrToolsActions {
                             (_a = argFilterset.filters) === null || _a === void 0 ? void 0 : _a.forEach(filter => {
                                 filter.fieldsToFilterArray.forEach(field => {
                                     field.valueToFilterWith.forEach(value => {
-                                        ({ pageNameLogged, flowNameLogged } = handleArgVariable(value, action, pageNameLogged, page, flowNameLogged, flow));
+                                        ({ pageNameLogged: logPageName, flowNameLogged: logFlowName } = handleArgVariable(value, action, logPageName, page, logFlowName, flow));
                                     });
                                 });
                             });
@@ -238,14 +224,8 @@ class BildrToolsActions {
             if (arg.argumentType == "variable") {
                 let argVariable = arg;
                 if (argVariable.variableName && matcher(argVariable.variableName)) {
-                    if (!pageNameLogged) {
-                        pageNameLogged = true;
-                        ConsoleLog("Page : " + page.name);
-                    }
-                    if (!flowNameLogged) {
-                        flowNameLogged = true;
-                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                    }
+                    pageNameLogged = ConsoleLog("Page : " + page.name, pageNameLogged);
+                    flowNameLogged = ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`, flowNameLogged);
                     ConsoleLog("    Used in Action : " + action.name);
                     if (variableName == "*")
                         ConsoleLog("      Variable : " + argVariable.variableName);
@@ -272,7 +252,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
 
-// If you want both Flows and actions use: Flows | Actions
+/**
+ * If you want both Flows and actions use: Flows | Actions
+ * @public
+ */
 var ActionsToShowEnum;
 (function (ActionsToShowEnum) {
     ActionsToShowEnum[ActionsToShowEnum["Flows"] = 1] = "Flows";
@@ -281,6 +264,9 @@ var ActionsToShowEnum;
     ActionsToShowEnum[ActionsToShowEnum["MouseActions"] = 8] = "MouseActions";
 })(ActionsToShowEnum || (ActionsToShowEnum = {}));
 ;
+/**
+ * @public
+ */
 class BildrToolsDebug {
     static ShowAllVariables() {
         function frmsRecursive(brwFrm) {
@@ -365,6 +351,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
 
+/**
+ * @public
+ */
 class BildrToolsFlows {
     static findUnusedFlows(skipAutoSave = true) {
         let bildrCache = _Helpers__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
@@ -381,16 +370,13 @@ class BildrToolsFlows {
         }
         console.log("");
         activePages.forEach(page => {
-            let pageNameLogged = false;
+            let logPageName = true;
             (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(page.ActiveFlows).forEach(flow => {
                 if (skipAutoSave && flow.name.includes("Auto Save")) {
                     return;
                 }
                 if (BildrToolsFlows.findUsageOfFlow(flow.id, false) == false) {
-                    if (!pageNameLogged) {
-                        pageNameLogged = true;
-                        console.log("Page : " + page.name);
-                    }
+                    logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
                     console.log("  Flow : " + flow.name);
                 }
             });
@@ -403,31 +389,26 @@ class BildrToolsFlows {
         const strFlowId = flowId.toString();
         // for easy reference
         let isUsed = false;
-        function ConsoleLog(text) {
-            if (logToConsole) {
-                console.log(text);
-            }
-        }
         // Create "Header" for the results
         let flow = bildrCache.activeFlows.find(flow => { return (flow.id == flowId); });
         // found it
         if (flow) {
             if (flow.Page) {
-                ConsoleLog(`Flow "${flow.name}" on page "${flow.Page.name}" is called by:`);
+                (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`Flow "${flow.name}" on page "${flow.Page.name}" is called by:`, logToConsole);
             }
             else {
-                ConsoleLog(`Couldn't find page for flowID ${flowId} in project!`);
+                (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`Couldn't find page for flowID ${flowId} in project!`, logToConsole);
             }
-            ConsoleLog("");
+            (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("", logToConsole);
         }
         else {
-            ConsoleLog(`Couldn't find flowID ${flowId} in project!`);
+            (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`Couldn't find flowID ${flowId} in project!`, logToConsole);
             return false;
         }
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
             var _a, _b, _c, _d, _e, _f;
-            let pageNameLogged = false;
+            let logPageName = logToConsole;
             // Check usage of Flow in Actions of page.Flows         
             (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(page.ActiveFlows).forEach(flow => {
                 flow.Actions.forEach(action => {
@@ -435,12 +416,9 @@ class BildrToolsFlows {
                     let asNestedFlow = action.id.toString().endsWith(strFlowId);
                     if (asNestedFlow) {
                         isUsed = true;
-                        if (!pageNameLogged) {
-                            pageNameLogged = true;
-                            ConsoleLog("Page : " + page.name);
-                        }
-                        ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                        ConsoleLog("    as nested flow");
+                        logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`  Flow : ${flow.name} (id: ${flow.id})`, logToConsole);
+                        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("    as nested flow", logToConsole);
                     }
                     else 
                     // or referenced by an action type argument
@@ -451,12 +429,9 @@ class BildrToolsFlows {
                                 let argumentStatic = arg;
                                 if (argumentStatic.type == "static.actions" && ((_a = argumentStatic.value) === null || _a === void 0 ? void 0 : _a.endsWith(strFlowId))) {
                                     isUsed = true;
-                                    if (!pageNameLogged) {
-                                        pageNameLogged = true;
-                                        ConsoleLog("Page : " + page.name);
-                                    }
-                                    ConsoleLog(`  Flow : ${flow.name} (id: ${flow.id})`);
-                                    ConsoleLog("    Action : " + action.name);
+                                    logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`  Flow : ${flow.name} (id: ${flow.id})`, logToConsole);
+                                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("    Action : " + action.name, logToConsole);
                                 }
                             }
                         });
@@ -464,15 +439,13 @@ class BildrToolsFlows {
                 });
             });
             (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(page.ActiveElements).forEach(element => {
+                let logElement = logToConsole;
                 let eventsUsingFlow = element.opts.events.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
                 eventsUsingFlow.forEach(theEvent => {
                     isUsed = true;
-                    if (!pageNameLogged) {
-                        pageNameLogged = true;
-                        ConsoleLog("Page : " + page.name);
-                    }
-                    ConsoleLog("  Element : " + element.name);
-                    ConsoleLog("    Event : " + theEvent.code);
+                    logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                    logElement = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("  Element : " + element.name, logElement);
+                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("    Event : " + theEvent.code, logToConsole);
                 });
             });
             // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
@@ -499,24 +472,24 @@ class BildrToolsFlows {
             }
             if (inPageEvents.length > 0) {
                 isUsed = true;
-                ConsoleLog("Page : " + page.name);
-                ConsoleLog("  Element : Page Body");
+                logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("  Element : Page Body", logToConsole);
                 inPageEvents.forEach(theEvent => {
-                    ConsoleLog("    Event : " + theEvent);
+                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("    Event : " + theEvent, logToConsole);
                 });
             }
             if (page.opts.resonanceDataListeners) {
                 let dataListenersUsingFlow = page.opts.resonanceDataListeners.filter(item => { return item.actID && item.actID.toString().endsWith(strFlowId); });
                 if (dataListenersUsingFlow.length > 0) {
                     isUsed = true;
-                    ConsoleLog("Page : " + page.name);
-                    ConsoleLog("  Element : Page Body");
-                    ConsoleLog(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`);
+                    logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
+                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("  Element : Page Body", logToConsole);
+                    (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`    Used by ${dataListenersUsingFlow.length} Data Listener(s)`, logToConsole);
                 }
             }
         });
-        ConsoleLog("");
-        ConsoleLog("THAT'S IT!");
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("", logToConsole);
+        (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("THAT'S IT!", logToConsole);
         return isUsed;
     }
     static findUsageOfDeletedFlows() {
@@ -679,6 +652,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "ActionHelper": () => (/* binding */ ActionHelper),
 /* harmony export */   "BildrCacheHelper": () => (/* binding */ BildrCacheHelper),
+/* harmony export */   "CacheHelper": () => (/* binding */ CacheHelper),
+/* harmony export */   "ConsoleLog": () => (/* binding */ ConsoleLog),
 /* harmony export */   "FlowHelper": () => (/* binding */ FlowHelper),
 /* harmony export */   "PageHelper": () => (/* binding */ PageHelper),
 /* harmony export */   "nameSort": () => (/* binding */ nameSort)
@@ -693,11 +668,16 @@ const groupBy = (list, getKey) => list.reduce((previous, currentItem) => {
 const nameSort = (list) => {
     return list.sort((a, b) => { return ('' + a.name).localeCompare(b.name); });
 };
+const ConsoleLog = (text, logIt = true) => {
+    if (logIt)
+        console.log(text);
+    return false;
+};
 class CacheItem {
-    constructor(name, exec, nullDefault) {
+    constructor(name, execFn, initValue) {
         this.name = name;
-        this.exec = exec;
-        this.nullDefault = nullDefault;
+        this.exec = execFn;
+        this.nullDefault = initValue;
         this.clear();
     }
     clear() {
@@ -714,15 +694,18 @@ class CacheHelper {
     constructor() {
         this.cache = [];
     }
-    register(variable, exec, nullDefault) {
-        this.cache.push(new CacheItem(variable, exec, nullDefault));
+    register(variableName, execFn, initValue) {
+        if (this.cache.find(item => item.name == variableName)) {
+            throw new Error(`VariableName '${variableName}' already registered.`);
+        }
+        this.cache.push(new CacheItem(variableName, execFn, initValue));
     }
     getValue(variableName) {
         let cacheItem = this.cache.find(item => item.name == variableName);
         if (cacheItem) {
             return cacheItem.getValue();
         }
-        throw new Error("variableName is not defined");
+        throw new Error(`VariableName '${variableName}' is not registered.`);
     }
     clear() {
         this.cache.forEach(item => item.clear());
@@ -947,3 +930,4 @@ __webpack_require__.r(__webpack_exports__);
 window.BildrTools = __webpack_exports__;
 /******/ })()
 ;
+//# sourceMappingURL=bildr-tools.js.map

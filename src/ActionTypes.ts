@@ -1,5 +1,8 @@
 import { BildrCacheHelper, ConsoleLog, nameSort } from "./Helpers";
 
+/**
+ * @public
+ */
 export class BildrToolsActionTypes {
     static findUsage(actionTypeId: string): void {
         let bildrCache = BildrCacheHelper.createInstance();

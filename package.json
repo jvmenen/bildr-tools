@@ -3,17 +3,16 @@
   "version": "0.4.3",
   "description": "The place for Bildr scripts to enhance the already awesome functionality of the low-code https://bildr.com developement Studio",
   "main": "./src/Bildr-tools.ts",
+  "typings": "./dist/types/BildrTools.d.ts",
   "scripts": {
+    "bundle-d-ts": "api-extractor run",
     "build:type": "tsc ./src/bild_src/common.220224164006.ts --declaration",
-    "build:types": "tsc --declaration --emitDeclarationOnly",
+    "build:types": "tsc", 
     "build:watch": "webpack --watch",
-    "build": "webpack",
+    "build:prod": "jest && rimraf dist && webpack --env production  && webpack --env development && npm run build:types && npm run bundle-d-ts",
+    "build:dev": "webpack --env development",
+    "build": "npm run build:prod",
     "test": "jest"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest"
-    }
   },
   "repository": {
     "type": "git",
@@ -21,12 +20,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/jvmenen/bildr-utils/issues"
   },
   "homepage": "https://github.com/jvmenen/bildr-utils#readme",
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.25.0",
     "@types/jest": "^28.1.1",
     "jest": "^28.1.1",
     "terser-webpack-plugin": "^5.3.3",

@@ -1,10 +1,14 @@
 import { ActionHelper, BildrCacheHelper, ConsoleLog, FlowHelper, nameSort, PageHelper } from "./Helpers";
 
+/**
+ * @public
+ */
 export class BildrToolsActions {
     /**
      * Search in the actions for use of path on Variables and Elements
-     * @param path any string text. Use * to list all actions that have a path
-     * @param exactMatch should it match exactly. default = false
+     * 
+     * @param path - any string text. Use * to list all actions that have a path
+     * @param exactMatch - should it match exactly. default = false
      */
     static findInPath(path: string, exactMatch: boolean = false): void {
         let bildrCache = BildrCacheHelper.createInstance();
@@ -91,10 +95,11 @@ export class BildrToolsActions {
     }
     /**
      * Find where variable(s) are used
-     * @param variableName The (partial) name of the variable. Use * to show all variable ussage
-     * @param setValue Show where the variable gets set
-     * @param readValue Show where the variable is read
-     * @param exactMatch Default true, if partial search is required set it to false
+     * 
+     * @param variableName - The (partial) name of the variable. Use * to show all variable ussage
+     * @param setValue - Show where the variable gets set
+     * @param readValue - Show where the variable is read
+     * @param exactMatch - Default true, if partial search is required set it to false
      */
     static findVariable(variableName: string, setValue: boolean = true, readValue: boolean = true, exactMatch: boolean = true): void {
         let bildrCache = BildrCacheHelper.createInstance();

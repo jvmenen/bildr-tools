@@ -1,5 +1,8 @@
 import { BildrCacheHelper, ConsoleLog, nameSort } from "./Helpers";
 
+/**
+ * @public
+ */
 export class BildrToolsFlows {
 
     static findUnusedFlows(skipAutoSave = true): void {

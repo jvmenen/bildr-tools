@@ -6,7 +6,11 @@ declare var window: {
     QueueAction: typeof QueueAction
 }
 
-// If you want both Flows and actions use: Flows | Actions
+
+/**
+ * If you want both Flows and actions use: Flows | Actions
+ * @public
+ */
 export enum ActionsToShowEnum {
     Flows = 1 << 0,
     Actions = 1 << 1,
@@ -14,6 +18,9 @@ export enum ActionsToShowEnum {
     MouseActions = 1 << 3,
 };
 
+/**
+ * @public
+ */
 export class BildrToolsDebug {
     private static _StepMode: boolean = false;
 

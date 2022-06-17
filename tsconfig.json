@@ -3,14 +3,16 @@
     "compilerOptions": {
         "target": "es6",
         "module": "es6",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "declarationMap": true,
         "sourceMap": true,
         "outDir": "./dist/types",
-        "strict": true
+        "strict": true,
+        "types": []
     },
-    "esModuleInterop": true,
-    "exclude": [
-        "tests",
-        "node_modules",
-        "dist"
-    ]
+    "include": [
+        "src/**/*.ts"
+      ],
+    "moduleResolution":"node"
 }
