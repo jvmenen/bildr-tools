@@ -17,7 +17,7 @@ describe("CacheHelper", () => {
     it("should not call execFn on registration", () => {
         // GIVEN an
         let cH = new CacheHelper
-        let x = jest.fn().mockReturnValue("variableValue")
+        let x = jest.fn()
 
         // WHEN
         cH.register("variableName", x, null)
