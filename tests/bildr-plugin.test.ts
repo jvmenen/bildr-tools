@@ -1,4 +1,3 @@
-import { BildrPlugin } from "../src/BildrPluginManager";
 import { myTestPlugin } from "./myTestPlugin";
 
 describe("BildrPugin", () => {

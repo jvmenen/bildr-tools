@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import { BildrPlugin } from "../src/BildrPluginManager";
+import { BildrPlugin } from "../src/BildrPlugin";
 
 export class myTestPlugin extends BildrPlugin {
     renderIsCalled: boolean = false;

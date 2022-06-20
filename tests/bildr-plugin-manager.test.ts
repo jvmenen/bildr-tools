@@ -1,4 +1,5 @@
-import { BildrPlugin, BildrPluginManager } from './../src/BildrPluginManager';
+import { BildrPlugin } from '../src/BildrPlugin';
+import { BildrPluginManager } from './../src/BildrPluginManager';
 import { myTestPlugin } from './myTestPlugin';
 
 describe('BildrPluginManager', () => {
