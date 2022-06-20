@@ -1,9 +1,23 @@
+import { JSDOM } from "jsdom";
 import { myTestPlugin } from "./myTestPlugin";
 
 describe("BildrPugin", () => {
+    let testBrowser: JSDOM;
+
+    beforeEach(() => {
+        testBrowser = new JSDOM(`<!DOCTYPE html>
+        <head>
+            <title>Bildr Studio Stub</title>
+        </head>
+        <body>
+            <div name="bildr_canvas"></div>
+        </body>
+        </html>`);
+    });
+
     it('should be hidden be hidden after renderPage', () => {
         // GIVEN
-        let plugin = new myTestPlugin("test", "")
+        let plugin = new myTestPlugin("test", "", testBrowser)
 
         // WHEN
         plugin.renderPage()
@@ -14,7 +28,7 @@ describe("BildrPugin", () => {
 
     it('should be visible', () => {
         // GIVEN
-        let plugin = new myTestPlugin("test", "")
+        let plugin = new myTestPlugin("test", "", testBrowser)
         plugin.renderPage()
 
         // WHEN
@@ -26,7 +40,7 @@ describe("BildrPugin", () => {
 
     it('should be not be visible', () => {
         // GIVEN
-        let plugin = new myTestPlugin("test", "")
+        let plugin = new myTestPlugin("test", "", testBrowser)
         plugin.renderPage()
 
         // WHEN
@@ -38,7 +52,7 @@ describe("BildrPugin", () => {
 
     it('should be visible after toggleVisibility', () => {
         // GIVEN
-        let plugin = new myTestPlugin("test", "")
+        let plugin = new myTestPlugin("test", "", testBrowser)
         plugin.renderPage()
 
         // WHEN
@@ -50,7 +64,7 @@ describe("BildrPugin", () => {
 
     it('should not be visible after toggleVisibility', () => {
         // GIVEN
-        let plugin = new myTestPlugin("test", "")
+        let plugin = new myTestPlugin("test", "", testBrowser)
         plugin.renderPage()
         plugin.show();
 
@@ -63,7 +77,7 @@ describe("BildrPugin", () => {
 
     it('should render div with page in iframe', () => {
         // GIVEN
-        let plugin = new myTestPlugin("test", "https://mydomain.plugin.html")
+        let plugin = new myTestPlugin("test", "https://mydomain.plugin.html", testBrowser)
 
         // WHEN
         plugin.renderPage()
@@ -78,7 +92,7 @@ describe("BildrPugin", () => {
 
     it('should remove div / plugin', () => {
         // GIVEN
-        let plugin = new myTestPlugin("test", "https://mydomain.plugin.html")
+        let plugin = new myTestPlugin("test", "https://mydomain.plugin.html", testBrowser)
         plugin.renderPage()
 
         // WHEN

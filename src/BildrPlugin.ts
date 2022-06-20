@@ -5,7 +5,7 @@ export class BildrPlugin {
     private _frameId: string;
     private _divElem!: HTMLDivElement;
     private _divId: string;
-
+    
     constructor(name: string, pageUrl: string) {
         this._name = name;
         this._pageUrl = pageUrl;
@@ -16,7 +16,11 @@ export class BildrPlugin {
     public get name(): string {
         return this._name;
     }
-
+    
+    postMessage(data: any) {
+        throw new Error("Method not implemented.");
+    }
+    
     public hide() {
         this._divElem.style.right = "-400px";
     }

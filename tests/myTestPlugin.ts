@@ -3,26 +3,28 @@ import { BildrPlugin } from "../src/BildrPlugin";
 
 export class myTestPlugin extends BildrPlugin {
     renderIsCalled: boolean = false;
-    latestMessage(latestMessage: any) {
-        throw new Error('Method not implemented.');
-    }
-    public testBrowser = new JSDOM(`<!DOCTYPE html>
-    <head>
-        <title>Bildr Studio Stub</title>
-    </head>
-    <body>
-        <div name="bildr_canvas"></div>
-    </body>
-    </html>`);
+    private _latestMessage : any;
 
-    constructor(name: string, url: string) {
+    
+    public testBrowser : JSDOM
+    
+    constructor(name: string, url: string, browser : JSDOM) {
         super(name, url);
+        this.testBrowser = browser;
     }
     protected override get document(): Document {
         return this.testBrowser.window.document;
     }
+
+    public latestMessage() {
+        return this._latestMessage;
+    }
+
     public override renderPage(): void {
         this.renderIsCalled = true;
         super.renderPage();
+    }
+    public override postMessage(data: any): void {
+        this._latestMessage = data;
     }
 }
