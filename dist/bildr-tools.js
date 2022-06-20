@@ -714,13 +714,13 @@ class CacheHelper {
 class BildrCacheHelper {
     constructor(...myarray) {
         if (myarray.length === 1) {
-            this.bildrCache = BildrDBCacheGet(myarray[0], "", "", null);
+            this.bildrCache = BildrCacheHelper.bildrDBCacheGet(myarray[0], "", "", null);
         }
         else if (myarray.length === 2) {
-            this.bildrCache = BildrDBCacheGet(false, myarray[0], myarray[1], null);
+            this.bildrCache = BildrCacheHelper.bildrDBCacheGet(false, myarray[0], myarray[1], null);
         }
         else {
-            this.bildrCache = BildrDBCacheGet(true, "", "", null);
+            this.bildrCache = BildrCacheHelper.bildrDBCacheGet(true, "", "", null);
         }
         this.cache = new CacheHelper();
         this.cache.register("actionsGroupedByFormID", () => groupBy(this.actions, act => act.formID), groupBy([], () => ""));
@@ -770,6 +770,7 @@ class BildrCacheHelper {
     }
 }
 BildrCacheHelper.createInstance = () => { return new BildrCacheHelper(true); };
+BildrCacheHelper.bildrDBCacheGet = (...args) => { return BildrDBCacheGet(args[0], args[1], args[2], args[3]); };
 class PageHelper {
     constructor(form, bildrCache) {
         this.opts = form.opts;

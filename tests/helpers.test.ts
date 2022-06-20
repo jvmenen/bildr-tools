@@ -1,4 +1,7 @@
-import { nameSort, CacheHelper } from '../src/Helpers';
+import { nameSort, CacheHelper, BildrCacheHelper } from '../src/Helpers';
+import { actionsJson } from "./data/actions";
+import { elementsJson } from "./data/elements";
+import { actionTypesJson } from "./data/actionsTypes";
 
 describe("nameSort", () => {
     it("should be sorted", () => {
@@ -89,3 +92,60 @@ describe("CacheHelper", () => {
         expect(() => cH.getValue("notRegistered")).toThrow("VariableName 'notRegistered' is not registered.")
     })
 })
+
+describe("BildrCacheHelper with mock data", () => {
+    beforeAll(() => {
+        // INIT BildrCache with Mock data
+        let bildrCache = {
+            actions: JSON.parse(actionsJson),
+            elements: JSON.parse(elementsJson),
+            actionsTypes: JSON.parse(actionTypesJson)
+        }
+        const fn = jest.fn().mockReturnValue(bildrCache);
+        BildrCacheHelper.bildrDBCacheGet = fn
+    });
+
+    it('should return all actions', () => {
+
+        // WHEN
+        let bCH = new BildrCacheHelper(true);
+        expect(bCH.actions).toHaveLength(303)
+    });
+
+    it('should return all activeFlows', () => {
+        // WHEN
+        let bCH = new BildrCacheHelper(true);
+        expect(bCH.activeFlows).toHaveLength(97)
+    });
+
+    it('should return all elements', () => {
+        // WHEN
+        let bCH = new BildrCacheHelper(true);
+        expect(bCH.elements).toHaveLength(86)
+    });
+
+    it('should return all actionTypes', () => {
+        // WHEN
+        let bCH = new BildrCacheHelper(true);
+        expect(bCH.actionTypes).toHaveLength(144)
+    });
+
+})
+
+describe("BildrCacheHelper", () => {
+    it("give an instance", () => {
+        //GIVEN
+        const fn = jest.fn();
+        BildrCacheHelper.bildrDBCacheGet = fn
+
+        // WHEN
+        let bCH = new BildrCacheHelper(true);
+
+        // THEN
+        expect(fn).toBeCalledWith(true, "", "", null)
+    });
+})
+
+describe('Find flow with actions', () => {
+    
+});

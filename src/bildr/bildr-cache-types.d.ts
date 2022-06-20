@@ -9,7 +9,23 @@ declare interface group<T> extends nameId {
     projectID: string;
     recs: T[]
 }
-declare interface actionType extends nameIdDeleted { }
+declare interface actionType extends nameIdDeleted {
+    opts: {
+        coreType: any;
+        archived?: boolean;
+        marketplace?: {
+            actionTypeID: string,
+            checksum: string
+        }
+    };
+}
+
+declare interface functon extends nameIdDeleted {
+    modifiedDate?: any;
+    type: any,
+    opts: any,
+    JsCode: any
+}
 
 declare interface form extends nameIdDeleted {
     opts: formOpts;
@@ -108,7 +124,7 @@ declare interface event {
 }
 
 declare interface nameIdDeleted extends nameId {
-    deleted: number;
+    deleted?: number;
 }
 
 declare interface nameId {
@@ -125,8 +141,16 @@ declare interface actionRef extends nameId { }
 declare interface formInstance extends nameIdDeleted { }
 
 declare interface brwForm {
+    brObj: brwObj;
     name: any;
     form: formInstance;
     cBrwForms: brwForm[];
     _vars: { [key: string]: any }
+}
+
+declare interface brwObj {
+    HTML: HTMLElement,
+    brwFrm: brwForm,
+    childBrwFrm: brwForm,
+    of: any
 }

@@ -7,7 +7,7 @@
   "scripts": {
     "bundle-d-ts": "api-extractor run",
     "build:type": "tsc ./src/bild_src/common.220224164006.ts --declaration",
-    "build:types": "tsc", 
+    "build:types": "tsc",
     "build:watch": "webpack --watch",
     "build:prod": "jest && rimraf dist && webpack --env production  && webpack --env development && npm run build:types && npm run bundle-d-ts",
     "build:dev": "webpack --env development",
@@ -28,7 +28,9 @@
   "devDependencies": {
     "@microsoft/api-extractor": "^7.25.0",
     "@types/jest": "^28.1.1",
+    "@types/jsdom": "^16.2.14",
     "jest": "^28.1.1",
+    "jsdom": "^20.0.0",
     "terser-webpack-plugin": "^5.3.3",
     "ts-jest": "^28.0.5",
     "ts-loader": "^9.3.0",

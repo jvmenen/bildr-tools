@@ -12,7 +12,7 @@ declare function BildrCacheRevision(bildrName: string): any;
 declare function RefreshSelectedBildr(): void;
 declare var baseProjID: number, baseRevID: number, baseSelProjID: number, baseSelRevID: number, baseProjDB: any, baseSelProjDB: any, baseSelProjDBOld: any;
 declare function BildrDBGetName(projectID: any, revisionID: any): any;
-declare function BildrDBCacheGet(forSelectedBildr: boolean, projectID: string, revisionID: string, type: any): any;
+declare function BildrDBCacheGet(forSelectedBildr: boolean, projectID?: string, revisionID?: string, type?: any): any;
 declare function BildrCacheGetForFltSet(brwForm: brwForm, oForProjRev: any): any;
 declare function BildrCacheGetForGroup(bildrCacheForFltSet: any, fltSet: any, oForProjRev: any): any;
 declare function BildrDBCreate(): void;
@@ -52,6 +52,17 @@ declare function UpdateStateObject(isFromDB: any): any;
 // declare function Response(name: any, dsc: any, obj: any): any;
 declare function Record(id: any, idsModifyByUser: any, usrId: any, usrIdModify: any, usrName: any, usrNameMod: any, dateCreated: any, dateModify: any, opts: any): any;
 declare function Filter(id: any, name: any, typ: any, usrId: any, isVis: any, vals: any, label: any): any;
+declare class Action implements nameId {
+    constructor(id: any, type: any, aSync: any, name: any, dsc: any, params: any, exec?: Function, frmID?: string);
+    name: string;
+    id: string | number;
+    async: any;
+    type: any;
+    dsc: any;
+    params: any;
+    exec: Function;
+    frmId: string;
+}
 declare function Action(id: any, type: any, aSync: any, name: any, dsc: any, params: any, exec: any, frmID: any): any;
 declare function ActionAddToQueue(wait: any, qAct: any, brwObj: any, params: any, brwForm: any): any;
 declare function ActionType(id: any, name: any, type: any, dsc: any, exec: any): any;
@@ -60,6 +71,9 @@ declare function getArgumentByName(args: any, name: any): any;
 declare function FunctionsAddToQueue(fncts: any, qa: any): void;
 declare function ActionExec(qa: any): any;
 declare var DBGParamsShowDiv: any;
+// declare class QueueAction {
+//     constructor(a: Action, wait: any, parentQAction: any, brwObj: any, params: any, isThread: any, qName: any, bildrCache: any, addToQueue: any);
+// }
 declare function QueueAction(a: any, wait: any, parentQAction: any, brwObj: any, params: any, isThread: any, qName: any, bildrCache: any, addToQueue: any): any;
 declare function QueueStart(qa: any, timeOut: any): void;
 declare function QueueRemoveChildsNode(qa: any): void;
@@ -80,7 +94,7 @@ declare var listActionsAfterGetOnline: any[];
 declare function QueueRunAfterGetOnline(fromQAction: any, isFromRun: any, isFromDebug: any, isStartThread: any, isFromRunAgain: any): any;
 declare function QueueActionCheckDone(qaToExec: any): void;
 declare var QueueRunAgain: string, QueueMustWait: string;
-declare function QueueExecNextActions(fromQAction: any, isFromRun: any, isFromDebug: any, isStartThread: any, isFromRunAgain: any, fromQAInitiate: any): boolean;
+declare function QueueExecNextActions(fromQAction: any, isFromRun?: boolean, isFromDebug?: boolean, isStartThread?: boolean, isFromRunAgain?: boolean, fromQAInitiate?: boolean): boolean;
 declare function FilterGetFields(fltNode: any): any;
 // declare function Request(xHttp: any, url: any, method: any, qAct: any, act: any, reqType: any, postData: any, returnAction: any, returnError: any, headers: any): void;
 declare function RequestError(qAct: any, msg: any, returnError: any, act: any, executeAgain: any, err: any): void;

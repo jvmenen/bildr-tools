@@ -55,7 +55,7 @@ export declare class Debug {
  */
 export declare class Flows {
     static findUnusedFlows(skipAutoSave?: boolean): void;
-    static findUsageOfFlow(flowId: actId, logToConsole?: boolean): boolean;
+    static findUsageOfFlow(flowId: string | number, logToConsole?: boolean): boolean;
     static findUsageOfDeletedFlows(): void;
     static getFlowWithActions(flowId: string): void;
 }

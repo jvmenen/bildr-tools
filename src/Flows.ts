@@ -35,7 +35,7 @@ export class BildrToolsFlows {
         console.log("THAT'S IT!");
     }
 
-    static findUsageOfFlow(flowId: actId, logToConsole: boolean = true): boolean {
+    static findUsageOfFlow(flowId: string | number, logToConsole: boolean = true): boolean {
         let bildrCache = BildrCacheHelper.createInstance();
         const strFlowId = flowId.toString();
 

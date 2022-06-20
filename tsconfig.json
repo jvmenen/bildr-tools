@@ -11,8 +11,6 @@
         "strict": true,
         "types": []
     },
-    "include": [
-        "src/**/*.ts"
-      ],
+    "include": ["src/**/*.ts"],
     "moduleResolution":"node"
 }

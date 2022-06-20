@@ -64,6 +64,7 @@ export class CacheHelper {
 
 export class BildrCacheHelper {
     static createInstance = () => { return new BildrCacheHelper(true) };
+    static bildrDBCacheGet = (...args:any[]): BildrDBCache => {return BildrDBCacheGet(args[0],args[1],args[2],args[3])} 
 
     bildrCache: BildrDBCache;
     cache: CacheHelper;
@@ -72,11 +73,11 @@ export class BildrCacheHelper {
     public constructor(projectID: string, revisionID: string);
     public constructor(...myarray: any[]) {
         if (myarray.length === 1) {
-            this.bildrCache = BildrDBCacheGet(myarray[0], "", "", null)!;
+            this.bildrCache = BildrCacheHelper.bildrDBCacheGet(myarray[0], "", "", null)!;
         } else if (myarray.length === 2) {
-            this.bildrCache = BildrDBCacheGet(false, myarray[0], myarray[1], null)!;
+            this.bildrCache = BildrCacheHelper.bildrDBCacheGet(false, myarray[0], myarray[1], null)!;
         } else {
-            this.bildrCache = BildrDBCacheGet(true, "", "", null)!;
+            this.bildrCache = BildrCacheHelper.bildrDBCacheGet(true, "", "", null)!;
         }
 
         this.cache = new CacheHelper()
@@ -102,7 +103,7 @@ export class BildrCacheHelper {
 
         this.cache.register("actionTypes",
             () => this.bildrCache.actionsTypes.recs,
-            Array<PageHelper>());
+            Array<actionType>());
 
         this.cache.register("activePages",
             () => this.pages.filter(item => item.deleted == 0 && item.opts.archived != true),
@@ -164,7 +165,7 @@ export class PageHelper implements form {
     opts: formOpts;
     objsTree?: element[] | undefined;
     actions: action[];
-    deleted: number;
+    deleted: number | undefined;
     name: string;
     id: string | number;
 
@@ -206,7 +207,7 @@ export class ActionHelper implements action {
     opts: { arguments: actionArgument[]; };
     formID: string;
     type: string;
-    deleted: number;
+    deleted: number | undefined;
     name: string;
     id: string | number;
 
