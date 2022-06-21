@@ -1,276 +1,111 @@
+import { BildrPlugin, BildrPluginAction } from "./BildrPlugin";
+import { BildrPluginManager } from './BildrPluginManager';
+
 var marketplaceUrl = "https://marketplace.bildr.com/BE";
 
-interface BildrHTMLDivElement extends HTMLDivElement {
-    brwObj: brwObj;
-}
-
-class MarketplacePage {
-    static iframeId = "ifrm_bildrMarketplacePage";
-    static marketplaceDivId = "bildrMarketplacePage"
-    private _instance: HTMLDivElement | null = null;
+export class MarketplacePlugin extends BildrPlugin {
+    private Version = "2";
 
     constructor() {
-        if (!this.instance) {
-            // CREATE plugin div/iframe
-            var elem = document.createElement('div');
-            elem.id = MarketplacePage.marketplaceDivId;
-            elem.style.cssText = "width:0px;height:100vh;top:0px;left:unset;right:-400px;bottom:unset;border:none;background:#ffffff;position: fixed;z-index: 100010;overflow: hidden;position:absolute;transition: right 300ms ease-in-out 0s;";
-            elem.innerHTML = `<iframe id='${MarketplacePage.iframeId}' src='${marketplaceUrl}' style='all:unset;width:100%;height:100%'></iframe>`;
-            // add to document (right side)
-            document.body.appendChild(elem);
+        super("marketplace", marketplaceUrl)
+        this.addAction("hideMarketplacePlugin", () => { this.hide(); return undefined });
+        this.addAction("getMarketPlaceVersion", () => { return this.Version });
 
-            // Animation end handler
-            elem.addEventListener('transitionend', _e => {
-                // when the animation is finished, "hide" it when out of view
-                // prevents UI issues when the Studio canvas is scaled
-                if (elem.style.right != '0px') { elem.style.width = '0px'; }
-            });
+        this.addAction("getProjectActionTypes", () => { return BildrAPIHelper.getProjectActionTypes() });
+        this.addAction("getProjectFunctions", () => { return BildrAPIHelper.getProjectFunctions(); });
+        this.addAction("getProjectPreviewId", () => { return BildrAPIHelper.getProjectPreviewId(); });
 
-            this._instance = elem;
-        }
-    }
-    get instance() {
-        if (!this._instance) {
-            this._instance = document.getElementById(MarketplacePage.marketplaceDivId) as HTMLDivElement;
-        }
-        return this._instance;
+        this.addAction2(new getActionTypeByMarketplaceId());
+        this.addAction2(new addActionTypeWithFunctions(this.sendmessage));
+        this.addAction2(new updateActionTypeWithFunctions(this.sendmessage));
+
+        this.addAction2(new imageUrlToBase64(this.sendmessage));
     }
 
-    // PUBLIC METHODS
-    toggleVisibility() {
-        if (this.isHidden()) {
-            this.show();
-        } else {
-            this.hide();
+    public override triggerAction(actionName: string, data: any): void {
+
+        let resultData = super.triggerAction(actionName, data)
+        if (resultData) {
+            this.sendmessage(data.msgId, "succes", actionName, resultData)
         }
     }
 
-    isHidden() {
-        return this.instance.style.right != '0px';
-    }
-
-    show() {
-        this.instance.style.width = '400px';
-        this.instance.style.right = '0px';
-    }
-
-    hide() {
-        this.instance.style.right = "-400px";
-        // setting width to 0px is handled be eventlistener on transitioned, setup in constructor
-    }
-
-    static sendmessage(msgId: string, result: any, message: string, data: any) {
+    public sendmessage(msgId: string, result: string, message: string, data: any) {
         var response = {
             "result": result,
             "message": message,
             "data": data
         }
-
-        var theIframe = (document.getElementById(MarketplacePage.iframeId) as HTMLIFrameElement).contentWindow;
-        theIframe!.postMessage({
-            "msgId": msgId,
-            "result": response
-        }, "*");
-
+        super.sendOutgoingMessage(msgId, response)
     }
 }
 
-class MarketplaceMenuBarButton {
-    static marketplaceMenuItemDivId = "bildrMarketplaceMenuItem";
-    static topMenuBarDivCss = "css_V9oRPFpIjEqGDrWGUv9yWg";
+class getActionTypeByMarketplaceId implements BildrPluginAction {
 
-    static isTopBarAvailable() {
-        return document.querySelector(`.${MarketplaceMenuBarButton.topMenuBarDivCss}`);
+    get name(): string {
+        return "getActionTypeByMarketplaceId";
     }
 
-    static create() {
-        if (!document.getElementById(MarketplaceMenuBarButton.marketplaceMenuItemDivId)) {
-            // Make some space in the menu bar
-            var topMenuBar = document.querySelector(`.${MarketplaceMenuBarButton.topMenuBarDivCss}`) as HTMLDivElement;
-            topMenuBar.style.width = "520px";
-
-            // CREATE menu bar item
-            var elem = document.createElement("div");
-            elem.id = MarketplaceMenuBarButton.marketplaceMenuItemDivId;
-            elem.className = "css_BRQAelSiDkOyetXlS0VDMQ";
-            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r9f576480f5ba4b118cec7ce8e6c345e3/doc/Bildr marketplace logo WB color.ynHqabhunkG6oesIc3Xzvg.png' class='css_0EWldTyzqU60XwJWKjRXog' style='filter:none;'><p class='css_BzJ7ABkWfkeHKsQbcZKVbA css_ixReGSYmjkKU0b6bxZNTHw'>market</p>";
-            // add to top menu bar
-            topMenuBar.appendChild(elem);
-
-            // init page for smooth sliding in and not seeing the page load
-            let init = new MarketplacePage;
-
-            // Handle click on button, inside the plugin or outside the plugin (auto hide)
-            // Mind the config param capture: true on the addEventListener
-            document.body.addEventListener('click', e => {
-
-                let marketplacePage = new MarketplacePage()
-                var target = (e && e.target);
-                // assume the click is outside the plugin / div
-                let action = "hide";
-
-                while ((target as HTMLElement).parentNode) {
-
-                    // Ignore click inside the plugin / div
-                    if (target == marketplacePage.instance) {
-                        action = "";
-                        break;
-                    }
-                    // Handles click on Marketplace button (and image and tekst)
-                    if (target && (target as HTMLElement).id == MarketplaceMenuBarButton.marketplaceMenuItemDivId) {
-                        action = "toggle";
-                        break;
-                    }
-                    target = (target as HTMLElement).parentNode;
-                }
-
-                if (action == "hide") { marketplacePage.hide(); }
-                if (action == "toggle") { marketplacePage.toggleVisibility(); }
-            }, { capture: true })
-
-        }
-    }
-    static getBrwObj() {
-        const topbarElement = document.querySelector(`.${MarketplaceMenuBarButton.topMenuBarDivCss}`) as HTMLDivElement;
-        var brObj = (topbarElement.children[0] as BildrHTMLDivElement).brwObj;
-        return brObj || null;
-    }
-}
-
-class Marketplace {
-    static Version = "2";
-
-    static init() {
-        // Create MenuBarItem for Marketplace
-        MarketplaceMenuBarButton.create();
-
-        // Start listening for messages from iFrame/Bildr Marketplace
-        window.addEventListener("message", e => {
-            if (e && (marketplaceUrl.indexOf(e.origin) != -1)) {
-                Marketplace.handleMessage(e.data);
-            }
-        });
-    }
-
-    static handleMessage(args:any) {
-
-        let callParams = parseStrAsJson(args);
-
-        let command = callParams.command;
-        let msgId = callParams.uMsgId;
-        let data = callParams.data;
-
-        switch (command) {
-            case "getMarketPlaceVersion":
-                MarketplacePage.sendmessage(msgId, "succes", "getMarketPlaceVersion", Marketplace.Version);
-                break;
-
-            case "hideMarketplacePlugin":
-                new MarketplacePage().hide();
-                break;
-
-            case "addActionTypeWithFunctions":
-                Marketplace.addActionTypeWithFunctions(msgId, callParams.actionType);
-                break;
-
-            case "updateActionTypeWithFunctions":
-                Marketplace.updateActionTypeWithFunctions(msgId, callParams.actionType);
-                break;
-
-            case "getProjectActionTypes":
-                let projectActionTypes = BildrAPIHelper.getProjectActionTypes();
-                MarketplacePage.sendmessage(msgId, "succes", "projectActionTypes", projectActionTypes);
-                break;
-
-            case "getActionTypeByMarketplaceId":
-                let actionType = Marketplace.getActionTypeByMarketplaceId(data.marketplaceActionTypeId);
-                MarketplacePage.sendmessage(msgId, "succes", "getActionTypeByMarketplaceId", actionType);
-                break;
-
-            case "getProjectFunctions":
-                let projectFunctions = BildrAPIHelper.getProjectFunctions();
-                MarketplacePage.sendmessage(msgId, "succes", "getProjectFunctions", projectFunctions);
-                break;
-
-            case "getProjectPreviewId":
-                let projectPreviewId = BildrAPIHelper.getProjectPreviewId();
-                MarketplacePage.sendmessage(msgId, "succes", "getProjectPreviewId", projectPreviewId);
-                break;
-
-            case "iconUrlToBase64":
-                Marketplace.imageUrlToBase64(data.iconUrl, (dataUrl: string) => {
-                    MarketplacePage.sendmessage(msgId, "succes", "iconUrlToBase64", dataUrl);
-                })
-                break;
-
-            default:
-                console.log('Unknown command from marketplace: ' + command);
-                break;
-        }
-    }
-
-    static getActionTypeByMarketplaceId(actionTypeId: string) {
+    public execFunc(args: any) {
         let projectActionTypes = BildrAPIHelper.getProjectActionTypes();
 
         var returnVal = projectActionTypes.find((act: actionType): boolean => {
-            return (act.opts.marketplace?.actionTypeID == actionTypeId)
+            return (act.opts.marketplace?.actionTypeID == args.actionTypeId)
         })
+        return returnVal;;
+    }
+}
 
-        return returnVal;
+class updateActionTypeWithFunctions implements BildrPluginAction {
+
+    private _sendMessageFunc: Function;
+
+    // static addActionTypeWithFunctions(msgId: string);
+    constructor(sendMessageFunc: Function) {
+        this._sendMessageFunc = sendMessageFunc
+    }
+    get name(): string {
+        return "updateActionTypeWithFunctions";
     }
 
-    static imageUrlToBase64(src: string, callback: Function): void {
-        var img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = function () {
+    execFunc(data: any) {
 
-            const MAX_WIDTH = 30;
-            const MAX_HEIGHT = 30;
-            let width = img.naturalHeight;
-            let height = img.naturalHeight;
-
-            // Change the resizing logic
-            if (width > height) {
-                if (width > MAX_WIDTH) {
-                    height = height * (MAX_WIDTH / width);
-                    width = MAX_WIDTH;
-                }
-            } else {
-                if (height > MAX_HEIGHT) {
-                    width = width * (MAX_HEIGHT / height);
-                    height = MAX_HEIGHT;
-                }
+        for (var index = 0; index < data.functions.length; index++) {
+            var functData = data.functions[index];
+            let stateData = {
+                "last": index + 1 == data.functions.length
             }
+            var dataToSave = {
+                "id": functData.id,
+                "opts": functData.opts
+            }
+            BildrAPIHelper.saveFiltersetRecord("7", dataToSave, stateData, (_returnData: any, stateData: { last: boolean; }) => {
 
-            // create canvas to draw on
-            let canvas = document.createElement('CANVAS') as HTMLCanvasElement;
-            let ctx = canvas.getContext('2d');
+                // Is this the last function added to the project?
+                if (stateData.last) {
 
-            // set size and draw
-            canvas.height = height;
-            canvas.width = width;
-
-            //ctx.mozImageSmoothingEnabled = false;
-            //ctx.webkitImageSmoothingEnabled = false;
-            //ctx.msImageSmoothingEnabled = false;
-            //ctx.imageSmoothingEnabled = false;
-
-            ctx!.drawImage(img, 0, 0, width, height);
-
-            // Encode the resized image to bas64 png
-            let dataURL = canvas.toDataURL("image/png");
-
-            // return result
-            callback(dataURL);
-        };
-        img.src = src;
-        if (img.complete || img.complete === undefined) {
-            img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-            img.src = src;
+                    BildrAPIHelper.saveFiltersetRecord("16", data.actionTypeJson, null, (returnData: any) => {
+                        this._sendMessageFunc(data.msgId, "succes", "action type added succesfully", returnData)
+                    });
+                }
+            })
         }
     }
-    static addActionTypeWithFunctions(msgId: string, data: any) {
+}
 
+class addActionTypeWithFunctions implements BildrPluginAction {
+    private _sendMessageFunc: Function;
+
+    // static addActionTypeWithFunctions(msgId: string);
+    constructor(sendMessageFunc: Function) {
+        this._sendMessageFunc = sendMessageFunc
+    }
+
+    get name(): string {
+        return "getActionTypeByMarketplaceId";
+    }
+
+    public execFunc(data: any) {
         // * add some extra info to replace the original function Id by new function Id in 
         //   the actionType.functions array
         // * data contains the json object data to store
@@ -323,40 +158,95 @@ class Marketplace {
                     }
 
                     BildrAPIHelper.saveFiltersetRecord("16", actionTypeJson, null, (returnData: any) => {
-                        MarketplacePage.sendmessage(msgId, "succes", "action type added succesfully", returnData)
+                        this._sendMessageFunc(data.msgId, "succes", "action type added succesfully", returnData)
                     });
 
                 }
             });
         }
     }
+}
 
-    static updateActionTypeWithFunctions(msgId: string, data: any) {
+class imageUrlToBase64 implements BildrPluginAction {
+    private _sendMessageFunc: Function;
 
-        var functionsArr = data.functions;
-        var actionTypeOpts = data.actionTypeJson;
+    // static addActionTypeWithFunctions(msgId: string);
+    constructor(sendMessageFunc: Function) {
+        this._sendMessageFunc = sendMessageFunc
+    }
 
-        for (var index = 0; index < functionsArr.length; index++) {
-            var functData = functionsArr[index];
-            let stateData = {
-                "last": index + 1 == functionsArr.length
-            }
-            var funct = {
-                "id": functData.id,
-                "opts": functData.opts
-            }
-            BildrAPIHelper.saveFiltersetRecord("7", funct, stateData, (_returnData: any, stateData: { last: boolean; }) => {
+    get name(): string {
+        return "imageUrlToBase64";
+    }
+    execFunc(data: any) {
+        this.imageUrlToBase64(data.iconUrl, (dataUrl: string) => {
+            this._sendMessageFunc(data.msgId, "succes", "iconUrlToBase64", dataUrl);
+        })
+        return undefined;
+    }
 
-                // Is this the last function added to the project?
-                if (stateData.last) {
+    private imageUrlToBase64(src: string, callback: Function): void {
+        var img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function () {
 
-                    BildrAPIHelper.saveFiltersetRecord("16", actionTypeOpts, null, (returnData: any) => {
-                        MarketplacePage.sendmessage(msgId, "succes", "action type added succesfully", returnData)
-                    });
+            const MAX_WIDTH = 30;
+            const MAX_HEIGHT = 30;
+            let width = img.naturalHeight;
+            let height = img.naturalHeight;
+
+            // Change the resizing logic
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height = height * (MAX_WIDTH / width);
+                    width = MAX_WIDTH;
                 }
-            })
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width = width * (MAX_HEIGHT / height);
+                    height = MAX_HEIGHT;
+                }
+            }
+
+            // create canvas to draw on
+            let canvas = document.createElement('CANVAS') as HTMLCanvasElement;
+            let ctx = canvas.getContext('2d');
+
+            // set size and draw
+            canvas.height = height;
+            canvas.width = width;
+
+            //ctx.mozImageSmoothingEnabled = false;
+            //ctx.webkitImageSmoothingEnabled = false;
+            //ctx.msImageSmoothingEnabled = false;
+            //ctx.imageSmoothingEnabled = false;
+
+            ctx!.drawImage(img, 0, 0, width, height);
+
+            // Encode the resized image to bas64 png
+            let dataURL = canvas.toDataURL("image/png");
+
+            // return result
+            callback(dataURL);
+        };
+        img.src = src;
+        if (img.complete || img.complete === undefined) {
+            img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+            img.src = src;
         }
     }
+
+}
+
+class MarketplaceActions {
+    static Version = "2";
+
+    static init() {
+        // Create MenuBarItem for Marketplace
+        MarketplaceMenuBarButton.create();
+    }
+
+
 }
 
 type convertFunction = {
@@ -463,6 +353,63 @@ class BildrAPIHelper {
 
 }
 
+class MarketplaceMenuBarButton {
+    static marketplaceMenuItemDivId = "bildrMarketplaceMenuItem";
+    static topMenuBarDivCss = "css_V9oRPFpIjEqGDrWGUv9yWg";
+
+    static isTopBarAvailable() {
+        return document.querySelector(`.${MarketplaceMenuBarButton.topMenuBarDivCss}`);
+    }
+
+    static create() {
+        if (!document.getElementById(MarketplaceMenuBarButton.marketplaceMenuItemDivId)) {
+            // init page for smooth sliding in and not seeing the page load
+            let plugin = new MarketplacePlugin();
+            BildrPluginManager.register(plugin)
+
+            // Make some space in the menu bar
+            var topMenuBar = document.querySelector(`.${MarketplaceMenuBarButton.topMenuBarDivCss}`) as HTMLDivElement;
+            topMenuBar.style.width = "520px";
+
+            // CREATE menu bar item
+            var elem = document.createElement("div");
+            elem.id = MarketplaceMenuBarButton.marketplaceMenuItemDivId;
+            elem.className = "css_BRQAelSiDkOyetXlS0VDMQ";
+            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r9f576480f5ba4b118cec7ce8e6c345e3/doc/Bildr marketplace logo WB color.ynHqabhunkG6oesIc3Xzvg.png' class='css_0EWldTyzqU60XwJWKjRXog' style='filter:none;'><p class='css_BzJ7ABkWfkeHKsQbcZKVbA css_ixReGSYmjkKU0b6bxZNTHw'>market</p>";
+            // add to top menu bar
+            topMenuBar.appendChild(elem);
+
+            // Handle click on button, inside the plugin or outside the plugin (auto hide)
+            // Mind the config param capture: true on the addEventListener
+            document.body.addEventListener('click', e => {
+
+                let marketplacePage = new MarketplacePlugin()
+                var target = (e && e.target);
+                // assume the click is outside the plugin / div
+                let action = "hide";
+
+                while ((target as HTMLElement).parentNode) {
+
+                    // Ignore click inside the plugin / div
+                    if (plugin.isSameDivElem(target as HTMLDivElement)) {
+                        action = "";
+                        break;
+                    }
+                    // Handles click on Marketplace button (and image and tekst)
+                    if (target && (target as HTMLElement).id == MarketplaceMenuBarButton.marketplaceMenuItemDivId) {
+                        action = "toggle";
+                        break;
+                    }
+                    target = (target as HTMLElement).parentNode;
+                }
+
+                if (action == "hide") { marketplacePage.hide(); }
+                if (action == "toggle") { marketplacePage.toggleVisibility(); }
+            }, { capture: true })
+
+        }
+    }
+}
 
 var onStudioLoadObservers = [];
 // set up marketplace button as soon as top bar is available
@@ -473,7 +420,7 @@ onStudioLoadObservers.push(new MutationObserver(function (_mutations, me) {
         // stop observing
         me.disconnect();
 
-        Marketplace.init();
+        MarketplaceActions.init();
     }
 }))
 

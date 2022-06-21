@@ -1,11 +1,17 @@
 
+export interface BildrPluginAction {
+    get name(): string;
+    execFunc(args: any): any;
+}
+
 export class BildrPlugin {
     private _name: string;
     private _pageUrl: string;
     private _frameId: string;
     private _divElem!: HTMLDivElement;
     private _divId: string;
-    
+    private _actions: BildrPluginAction[] = []
+
     constructor(name: string, pageUrl: string) {
         this._name = name;
         this._pageUrl = pageUrl;
@@ -16,11 +22,31 @@ export class BildrPlugin {
     public get name(): string {
         return this._name;
     }
-    
-    postMessage(data: any) {
-        throw new Error("Method not implemented.");
+
+    protected get divElem(): HTMLDivElement {
+        return this._divElem;
     }
-    
+    public isSameDivElem(divElem: HTMLDivElement) {
+        return this._divElem === divElem;
+    }
+
+    protected sendOutgoingMessage(msgId: string, data: any) {
+        var window = (document.getElementById(this._frameId) as HTMLIFrameElement).contentWindow;
+        window!.postMessage({
+            "msgId": msgId,
+            "result": data
+        }, "*");
+
+    }
+
+    public triggerAction(actionName: string, actionData: any) {
+        let action = this._actions.find(item => item.name == actionName)
+        if (action == undefined) {
+            throw new Error(`Unknown action '${actionName}' on plugin '${this.name}'`);
+        }
+        return action.execFunc(actionData)
+    }
+
     public hide() {
         this._divElem.style.right = "-400px";
     }
@@ -45,6 +71,7 @@ export class BildrPlugin {
     protected get document(): Document {
         return window.document;
     }
+
     public renderPage() {
         if (!this._divElem) {
             // CREATE plugin div/iframe
@@ -70,4 +97,25 @@ export class BildrPlugin {
         this.document.body.removeChild(this._divElem);
     }
 
+    public addAction2(action: BildrPluginAction) {
+        this.addAction(action.name, action.execFunc);
+    }
+
+    public addAction(actionName: string, execFnc: Function) {
+        this._actions.push(new SimplePluginAction(actionName, execFnc));
+    }
+}
+
+class SimplePluginAction implements BildrPluginAction {
+    public name: string;
+    private _execFunc: Function;
+
+    constructor(actionName: string, execFunc: Function) {
+        this.name = actionName;
+        this._execFunc = execFunc;
+    }
+
+    execFunc(args: any): any {
+        return this._execFunc(args);
+    }
 }

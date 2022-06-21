@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
 import { myTestPlugin } from "./myTestPlugin";
 
-describe("BildrPugin", () => {
+describe("BildrPlugin", () => {
     let testBrowser: JSDOM;
 
     beforeEach(() => {
@@ -103,5 +103,44 @@ describe("BildrPugin", () => {
         expect(plugin.testBrowser.window.document.querySelector("iframe")).toBeNull()
     })
 
+    it("should be the same divElem", () => {
+        // GIVEN
+        let plugin = new myTestPlugin("test", "https://mydomain.plugin.html", testBrowser)
+        plugin.renderPage()
+
+        // WHEN
+        let result = plugin.isSameDivElem(plugin.divElem)
+        // THEN
+        expect(result).toBeTruthy();
+    })
+
+    it("should not be the same divElem", () => {
+        // GIVEN
+        let plugin = new myTestPlugin("test", "https://mydomain.plugin.html", testBrowser)
+        let plugin2 = new myTestPlugin("test", "https://mydomain.plugin.html", testBrowser)
+        plugin.renderPage()
+
+        // WHEN
+        let result = plugin.isSameDivElem(plugin2.divElem)
+        // THEN
+        expect(result).toBeFalsy();
+    })
+
+    it("should be possible to register an action", () => {
+        // GIVEN
+        let plugin = new myTestPlugin("test", "", testBrowser)
+        plugin.triggerActionShouldCallSuper = true
+
+        plugin.addAction("doSomething", (actionData: any) => {
+            return actionData.message;
+        })
+
+        // WHEN
+        let result = plugin.triggerAction("doSomething", { "message": "Hello World!" })
+
+        // THEN
+        expect(result).toEqual("Hello World!")
+
+    })
 });
 

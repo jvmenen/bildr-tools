@@ -83,32 +83,62 @@ describe('BildrPluginManager', () => {
     });
     it('should receive a message', () => {
         // GIVEN
-        let events: Function;
+        // set up to get a reference to the callback function that
+        // will be triggered by the "message" event handler on window
+        let messageFunc: Function;
 
         let addEventListenerSpy = jest.fn((event: any, callback: any) => {
-            events = callback as Function;
+            messageFunc = callback as Function;
         })
-
         testBrowser.window.addEventListener = addEventListenerSpy
 
         BildrPluginManager.register(plugin)
 
-
-        let messageToPost = {
-            pluginName: "marketplace",
-            command: "specialMessage",
+        let actionData = {
+            pluginName: plugin.name,
+            command: "saySomething",
             msgId: "123456789",
-            data: { "param1": 1, "param2": "the second one" }
+            data: { "param1": "Hello World!" }
         }
 
         // WHEN
         // let window = plugin.testBrowser.window;
         // window.postMessage(JSON.stringify(messageToPost), "*")
-        events!({"data": JSON.stringify(messageToPost)}, "*")
+        messageFunc!({ "data": JSON.stringify(actionData) }, "*")
 
         // THEN
-        expect(plugin.latestMessage().command).toEqual("specialMessage")
+        expect(plugin.recentActionName).toEqual("saySomething")
+        expect(plugin.recentActionData.msgId).toEqual("123456789")
+        expect(plugin.recentActionData.param1).toEqual("Hello World!")
+    });
 
+    it('should add msgId to data even if data is initially undefined', () => {
+        // GIVEN
+        // set up to get a reference to the callback function that
+        // will be triggered by the "message" event handler on window
+        let messageFunc: Function;
+
+        let addEventListenerSpy = jest.fn((event: any, callback: any) => {
+            messageFunc = callback as Function;
+        })
+        testBrowser.window.addEventListener = addEventListenerSpy
+
+        BildrPluginManager.register(plugin)
+
+        let actionData = {
+            pluginName: plugin.name,
+            command: "saySomething",
+            msgId: "123456789",
+            data: undefined
+        }
+
+        // WHEN
+        // let window = plugin.testBrowser.window;
+        // window.postMessage(JSON.stringify(messageToPost), "*")
+        messageFunc!({ "data": JSON.stringify(actionData) }, "*")
+
+        // THEN
+        expect(plugin.recentActionData.msgId).toEqual("123456789")
     });
 })
 

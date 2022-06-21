@@ -28,19 +28,21 @@ export class BildrPluginManager {
         if (plugin.name == undefined || plugin.name == null || plugin.name.trim().length == 0) {
             throw new Error("Name is required to register a plugin.");
         }
-
         if (BildrPluginManager.isRegistered(plugin.name)) {
             throw new Error(`Plugin with name '${plugin.name}' already registered. Name needs to be unique.`);
         }
+
         if (this._registeredPlugins.length == 0) {
             // Start listening for messages from iFrame/Bildr Marketplace
             this.window.addEventListener("message", e => {
                 if (e.data) {
-                    let dataJson = JSON.parse(e.data);
+                    let dataJson = JSON.parse(e.data) as BildrPluginData;
                     if (dataJson.pluginName) {
                         this._registeredPlugins.forEach(plugin => {
                             if (plugin.name == dataJson.pluginName) {
-                                plugin.postMessage(dataJson)
+                                if (dataJson.data == undefined) dataJson.data = {};
+                                dataJson.data.msgId = dataJson.msgId;
+                                plugin.triggerAction(dataJson.command, dataJson.data)
                             }
                         })
                     }
@@ -65,5 +67,12 @@ export class BildrPluginManager {
     static register(plugin: BildrPlugin) {
         this._instance.register(plugin)
     }
+}
+
+type BildrPluginData = {
+    pluginName: string,
+    command: string,
+    msgId: string,
+    data : any
 }
 
