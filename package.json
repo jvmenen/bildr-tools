@@ -2,7 +2,10 @@
   "name": "bildr-tools",
   "version": "0.4.3",
   "description": "The place for Bildr scripts to enhance the already awesome functionality of the low-code https://bildr.com developement Studio",
-  "main": "./src/Bildr-tools.ts",
+  "main": "./dist/bildr-tools.js",
+  "files": [
+    "dist/**/*"
+  ],
   "typings": "./dist/types/BildrTools.d.ts",
   "scripts": {
     "bundle-d-ts": "api-extractor run",

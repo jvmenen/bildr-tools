@@ -1,10 +1,16 @@
 
+/**
+ * @public
+ */
 export interface BildrPluginAction {
     get name(): string;
     execFunc(args: any): any;
 }
 
-export class BildrPlugin {
+/**
+ * @public
+ */
+export class BildrPluginBase {
     private _name: string;
     private _pageUrl: string;
     private _frameId: string;
@@ -30,21 +36,29 @@ export class BildrPlugin {
         return this._divElem === divElem;
     }
 
-    protected sendOutgoingMessage(msgId: string, data: any) {
+    protected sendOutgoingMessage(msgId: string, result: any) {
         var window = (document.getElementById(this._frameId) as HTMLIFrameElement).contentWindow;
         window!.postMessage({
             "msgId": msgId,
-            "result": data
+            "result": result
         }, "*");
 
     }
 
     public triggerAction(actionName: string, actionData: any) {
+        if (actionData.uMsgId == undefined || actionData.uMsgId == null || actionData.uMsgId == "") {
+            throw new Error("uMsgId should be set on argument actionData");
+        }
+
         let action = this._actions.find(item => item.name == actionName)
         if (action == undefined) {
             throw new Error(`Unknown action '${actionName}' on plugin '${this.name}'`);
         }
-        return action.execFunc(actionData)
+        let result = action.execFunc(actionData)
+        if (result) {
+            this.sendOutgoingMessage(actionData.uMsgId, result)
+        }
+        return result;
     }
 
     public hide() {
@@ -97,7 +111,7 @@ export class BildrPlugin {
         this.document.body.removeChild(this._divElem);
     }
 
-    public addAction2(action: BildrPluginAction) {
+    public addActionObject(action: BildrPluginAction) {
         this.addAction(action.name, action.execFunc);
     }
 

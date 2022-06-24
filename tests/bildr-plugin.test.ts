@@ -136,11 +136,26 @@ describe("BildrPlugin", () => {
         })
 
         // WHEN
-        let result = plugin.triggerAction("doSomething", { "message": "Hello World!" })
+        let result = plugin.triggerAction("doSomething", { uMsgId: "1", "message": "Hello World!" })
 
         // THEN
         expect(result).toEqual("Hello World!")
 
     })
+
+    it('should cal senOutgGoinMessage when triggerAction returns a value', () => {
+        let plugin = new myTestPlugin("", "", testBrowser);
+        plugin.triggerActionShouldCallSuper=true;
+        plugin.addAction("saySomething", ()=> { return "awesome"})
+
+        // WHEN
+        plugin.triggerAction("saySomething", {uMsgId:"123", something : "else"})
+
+        // THEN
+        expect(plugin.recentOutgoingMessageMsgId).toEqual("123");
+        expect(plugin.recentOutgoingMessageData).toEqual("awesome")
+        
+        
+    });
 });
 

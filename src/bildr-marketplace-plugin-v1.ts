@@ -1,13 +1,11 @@
-import { BildrPlugin, BildrPluginAction } from "./BildrPlugin";
-import { BildrPluginManager } from './BildrPluginManager';
+import { BildrPluginBase, BildrPluginAction } from "./plugin/BildrPluginBase";
+import { BildrPluginManager } from './plugin/BildrPluginManager';
 
-var marketplaceUrl = "https://marketplace.bildr.com/BE";
-
-export class MarketplacePlugin extends BildrPlugin {
+export class MarketplacePlugin extends BildrPluginBase {
     private Version = "2";
 
     constructor() {
-        super("marketplace", marketplaceUrl)
+        super("marketplace", "https://marketplace.bildr.com/BE")
         this.addAction("hideMarketplacePlugin", () => { this.hide(); return undefined });
         this.addAction("getMarketPlaceVersion", () => { return this.Version });
 
@@ -15,32 +13,30 @@ export class MarketplacePlugin extends BildrPlugin {
         this.addAction("getProjectFunctions", () => { return BildrAPIHelper.getProjectFunctions(); });
         this.addAction("getProjectPreviewId", () => { return BildrAPIHelper.getProjectPreviewId(); });
 
-        this.addAction2(new getActionTypeByMarketplaceId());
-        this.addAction2(new addActionTypeWithFunctions(this.sendmessage));
-        this.addAction2(new updateActionTypeWithFunctions(this.sendmessage));
+        this.addActionObject(new getActionTypeByMarketplaceIdAction());
+        this.addActionObject(new addActionTypeWithFunctionsAction(this.sendOutgoingMessage));
+        this.addActionObject(new updateActionTypeWithFunctionsAction(this.sendOutgoingMessage));
 
-        this.addAction2(new imageUrlToBase64(this.sendmessage));
+        this.addActionObject(new imageUrlToBase64Action(this.sendOutgoingMessage));
     }
 
-    public override triggerAction(actionName: string, data: any): void {
-
-        let resultData = super.triggerAction(actionName, data)
-        if (resultData) {
-            this.sendmessage(data.msgId, "succes", actionName, resultData)
+    protected override sendOutgoingMessage(msgId: string, result: any) {
+        // Maybe this can be simplified since result is always success and
+        // message contained the action name but never gets used I think.
+        // But that requires also changes in the Marketplace plugin Website in 
+        // all places where data is received an processed.... not easy to find where.
+        var marketplaceResult = {
+            "result": "succes",
+            "message": "",  // was this needed anyway in the marketplace?
+            "data": result
         }
-    }
-
-    public sendmessage(msgId: string, result: string, message: string, data: any) {
-        var response = {
-            "result": result,
-            "message": message,
-            "data": data
-        }
-        super.sendOutgoingMessage(msgId, response)
+        super.sendOutgoingMessage(msgId, marketplaceResult)
     }
 }
 
-class getActionTypeByMarketplaceId implements BildrPluginAction {
+type sendOutgoingMessage = (msgId: string, result: any) => void;
+
+class getActionTypeByMarketplaceIdAction implements BildrPluginAction {
 
     get name(): string {
         return "getActionTypeByMarketplaceId";
@@ -56,12 +52,12 @@ class getActionTypeByMarketplaceId implements BildrPluginAction {
     }
 }
 
-class updateActionTypeWithFunctions implements BildrPluginAction {
+class updateActionTypeWithFunctionsAction implements BildrPluginAction {
 
-    private _sendMessageFunc: Function;
+    private _sendMessageFunc: sendOutgoingMessage;
 
     // static addActionTypeWithFunctions(msgId: string);
-    constructor(sendMessageFunc: Function) {
+    constructor(sendMessageFunc: sendOutgoingMessage) {
         this._sendMessageFunc = sendMessageFunc
     }
     get name(): string {
@@ -85,7 +81,7 @@ class updateActionTypeWithFunctions implements BildrPluginAction {
                 if (stateData.last) {
 
                     BildrAPIHelper.saveFiltersetRecord("16", data.actionTypeJson, null, (returnData: any) => {
-                        this._sendMessageFunc(data.msgId, "succes", "action type added succesfully", returnData)
+                        this._sendMessageFunc(data.msgId, returnData)
                     });
                 }
             })
@@ -93,16 +89,16 @@ class updateActionTypeWithFunctions implements BildrPluginAction {
     }
 }
 
-class addActionTypeWithFunctions implements BildrPluginAction {
-    private _sendMessageFunc: Function;
+class addActionTypeWithFunctionsAction implements BildrPluginAction {
+    private _sendMessageFunc: sendOutgoingMessage;
 
     // static addActionTypeWithFunctions(msgId: string);
-    constructor(sendMessageFunc: Function) {
+    constructor(sendMessageFunc: sendOutgoingMessage) {
         this._sendMessageFunc = sendMessageFunc
     }
 
     get name(): string {
-        return "getActionTypeByMarketplaceId";
+        return "addActionTypeWithFunctions";
     }
 
     public execFunc(data: any) {
@@ -158,7 +154,7 @@ class addActionTypeWithFunctions implements BildrPluginAction {
                     }
 
                     BildrAPIHelper.saveFiltersetRecord("16", actionTypeJson, null, (returnData: any) => {
-                        this._sendMessageFunc(data.msgId, "succes", "action type added succesfully", returnData)
+                        this._sendMessageFunc(data.msgId, returnData)
                     });
 
                 }
@@ -167,11 +163,11 @@ class addActionTypeWithFunctions implements BildrPluginAction {
     }
 }
 
-class imageUrlToBase64 implements BildrPluginAction {
-    private _sendMessageFunc: Function;
+class imageUrlToBase64Action implements BildrPluginAction {
+    private _sendMessageFunc: sendOutgoingMessage;
 
     // static addActionTypeWithFunctions(msgId: string);
-    constructor(sendMessageFunc: Function) {
+    constructor(sendMessageFunc: sendOutgoingMessage) {
         this._sendMessageFunc = sendMessageFunc
     }
 
@@ -180,7 +176,7 @@ class imageUrlToBase64 implements BildrPluginAction {
     }
     execFunc(data: any) {
         this.imageUrlToBase64(data.iconUrl, (dataUrl: string) => {
-            this._sendMessageFunc(data.msgId, "succes", "iconUrlToBase64", dataUrl);
+            this._sendMessageFunc(data.msgId, dataUrl);
         })
         return undefined;
     }
@@ -238,17 +234,6 @@ class imageUrlToBase64 implements BildrPluginAction {
 
 }
 
-class MarketplaceActions {
-    static Version = "2";
-
-    static init() {
-        // Create MenuBarItem for Marketplace
-        MarketplaceMenuBarButton.create();
-    }
-
-
-}
-
 type convertFunction = {
     "originalId": string | number,
     "newId": string,
@@ -260,7 +245,7 @@ class BildrAPIHelper {
     static saveFiltersetRecord(filtersetID: string, dataToSave: any, stateData: any, afterOnSucces: Function) {
 
         // create custom action to execute RecordSave
-        var act = new Action(0, 0, 0, "Marketplace plugin adding filterset: " + dataToSave.filtersetID, '', '');
+        var act = new Action(0, 0, 0, "BildrAPIHelper adding filterset: " + dataToSave.filtersetID, '', '');
         act.exec = function (qa: any) {
 
             var jsonData = parseStrAsJson(dataToSave)
@@ -420,7 +405,7 @@ onStudioLoadObservers.push(new MutationObserver(function (_mutations, me) {
         // stop observing
         me.disconnect();
 
-        MarketplaceActions.init();
+        MarketplaceMenuBarButton.create();
     }
 }))
 

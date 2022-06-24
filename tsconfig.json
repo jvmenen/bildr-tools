@@ -12,5 +12,5 @@
         "types": []
     },
     "include": ["src/**/*.ts"],
-    "moduleResolution":"node"
+    "moduleResolution":"node", 
 }

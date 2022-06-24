@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom';
-import { BildrPluginManager } from './../src/BildrPluginManager';
+import { BildrPluginManager } from './../src/plugin/BildrPluginManager';
 
 export class myTestPluginManager extends BildrPluginManager {
     testBrowser: JSDOM;

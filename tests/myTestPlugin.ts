@@ -1,12 +1,14 @@
 import { JSDOM } from "jsdom";
-import { BildrPlugin } from "../src/BildrPlugin";
+import { BildrPluginBase } from "../src/plugin/BildrPluginBase";
 
-export class myTestPlugin extends BildrPlugin {
+export class myTestPlugin extends BildrPluginBase {
     public testBrowser: JSDOM
 
     public renderIsCalled: boolean = false;
     public recentActionName: string = "";
     public recentActionData: any = {};
+    public recentOutgoingMessageMsgId: string = "";
+    public recentOutgoingMessageData: any = {};
 
     constructor(name: string, url: string, browser: JSDOM) {
         super(name, url);
@@ -31,5 +33,10 @@ export class myTestPlugin extends BildrPlugin {
 
     public override get divElem(): HTMLDivElement {
         return super.divElem;
+    }
+
+    public override sendOutgoingMessage(msgId: string, data: any): void {
+        this.recentOutgoingMessageMsgId = msgId;
+        this.recentOutgoingMessageData = data;
     }
 }

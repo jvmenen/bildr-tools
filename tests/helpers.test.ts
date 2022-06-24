@@ -1,4 +1,4 @@
-import { nameSort, CacheHelper, BildrCacheHelper } from '../src/Helpers';
+import { nameSort, CacheHelper, BildrCacheHelper } from '../src/tools/Helpers';
 import { actionsJson } from "./data/actions";
 import { elementsJson } from "./data/elements";
 import { actionTypesJson } from "./data/actionsTypes";

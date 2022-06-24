@@ -1,13 +1,16 @@
-import { BildrPlugin } from "./BildrPlugin";
+import { BildrPluginBase } from "./BildrPluginBase";
 
+/**
+ * @public
+ */
 export class BildrPluginManager {
-    static _instance = new BildrPluginManager()
+    static _instance: BildrPluginManager;
 
-    private _registeredPlugins: BildrPlugin[] = [];
+    private _registeredPlugins: BildrPluginBase[] = [];
 
     constructor() { }
-    
-    public register(plugin: BildrPlugin) {
+
+    public register(plugin: BildrPluginBase) {
         if (plugin.name == undefined || plugin.name == null || plugin.name.trim().length == 0) {
             throw new Error("Name is required to register a plugin.");
         }
@@ -24,7 +27,7 @@ export class BildrPluginManager {
     public isRegistered(pluginName: string): boolean {
         return this._registeredPlugins.find(item => item.name == pluginName) != undefined
     }
-    
+
     public remove(pluginName: string) {
         let plugin = this._registeredPlugins.find(item => item.name == pluginName)
         if (plugin != undefined) {
@@ -51,36 +54,42 @@ export class BildrPluginManager {
     private triggerActionInPlugin(e: any) {
         if (!e.data) return;
 
-        let dataJson = JSON.parse(e.data) as BildrPluginData;
+        let dataJson = e.data as BildrPluginData;
 
         let plugin = this._registeredPlugins.find(item => dataJson.pluginName && item.name == dataJson.pluginName);
 
         if (plugin == undefined) return;
 
         if (dataJson.data == undefined) dataJson.data = {};
-        dataJson.data.msgId = dataJson.msgId;
+        dataJson.data.uMsgId = dataJson.uMsgId;
 
         plugin.triggerAction(dataJson.command, dataJson.data);
     }
 
     // STATIC FUNCTIONS
+    static getInstance(): BildrPluginManager {
+        if (this._instance == undefined) {
+            this._instance = new BildrPluginManager()
+        }
+        return this._instance
+    }
     static remove(pluginName: string) {
-        this._instance.remove(pluginName)
+        this.getInstance().remove(pluginName)
     }
 
     static isRegistered(pluginName: string): boolean {
-        return this._instance.isRegistered(pluginName)
+        return this.getInstance().isRegistered(pluginName)
     }
 
-    static register(plugin: BildrPlugin) {
-        this._instance.register(plugin)
+    static register(plugin: BildrPluginBase) {
+        this.getInstance().register(plugin)
     }
 }
 
 type BildrPluginData = {
     pluginName: string,
     command: string,
-    msgId: string,
+    uMsgId: string,
     data: any
 }
 

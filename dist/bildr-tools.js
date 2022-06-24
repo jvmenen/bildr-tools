@@ -1,18 +1,28 @@
-/******/ (() => { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["Bildr"] = factory();
+	else
+		root["Bildr"] = root["Bildr"] || {}, root["Bildr"]["tools"] = factory();
+})(self, () => {
+return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/ActionTypes.ts":
-/*!****************************!*\
-  !*** ./src/ActionTypes.ts ***!
-  \****************************/
+/***/ "./src/tools/ActionTypes.ts":
+/*!**********************************!*\
+  !*** ./src/tools/ActionTypes.ts ***!
+  \**********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "BildrToolsActionTypes": () => (/* binding */ BildrToolsActionTypes)
 /* harmony export */ });
-/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
+/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/tools/Helpers.ts");
 
 /**
  * @public
@@ -20,7 +30,6 @@ __webpack_require__.r(__webpack_exports__);
 class BildrToolsActionTypes {
     static findUsage(actionTypeId) {
         let bildrCache = _Helpers__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
-        let logToConsole = true;
         // Create "Header" for the results
         let theActionType = bildrCache.actionTypes.find(acT => { return (acT.id == actionTypeId); });
         // found it
@@ -55,17 +64,17 @@ class BildrToolsActionTypes {
 
 /***/ }),
 
-/***/ "./src/Actions.ts":
-/*!************************!*\
-  !*** ./src/Actions.ts ***!
-  \************************/
+/***/ "./src/tools/Actions.ts":
+/*!******************************!*\
+  !*** ./src/tools/Actions.ts ***!
+  \******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "BildrToolsActions": () => (/* binding */ BildrToolsActions)
 /* harmony export */ });
-/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
+/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/tools/Helpers.ts");
 
 /**
  * @public
@@ -239,10 +248,10 @@ class BildrToolsActions {
 
 /***/ }),
 
-/***/ "./src/Debug.ts":
-/*!**********************!*\
-  !*** ./src/Debug.ts ***!
-  \**********************/
+/***/ "./src/tools/Debug.ts":
+/*!****************************!*\
+  !*** ./src/tools/Debug.ts ***!
+  \****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -250,7 +259,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ActionsToShowEnum": () => (/* binding */ ActionsToShowEnum),
 /* harmony export */   "BildrToolsDebug": () => (/* binding */ BildrToolsDebug)
 /* harmony export */ });
-/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
+/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/tools/Helpers.ts");
 
 /**
  * If you want both Flows and actions use: Flows | Actions
@@ -339,17 +348,17 @@ BildrToolsDebug.ActionsToShow = ActionsToShowEnum.Flows;
 
 /***/ }),
 
-/***/ "./src/Flows.ts":
-/*!**********************!*\
-  !*** ./src/Flows.ts ***!
-  \**********************/
+/***/ "./src/tools/Flows.ts":
+/*!****************************!*\
+  !*** ./src/tools/Flows.ts ***!
+  \****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "BildrToolsFlows": () => (/* binding */ BildrToolsFlows)
 /* harmony export */ });
-/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/Helpers.ts");
+/* harmony import */ var _Helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Helpers */ "./src/tools/Helpers.ts");
 
 /**
  * @public
@@ -642,10 +651,10 @@ class BildrToolsFlows {
 
 /***/ }),
 
-/***/ "./src/Helpers.ts":
-/*!************************!*\
-  !*** ./src/Helpers.ts ***!
-  \************************/
+/***/ "./src/tools/Helpers.ts":
+/*!******************************!*\
+  !*** ./src/tools/Helpers.ts ***!
+  \******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -904,9 +913,9 @@ class FlowHelper extends ActionHelper {
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-/*!***************************!*\
-  !*** ./src/BildrTools.ts ***!
-  \***************************/
+/*!*********************************!*\
+  !*** ./src/tools/BildrTools.ts ***!
+  \*********************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "ActionTypes": () => (/* reexport safe */ _ActionTypes__WEBPACK_IMPORTED_MODULE_1__.BildrToolsActionTypes),
@@ -915,20 +924,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Debug": () => (/* reexport safe */ _Debug__WEBPACK_IMPORTED_MODULE_2__.BildrToolsDebug),
 /* harmony export */   "Flows": () => (/* reexport safe */ _Flows__WEBPACK_IMPORTED_MODULE_3__.BildrToolsFlows)
 /* harmony export */ });
-/* harmony import */ var _Actions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Actions */ "./src/Actions.ts");
-/* harmony import */ var _ActionTypes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ActionTypes */ "./src/ActionTypes.ts");
-/* harmony import */ var _Debug__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Debug */ "./src/Debug.ts");
-/* harmony import */ var _Flows__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Flows */ "./src/Flows.ts");
+/* harmony import */ var _Actions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Actions */ "./src/tools/Actions.ts");
+/* harmony import */ var _ActionTypes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ActionTypes */ "./src/tools/ActionTypes.ts");
+/* harmony import */ var _Debug__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Debug */ "./src/tools/Debug.ts");
+/* harmony import */ var _Flows__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Flows */ "./src/tools/Flows.ts");
 
 
 
 
 
+//import { BildrCacheHelper, ActionHelper, FlowHelper, PageHelper } from './Helpers';
 
 
 })();
 
-window.BildrTools = __webpack_exports__;
+/******/ 	return __webpack_exports__;
 /******/ })()
 ;
+});
 //# sourceMappingURL=bildr-tools.js.map

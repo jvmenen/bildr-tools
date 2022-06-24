@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom';
-import { BildrPluginManager } from './../src/BildrPluginManager';
+import { BildrPluginManager } from './../src/plugin/BildrPluginManager';
 import { myTestPlugin } from './myTestPlugin';
 import { myTestPluginManager } from './myTestPluginManager';
 
@@ -97,18 +97,19 @@ describe('BildrPluginManager', () => {
         let actionData = {
             pluginName: plugin.name,
             command: "saySomething",
-            msgId: "123456789",
+            uMsgId: "123456789",
             data: { "param1": "Hello World!" }
         }
+        let eventData = { "data": actionData }
 
         // WHEN
         // let window = plugin.testBrowser.window;
         // window.postMessage(JSON.stringify(messageToPost), "*")
-        messageFunc!({ "data": JSON.stringify(actionData) }, "*")
+        messageFunc!(eventData, "*")
 
         // THEN
         expect(plugin.recentActionName).toEqual("saySomething")
-        expect(plugin.recentActionData.msgId).toEqual("123456789")
+        expect(plugin.recentActionData.uMsgId).toEqual("123456789")
         expect(plugin.recentActionData.param1).toEqual("Hello World!")
     });
 
@@ -125,20 +126,22 @@ describe('BildrPluginManager', () => {
 
         BildrPluginManager.register(plugin)
 
-        let actionData = {
+        const actionData = {
             pluginName: plugin.name,
             command: "saySomething",
-            msgId: "123456789",
+            uMsgId: "123456789",
             data: undefined
         }
+
+        const eventData = { "data": actionData };
 
         // WHEN
         // let window = plugin.testBrowser.window;
         // window.postMessage(JSON.stringify(messageToPost), "*")
-        messageFunc!({ "data": JSON.stringify(actionData) }, "*")
+        messageFunc!(eventData, "*")
 
         // THEN
-        expect(plugin.recentActionData.msgId).toEqual("123456789")
+        expect(plugin.recentActionData.uMsgId).toEqual("123456789")
     });
 })
 

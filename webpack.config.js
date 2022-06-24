@@ -3,17 +3,21 @@ const webpack = require('webpack'); //to access built-in plugins
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = (env) => {
-    let outputFileName = "bildr-tools.js"
+    let fileExtension = "js"
     let environment = "development";
     if (env.production) {
-        outputFileName = "bildr-tools.min.js";
+        fileExtension = "min.js";
         environment = "production";
     }
 
     let config = {
         mode: `${environment}`, //"development", "production"
         devtool: "source-map", // "", "eval-source-map", "source-map"
-        entry: "./src/BildrTools.ts",
+        entry: {
+            tools: "./src/tools/BildrTools.ts",
+            plugins: "./src/plugin/PluginEntry.ts",
+            marketplace: "./src/bildr-marketplace-plugin-v1.ts"
+        },
         target: ['web', 'es6'],
         module: {
             rules: [
@@ -36,9 +40,10 @@ module.exports = (env) => {
             extensions: ['.ts', '.js']
         },
         output: {
-            filename: `${outputFileName}`,
+            filename: `bildr-[name].${fileExtension}`,
             path: path.resolve(__dirname, 'dist'),
-            library: { name: "BildrTools", type: "window" }
+            library: ["Bildr", "[name]"],
+            libraryTarget: "umd"
         },
         stats: {
             errorDetails: true

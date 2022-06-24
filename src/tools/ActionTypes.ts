@@ -6,7 +6,6 @@ import { BildrCacheHelper, ConsoleLog, nameSort } from "./Helpers";
 export class BildrToolsActionTypes {
     static findUsage(actionTypeId: string): void {
         let bildrCache = BildrCacheHelper.createInstance();
-        let logToConsole = true;
 
         // Create "Header" for the results
         let theActionType = bildrCache.actionTypes.find(acT => { return (acT.id == actionTypeId); });
