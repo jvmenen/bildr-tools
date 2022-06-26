@@ -10,13 +10,13 @@ export interface BildrPluginAction {
 /**
  * @public
  */
-export class BildrPluginBase {
-    private _name: string;
-    private _pageUrl: string;
-    private _frameId: string;
-    private _divElem!: HTMLDivElement;
-    private _divId: string;
-    private _actions: BildrPluginAction[] = []
+export class BildrPluginRightSide {
+    protected _name: string;
+    protected _pageUrl: string;
+    protected _frameId: string;
+    protected _divElem!: HTMLDivElement;
+    protected _divId: string;
+    protected _actions: BildrPluginAction[] = []
 
     constructor(name: string, pageUrl: string) {
         this._name = name;
@@ -32,7 +32,7 @@ export class BildrPluginBase {
     protected get divElem(): HTMLDivElement {
         return this._divElem;
     }
-    public isSameDivElem(divElem: HTMLDivElement) {
+    public isSameDivElem(divElem: HTMLElement) {
         return this._divElem === divElem;
     }
 
@@ -86,7 +86,7 @@ export class BildrPluginBase {
         return window.document;
     }
 
-    public renderPage() {
+    public renderPage(): void {
         if (!this._divElem) {
             // CREATE plugin div/iframe
             let elem = this.document.createElement('div');
@@ -107,16 +107,16 @@ export class BildrPluginBase {
         }
     }
 
-    public remove() {
+    public remove(): void {
         this.document.body.removeChild(this._divElem);
     }
 
-    public addActionObject(action: BildrPluginAction) {
-        this.addAction(action.name, action.execFunc);
+    public addActionObject(action: BildrPluginAction): void {
+        this._actions.push(action)
     }
 
-    public addAction(actionName: string, execFnc: Function) {
-        this._actions.push(new SimplePluginAction(actionName, execFnc));
+    public addAction(actionName: string, execFnc: Function): void {
+        this.addActionObject(new SimplePluginAction(actionName, execFnc));
     }
 }
 

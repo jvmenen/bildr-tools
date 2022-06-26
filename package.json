@@ -11,6 +11,7 @@
     "bundle-d-ts": "api-extractor run",
     "build:type": "tsc ./src/bild_src/common.220224164006.ts --declaration",
     "build:types": "tsc",
+    "build:plugins": "tsc ./src/plugin/bildr-pluginmanager.ts",
     "build:watch": "webpack --watch",
     "build:prod": "jest && rimraf dist && webpack --env production  && webpack --env development && npm run build:types && npm run bundle-d-ts",
     "build:dev": "webpack --env development",

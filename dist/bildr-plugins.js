@@ -12,20 +12,170 @@ return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/plugin/BildrPluginBase.ts":
-/*!***************************************!*\
-  !*** ./src/plugin/BildrPluginBase.ts ***!
-  \***************************************/
+/***/ "./src/plugin/BildrPluginLeftSide.ts":
+/*!*******************************************!*\
+  !*** ./src/plugin/BildrPluginLeftSide.ts ***!
+  \*******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "BildrPluginBase": () => (/* binding */ BildrPluginBase)
+/* harmony export */   "BildrPluginLeftSide": () => (/* binding */ BildrPluginLeftSide)
+/* harmony export */ });
+/* harmony import */ var _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./BildrPluginRightSide */ "./src/plugin/BildrPluginRightSide.ts");
+
+class BildrPluginLeftSide extends _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE_0__.BildrPluginRightSide {
+    constructor(name, pageUrl) {
+        super(name, pageUrl);
+    }
+    renderPage() {
+        if (!this._divElem) {
+            // CREATE plugin div/iframe
+            let elem = this.document.createElement('div');
+            elem.id = this._divId;
+            elem.style.cssText = "width:0px;height:100vh;top:0px;left:-350px;right:unset;bottom:unset;border:none;background:#ffffff;position: fixed;z-index: 100010;overflow: hidden;position:absolute;transition: right 300ms ease-in-out 0s;";
+            elem.innerHTML = `<iframe id='${this._frameId}' src='${this._pageUrl}' style='all:unset;width:100%;height:100%'></iframe>`;
+            // add to document (right side)
+            this.document.body.appendChild(elem);
+            // Animation end handler
+            elem.addEventListener('transitionend', _e => {
+                // when the animation is finished, "hide" it when out of view
+                // prevents UI issues when the Studio canvas is scaled
+                if (elem.style.left != '53px') {
+                    elem.style.width = '0px';
+                }
+            });
+            this._divElem = elem;
+        }
+    }
+    hide() {
+        this._divElem.style.left = "-350px";
+    }
+    show() {
+        this._divElem.style.width = '350px';
+        this._divElem.style.left = '53px';
+    }
+    get isVisible() {
+        return this._divElem.style.left == '53px';
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/plugin/BildrPluginManager.ts":
+/*!******************************************!*\
+  !*** ./src/plugin/BildrPluginManager.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BildrPluginManager": () => (/* binding */ BildrPluginManager)
 /* harmony export */ });
 /**
  * @public
  */
-class BildrPluginBase {
+class BildrPluginManager {
+    constructor() {
+        this._registeredPlugins = [];
+    }
+    register(plugin) {
+        if (plugin.name == undefined || plugin.name == null || plugin.name.trim().length == 0) {
+            throw new Error("Name is required to register a plugin.");
+        }
+        if (BildrPluginManager.isRegistered(plugin.name)) {
+            throw new Error(`Plugin with name '${plugin.name}' already registered. Name needs to be unique.`);
+        }
+        this.startListeningForMessagesFromIFrame();
+        this._registeredPlugins.push(plugin);
+        plugin.renderPage();
+    }
+    isRegistered(pluginName) {
+        return this._registeredPlugins.find(item => item.name == pluginName) != undefined;
+    }
+    showPlugin(pluginName) {
+        let plugin = this._registeredPlugins.find(item => item.name == pluginName);
+        if (plugin != undefined) {
+            plugin.show();
+        }
+    }
+    remove(pluginName) {
+        let plugin = this._registeredPlugins.find(item => item.name == pluginName);
+        if (plugin != undefined) {
+            plugin.remove();
+            this._registeredPlugins.forEach((item, index) => {
+                if (item === plugin)
+                    this._registeredPlugins.splice(index, 1);
+            });
+        }
+    }
+    get window() {
+        return window;
+    }
+    startListeningForMessagesFromIFrame() {
+        if (this._registeredPlugins.length != 0)
+            return;
+        this.window.addEventListener("message", e => {
+            this.triggerActionInPlugin(e);
+        });
+    }
+    triggerActionInPlugin(e) {
+        if (!e.data)
+            return;
+        let dataJson = e.data;
+        let plugin = this._registeredPlugins.find(item => dataJson.pluginName && item.name == dataJson.pluginName);
+        if (plugin == undefined)
+            return;
+        if (dataJson.data == undefined)
+            dataJson.data = {};
+        dataJson.data.uMsgId = dataJson.uMsgId;
+        plugin.triggerAction(dataJson.command, dataJson.data);
+    }
+    getVisiblePlugins() {
+        return this._registeredPlugins.filter(item => item.isVisible);
+    }
+    // STATIC FUNCTIONS
+    static getInstance() {
+        if (this._instance == undefined) {
+            this._instance = new BildrPluginManager();
+        }
+        return this._instance;
+    }
+    static remove(pluginName) {
+        this.getInstance().remove(pluginName);
+    }
+    static isRegistered(pluginName) {
+        return this.getInstance().isRegistered(pluginName);
+    }
+    static register(plugin) {
+        this.getInstance().register(plugin);
+    }
+    static getVisiblePlugins() {
+        return this.getInstance().getVisiblePlugins();
+    }
+    static showPlugin(pluginName) {
+        this.getInstance().showPlugin(pluginName);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/plugin/BildrPluginRightSide.ts":
+/*!********************************************!*\
+  !*** ./src/plugin/BildrPluginRightSide.ts ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BildrPluginRightSide": () => (/* binding */ BildrPluginRightSide)
+/* harmony export */ });
+/**
+ * @public
+ */
+class BildrPluginRightSide {
     constructor(name, pageUrl) {
         this._actions = [];
         this._name = name;
@@ -108,10 +258,10 @@ class BildrPluginBase {
         this.document.body.removeChild(this._divElem);
     }
     addActionObject(action) {
-        this.addAction(action.name, action.execFunc);
+        this._actions.push(action);
     }
     addAction(actionName, execFnc) {
-        this._actions.push(new SimplePluginAction(actionName, execFnc));
+        this.addActionObject(new SimplePluginAction(actionName, execFnc));
     }
 }
 class SimplePluginAction {
@@ -121,90 +271,6 @@ class SimplePluginAction {
     }
     execFunc(args) {
         return this._execFunc(args);
-    }
-}
-
-
-/***/ }),
-
-/***/ "./src/plugin/BildrPluginManager.ts":
-/*!******************************************!*\
-  !*** ./src/plugin/BildrPluginManager.ts ***!
-  \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "BildrPluginManager": () => (/* binding */ BildrPluginManager)
-/* harmony export */ });
-/**
- * @public
- */
-class BildrPluginManager {
-    constructor() {
-        this._registeredPlugins = [];
-    }
-    register(plugin) {
-        if (plugin.name == undefined || plugin.name == null || plugin.name.trim().length == 0) {
-            throw new Error("Name is required to register a plugin.");
-        }
-        if (BildrPluginManager.isRegistered(plugin.name)) {
-            throw new Error(`Plugin with name '${plugin.name}' already registered. Name needs to be unique.`);
-        }
-        this.startListeningForMessagesFromIFrame();
-        this._registeredPlugins.push(plugin);
-        plugin.renderPage();
-    }
-    isRegistered(pluginName) {
-        return this._registeredPlugins.find(item => item.name == pluginName) != undefined;
-    }
-    remove(pluginName) {
-        let plugin = this._registeredPlugins.find(item => item.name == pluginName);
-        if (plugin != undefined) {
-            plugin.remove();
-            this._registeredPlugins.forEach((item, index) => {
-                if (item === plugin)
-                    this._registeredPlugins.splice(index, 1);
-            });
-        }
-    }
-    get window() {
-        return window;
-    }
-    startListeningForMessagesFromIFrame() {
-        if (this._registeredPlugins.length != 0)
-            return;
-        this.window.addEventListener("message", e => {
-            this.triggerActionInPlugin(e);
-        });
-    }
-    triggerActionInPlugin(e) {
-        if (!e.data)
-            return;
-        let dataJson = e.data;
-        let plugin = this._registeredPlugins.find(item => dataJson.pluginName && item.name == dataJson.pluginName);
-        if (plugin == undefined)
-            return;
-        if (dataJson.data == undefined)
-            dataJson.data = {};
-        dataJson.data.uMsgId = dataJson.uMsgId;
-        plugin.triggerAction(dataJson.command, dataJson.data);
-    }
-    // STATIC FUNCTIONS
-    static getInstance() {
-        if (this._instance == undefined) {
-            this._instance = new BildrPluginManager();
-        }
-        return this._instance;
-    }
-    static remove(pluginName) {
-        this.getInstance().remove(pluginName);
-    }
-    static isRegistered(pluginName) {
-        return this.getInstance().isRegistered(pluginName);
-    }
-    static register(plugin) {
-        this.getInstance().register(plugin);
     }
 }
 
@@ -276,10 +342,13 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "manager": () => (/* reexport safe */ _BildrPluginManager__WEBPACK_IMPORTED_MODULE_0__.BildrPluginManager),
-/* harmony export */   "pluginBase": () => (/* reexport safe */ _BildrPluginBase__WEBPACK_IMPORTED_MODULE_1__.BildrPluginBase)
+/* harmony export */   "pluginBase": () => (/* reexport safe */ _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE_1__.BildrPluginRightSide),
+/* harmony export */   "pluginLeftSide": () => (/* reexport safe */ _BildrPluginLeftSide__WEBPACK_IMPORTED_MODULE_2__.BildrPluginLeftSide)
 /* harmony export */ });
 /* harmony import */ var _BildrPluginManager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./BildrPluginManager */ "./src/plugin/BildrPluginManager.ts");
-/* harmony import */ var _BildrPluginBase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./BildrPluginBase */ "./src/plugin/BildrPluginBase.ts");
+/* harmony import */ var _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./BildrPluginRightSide */ "./src/plugin/BildrPluginRightSide.ts");
+/* harmony import */ var _BildrPluginLeftSide__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./BildrPluginLeftSide */ "./src/plugin/BildrPluginLeftSide.ts");
+
 
 
 

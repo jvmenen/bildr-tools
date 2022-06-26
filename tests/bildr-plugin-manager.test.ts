@@ -143,5 +143,38 @@ describe('BildrPluginManager', () => {
         // THEN
         expect(plugin.recentActionData.uMsgId).toEqual("123456789")
     });
+
+    it('should return visible plugin', () => {
+        // GIVEN
+        let plugin = new myTestPlugin("plugin1", "", testBrowser);
+        let plugin2 = new myTestPlugin("plugin2", "", testBrowser);
+
+        BildrPluginManager.register(plugin)
+        BildrPluginManager.register(plugin2)
+
+        plugin.show();
+
+        // WHEN
+        let visiblePlugin = BildrPluginManager.getVisiblePlugins();
+
+        // THEN
+        expect(visiblePlugin).toHaveLength(1)
+        expect(visiblePlugin[0].name).toEqual(plugin.name);
+    });
+
+    it('should return undefined if no plugin is vissble', () => {
+        // GIVEN
+        let plugin = new myTestPlugin("plugin1", "", testBrowser);
+        let plugin2 = new myTestPlugin("plugin2", "", testBrowser);
+
+        BildrPluginManager.register(plugin)
+        BildrPluginManager.register(plugin2)
+
+        // WHEN
+        let visiblePlugin = BildrPluginManager.getVisiblePlugins();
+
+        // THEN
+        expect(visiblePlugin).toHaveLength(0);
+    });
 })
 

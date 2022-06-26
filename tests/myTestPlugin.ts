@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
-import { BildrPluginBase } from "../src/plugin/BildrPluginBase";
+import { BildrPluginRightSide } from '../src/plugin/BildrPluginRightSide';
 
-export class myTestPlugin extends BildrPluginBase {
+export class myTestPlugin extends BildrPluginRightSide {
     public testBrowser: JSDOM
 
     public renderIsCalled: boolean = false;

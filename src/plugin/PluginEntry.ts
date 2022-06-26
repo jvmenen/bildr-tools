@@ -1,6 +1,9 @@
 import { BildrPluginManager } from './BildrPluginManager';
-import { BildrPluginBase as BildrPluginBase } from './BildrPluginBase';
+import { BildrPluginRightSide } from './BildrPluginRightSide';
+import { BildrPluginLeftSide } from './BildrPluginLeftSide';
+
 export {
     BildrPluginManager as manager,
-    BildrPluginBase as pluginBase
+    BildrPluginRightSide as pluginBase,
+    BildrPluginLeftSide as pluginLeftSide,
 }

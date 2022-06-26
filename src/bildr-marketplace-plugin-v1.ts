@@ -1,7 +1,7 @@
-import { BildrPluginBase, BildrPluginAction } from "./plugin/BildrPluginBase";
+import { BildrPluginRightSide, BildrPluginAction } from "./plugin/BildrPluginRightSide";
 import { BildrPluginManager } from './plugin/BildrPluginManager';
 
-export class MarketplacePlugin extends BildrPluginBase {
+export class MarketplacePlugin extends BildrPluginRightSide {
     private Version = "2";
 
     constructor() {

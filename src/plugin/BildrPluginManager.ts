@@ -1,4 +1,4 @@
-import { BildrPluginBase } from "./BildrPluginBase";
+import { BildrPluginRightSide } from "./BildrPluginRightSide";
 
 /**
  * @public
@@ -6,11 +6,11 @@ import { BildrPluginBase } from "./BildrPluginBase";
 export class BildrPluginManager {
     static _instance: BildrPluginManager;
 
-    private _registeredPlugins: BildrPluginBase[] = [];
+    private _registeredPlugins: BildrPluginRightSide[] = [];
 
     constructor() { }
 
-    public register(plugin: BildrPluginBase) {
+    public register(plugin: BildrPluginRightSide) {
         if (plugin.name == undefined || plugin.name == null || plugin.name.trim().length == 0) {
             throw new Error("Name is required to register a plugin.");
         }
@@ -28,6 +28,12 @@ export class BildrPluginManager {
         return this._registeredPlugins.find(item => item.name == pluginName) != undefined
     }
 
+    public showPlugin(pluginName: string) {
+        let plugin = this._registeredPlugins.find(item => item.name == pluginName)
+        if (plugin != undefined) {
+            plugin.show();
+        }
+    }
     public remove(pluginName: string) {
         let plugin = this._registeredPlugins.find(item => item.name == pluginName)
         if (plugin != undefined) {
@@ -66,6 +72,10 @@ export class BildrPluginManager {
         plugin.triggerAction(dataJson.command, dataJson.data);
     }
 
+    public getVisiblePlugins() {
+        return this._registeredPlugins.filter(item => item.isVisible)
+    }
+
     // STATIC FUNCTIONS
     static getInstance(): BildrPluginManager {
         if (this._instance == undefined) {
@@ -81,9 +91,18 @@ export class BildrPluginManager {
         return this.getInstance().isRegistered(pluginName)
     }
 
-    static register(plugin: BildrPluginBase) {
+    static register(plugin: BildrPluginRightSide) {
         this.getInstance().register(plugin)
     }
+
+    static getVisiblePlugins() {
+        return this.getInstance().getVisiblePlugins();
+    }
+
+    static showPlugin(pluginName: string) {
+        this.getInstance().showPlugin(pluginName)
+    }
+
 }
 
 type BildrPluginData = {
