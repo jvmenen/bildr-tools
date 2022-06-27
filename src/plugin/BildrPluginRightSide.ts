@@ -2,7 +2,7 @@
 /**
  * @public
  */
-export interface BildrPluginAction {
+export type BildrPluginAction = {
     get name(): string;
     execFunc(args: any): any;
 }
@@ -120,15 +120,18 @@ export class BildrPluginRightSide {
     }
 }
 
-class SimplePluginAction implements BildrPluginAction {
-    public name: string;
+export class SimplePluginAction implements BildrPluginAction {
+    private _name: string;
     private _execFunc: Function;
 
     constructor(actionName: string, execFunc: Function) {
-        this.name = actionName;
+        this._name = actionName;
         this._execFunc = execFunc;
     }
 
+    get name(): string {
+        return this._name;
+    }
     execFunc(args: any): any {
         return this._execFunc(args);
     }

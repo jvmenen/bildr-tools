@@ -1,9 +1,13 @@
 import { BildrPluginManager } from './BildrPluginManager';
-import { BildrPluginRightSide } from './BildrPluginRightSide';
+import { BildrPluginAction, BildrPluginRightSide, SimplePluginAction } from './BildrPluginRightSide';
 import { BildrPluginLeftSide } from './BildrPluginLeftSide';
+import { initPluginManagerUI } from './bildr-pluginmanager';
 
 export {
     BildrPluginManager as manager,
-    BildrPluginRightSide as pluginBase,
-    BildrPluginLeftSide as pluginLeftSide,
+    BildrPluginRightSide as PluginBase,
+    BildrPluginLeftSide as PluginLeftSide,
+    initPluginManagerUI as initPluginManagerUI,
+    SimplePluginAction as SimplePluginAction,
+    type BildrPluginAction as BildrPluginAction
 }

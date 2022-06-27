@@ -1,19 +1,49 @@
 import { BildrPluginLeftSide } from "./BildrPluginLeftSide";
 import { BildrPluginManager } from "./BildrPluginManager";
 
-export class BildrPlugins extends BildrPluginLeftSide {
-    private Version = "2";
+Node.prototype.appendAfter = function (element: HTMLElement) {
+    element.parentNode?.insertBefore(this, element.nextSibling);
+}
+
+class BildrPlugins extends BildrPluginLeftSide {
 
     constructor() {
-        super("marketplace", "https://marketplace.bildr.com/BE")
-        this.addAction("hidePlugin", () => { this.hide(); return undefined });
-        this.addAction("showPlugin", () => { this.show(); return undefined });
+        super("plugins", "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/")
+        this.addAction("hidePlugin", () => { this.hide() });
+        this.addActionObject(new LoadPluginScriptAction(document));
+    }
+
+}
+
+class LoadPluginScriptAction {
+    private _document: Document;
+
+    constructor(document: Document) {
+        this._document = document
+    }
+
+    get name() {
+        return "loadPluginScript"
+    };
+
+    execFunc(args: any) {
+        if (!BildrPluginManager.isRegistered(args.pluginName)) {
+                var script = this._document.createElement("script");
+                script.src = args.src;
+                script.onload = () => {
+                    BildrPluginManager.showPlugin(args.pluginName);
+                };
+                this._document.head.appendChild(script);
+        } else {
+            BildrPluginManager.showPlugin(args.pluginName)
+        }
+
     }
 }
 
-export class PluginToolBarButton {
+class PluginToolBarButton {
     static pluginsMenuItemDivId = "bildrPluginsMenuItem";
-    static sideMenuBarDivCss = ".css_23071.css_23052";
+    static sideMenuBarDivCss = "css_23071.css_23052";
 
     static isSideBarAvailable() {
         return document.querySelector(`.${PluginToolBarButton.sideMenuBarDivCss}`);
@@ -25,18 +55,25 @@ export class PluginToolBarButton {
             let bildrPlugins = new BildrPlugins();
             BildrPluginManager.register(bildrPlugins)
 
-            // Make some space in the menu bar
-            var sideMenuBar = document.querySelector(`.${PluginToolBarButton.sideMenuBarDivCss}`) as HTMLDivElement;
-            // sideMenuBar.style.width = "520px";
-
             // CREATE menu bar item
             var elem = document.createElement("div");
             elem.id = PluginToolBarButton.pluginsMenuItemDivId;
-            elem.className = "css_40tBJ8HulEaFxBAoX32hBQ css_23637 ";
-            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r9f576480f5ba4b118cec7ce8e6c345e3/doc/Bildr marketplace logo WB color.ynHqabhunkG6oesIc3Xzvg.png' class='css_0EWldTyzqU60XwJWKjRXog' draggable='false' width='240'><div innerhtml='Plugins' class='css_ css_23185 css_22538 css_23641 ' style='white-space:nowrap;'>Plugins</div>";
+            elem.className = "css_0Bn06MSFX0Oj13pgDAho9g ";
+            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r778fd6080b694ebc8451a3af0b77b028/doc/tool.5hBAqSf0U0aFZAloVaMjBw.svg' class='css_0EWldTyzqU60XwJWKjRXog' draggable='false' width='240'><div innerhtml='Plugins' class='css_ css_23185 css_22538 css_23641 ' style='white-space:nowrap;'>Plugins</div>";
 
             // add to side menu bar
-            sideMenuBar.appendChild(elem);
+            var sideMenuBar = document.querySelector(`.${PluginToolBarButton.sideMenuBarDivCss}`);
+            if (sideMenuBar == undefined) {
+                throw new Error("Could not find side menu bar");
+
+            }
+            // after the 5th seperator
+            let seperator = sideMenuBar.querySelectorAll(".css_jMrwOmSGxUezs1sr6VSoNQ  ")[5]
+            if (seperator) {
+                elem.appendAfter(seperator);
+            } else {
+                sideMenuBar.appendChild(elem);
+            }
 
             // Handle click on button, inside the plugin or outside the plugin (auto hide)
             // Mind the config param capture: true on the addEventListener
@@ -50,6 +87,7 @@ export class PluginToolBarButton {
                 let visiblePlugins = BildrPluginManager.getVisiblePlugins();
 
                 while (target) {
+                    if (target == null) return;
 
                     // Ignore click inside the plugin / div
                     let clickedInPlugin = visiblePlugins.find(p => p.isSameDivElem(target));
@@ -65,7 +103,7 @@ export class PluginToolBarButton {
                     target = target.parentNode as HTMLElement;
                 }
 
-                if (action == "hide") { 
+                if (action == "hide") {
                     visiblePlugins.forEach(p => p.hide());
                 }
                 if (action == "toggle") { bildrPlugins.toggleVisibility(); }
@@ -75,27 +113,34 @@ export class PluginToolBarButton {
         }
     }
 }
-var onStudioLoadObservers = [];
-// set up marketplace button as soon as top bar is available
-onStudioLoadObservers.push(new MutationObserver(function (_mutations, me) {
-    // `me` is the MutationObserver instance
 
-    if (PluginToolBarButton.isSideBarAvailable()) {
-        // stop observing
-        me.disconnect();
+function initializeMutationObservers() {
+    var onStudioLoadObservers = [];
+    // set up marketplace button as soon as top bar is available
+    onStudioLoadObservers.push(new MutationObserver(function (_mutations, me) {
+        // `me` is the MutationObserver instance
+        if (PluginToolBarButton.isSideBarAvailable()) {
+            // stop observing
+            me.disconnect();
 
-        PluginToolBarButton.create();
-    }
-}))
+            PluginToolBarButton.create();
+        }
+    }));
+    return onStudioLoadObservers;
+}
 
-// prevent running this script when not in Bildr Studio
-if (location.href.indexOf("https://www.bildr.com/studio?projectName=") != -1) {
-    // start observing
+export function initPluginManagerUI() {
 
-    onStudioLoadObservers.forEach(observer => {
-        observer.observe(document, {
-            childList: true,
-            subtree: true
+    // prevent running this script when not in Bildr Studio
+    if (location.href.indexOf("https://www.bildr.com/studio?projectName=") != -1) {
+        // start observing
+        var onStudioLoadObservers = initializeMutationObservers();
+
+        onStudioLoadObservers.forEach(observer => {
+            observer.observe(document, {
+                childList: true,
+                subtree: true
+            });
         });
-    });
+    }
 }

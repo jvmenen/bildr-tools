@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const TerserPlugin = require("terser-webpack-plugin");
+var DeclarationBundlerPlugin = require('./DeclarationBundlerPlugin');
 
 module.exports = (env) => {
     let fileExtension = "js"
@@ -15,8 +16,7 @@ module.exports = (env) => {
         devtool: "source-map", // "", "eval-source-map", "source-map"
         entry: {
             tools: "./src/tools/BildrTools.ts",
-            plugins: "./src/plugin/PluginEntry.ts",
-            marketplace: "./src/bildr-marketplace-plugin-v1.ts"
+            plugins: "./src/plugin/PluginEntry.ts"
         },
         target: ['web', 'es6'],
         module: {
@@ -36,6 +36,12 @@ module.exports = (env) => {
                 }
             ]
         },
+        plugins: [
+            new DeclarationBundlerPlugin({
+                moduleName: 'Bildr.plugins',
+                out: './dist/bildr-plugins.d.ts',
+            })
+        ],
         resolve: {
             extensions: ['.ts', '.js']
         },
