@@ -33,7 +33,7 @@ class BildrPluginLeftSide extends _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE
             // CREATE plugin div/iframe
             let elem = this.document.createElement('div');
             elem.id = this._divId;
-            elem.style.cssText = "width:0px;height:100vh;top:0px;left:-350px;right:unset;bottom:unset;border:none;background:#ffffff;position: fixed;z-index: 100004;overflow: hidden;position:absolute;transition: right 300ms ease-in-out 0s;";
+            elem.style.cssText = "width:0px;height:100vh;top:0px;left:-350px;right:unset;bottom:unset;border:none;background:#ffffff;position: fixed;z-index: 100004;overflow: hidden;position:absolute;transition: left 300ms ease-in-out 0s;";
             elem.innerHTML = `<iframe id='${this._frameId}' src='${this._pageUrl}' style='all:unset;width:100%;height:100%'></iframe>`;
             // add to document (right side)
             this.document.body.appendChild(elem);
@@ -122,11 +122,17 @@ class BildrPluginManager {
     }
     triggerActionInPlugin(e) {
         if (!e.data)
-            return;
+            throw new Error("e.data property is missing.");
         let dataJson = e.data;
+        if (!dataJson.uMsgId)
+            throw new Error("Required property e.data.uMsgId is missing.");
+        if (!dataJson.command)
+            throw new Error("Required property e.data.command is missing.");
         let plugin = this._registeredPlugins.find(item => dataJson.pluginName && item.name == dataJson.pluginName);
-        if (plugin == undefined)
-            return;
+        if (plugin == undefined) {
+            throw new Error(`Plugin with name '${dataJson.pluginName}' is not registered.`);
+        }
+        ;
         if (dataJson.data == undefined)
             dataJson.data = {};
         dataJson.data.uMsgId = dataJson.uMsgId;
@@ -281,10 +287,10 @@ class SimplePluginAction {
 
 /***/ }),
 
-/***/ "./src/plugin/bildr-pluginmanager.ts":
-/*!*******************************************!*\
-  !*** ./src/plugin/bildr-pluginmanager.ts ***!
-  \*******************************************/
+/***/ "./src/plugin/BildrPluginsUI.ts":
+/*!**************************************!*\
+  !*** ./src/plugin/BildrPluginsUI.ts ***!
+  \**************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -299,9 +305,9 @@ Node.prototype.appendAfter = function (element) {
     var _a;
     (_a = element.parentNode) === null || _a === void 0 ? void 0 : _a.insertBefore(this, element.nextSibling);
 };
-class BildrPlugins extends _BildrPluginLeftSide__WEBPACK_IMPORTED_MODULE_0__.BildrPluginLeftSide {
+class BildrPluginsUI extends _BildrPluginLeftSide__WEBPACK_IMPORTED_MODULE_0__.BildrPluginLeftSide {
     constructor() {
-        super("plugins", "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/");
+        super(BildrPluginsUI.name, "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/");
         this.addAction("hidePlugin", () => { this.hide(); });
         this.addActionObject(new LoadPluginScriptAction(document));
     }
@@ -315,15 +321,22 @@ class LoadPluginScriptAction {
     }
     ;
     execFunc(args) {
-        if (!_BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.isRegistered(args.pluginName)) {
-            {
-                var script = this._document.createElement("script");
-                script.src = args.src;
-                script.onload = () => {
-                    _BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.showPlugin(args.pluginName);
-                };
-                this._document.head.appendChild(script);
+        // Hide the visible plugin(s) (except me=BildrPluginsUI)
+        _BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.getVisiblePlugins().forEach(plugin => {
+            if (plugin.name != BildrPluginsUI.name) {
+                plugin.hide();
             }
+        });
+        if (!_BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.isRegistered(args.pluginName)) {
+            var script = this._document.createElement("script");
+            script.src = args.src;
+            script.onload = () => {
+                _BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.showPlugin(args.pluginName);
+            };
+            this._document.head.appendChild(script);
+        }
+        else {
+            _BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.showPlugin(args.pluginName);
         }
     }
 }
@@ -334,13 +347,13 @@ class PluginToolBarButton {
     static create() {
         if (!document.getElementById(PluginToolBarButton.pluginsMenuItemDivId)) {
             // init page for smooth sliding in and not seeing the page load
-            let bildrPlugins = new BildrPlugins();
+            let bildrPlugins = new BildrPluginsUI();
             _BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.register(bildrPlugins);
             // CREATE menu bar item
             var elem = document.createElement("div");
             elem.id = PluginToolBarButton.pluginsMenuItemDivId;
             elem.className = "css_0Bn06MSFX0Oj13pgDAho9g ";
-            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r778fd6080b694ebc8451a3af0b77b028/doc/tool.5hBAqSf0U0aFZAloVaMjBw.svg' class='css_0EWldTyzqU60XwJWKjRXog' draggable='false' width='240'><div innerhtml='Plugins' class='css_ css_23185 css_22538 css_23641 ' style='white-space:nowrap;'>Plugins</div>";
+            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r778fd6080b694ebc8451a3af0b77b028/doc/tool.5hBAqSf0U0aFZAloVaMjBw.svg' class='css_40tBJ8HulEaFxBAoX32hBQ' draggable='false' width='240'><div innerhtml='Community Plugins' class='css_ css_23185 css_22538 css_23641' style='white-space:nowrap;'>Community Plugins</div>";
             // add to side menu bar
             var sideMenuBar = document.querySelector(`.${PluginToolBarButton.sideMenuBarDivCss}`);
             if (sideMenuBar == undefined) {
@@ -486,13 +499,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "PluginBase": () => (/* reexport safe */ _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE_1__.BildrPluginRightSide),
 /* harmony export */   "PluginLeftSide": () => (/* reexport safe */ _BildrPluginLeftSide__WEBPACK_IMPORTED_MODULE_2__.BildrPluginLeftSide),
 /* harmony export */   "SimplePluginAction": () => (/* reexport safe */ _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE_1__.SimplePluginAction),
-/* harmony export */   "initPluginManagerUI": () => (/* reexport safe */ _bildr_pluginmanager__WEBPACK_IMPORTED_MODULE_3__.initPluginManagerUI),
+/* harmony export */   "initPluginManagerUI": () => (/* reexport safe */ _BildrPluginsUI__WEBPACK_IMPORTED_MODULE_3__.initPluginManagerUI),
 /* harmony export */   "manager": () => (/* reexport safe */ _BildrPluginManager__WEBPACK_IMPORTED_MODULE_0__.BildrPluginManager)
 /* harmony export */ });
 /* harmony import */ var _BildrPluginManager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./BildrPluginManager */ "./src/plugin/BildrPluginManager.ts");
 /* harmony import */ var _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./BildrPluginRightSide */ "./src/plugin/BildrPluginRightSide.ts");
 /* harmony import */ var _BildrPluginLeftSide__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./BildrPluginLeftSide */ "./src/plugin/BildrPluginLeftSide.ts");
-/* harmony import */ var _bildr_pluginmanager__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./bildr-pluginmanager */ "./src/plugin/bildr-pluginmanager.ts");
+/* harmony import */ var _BildrPluginsUI__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./BildrPluginsUI */ "./src/plugin/BildrPluginsUI.ts");
 
 
 

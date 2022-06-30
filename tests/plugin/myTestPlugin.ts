@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import { BildrPluginRightSide } from '../src/plugin/BildrPluginRightSide';
+import { BildrPluginRightSide } from '../../src/plugin/BildrPluginRightSide';
 
 export class myTestPlugin extends BildrPluginRightSide {
     public testBrowser: JSDOM

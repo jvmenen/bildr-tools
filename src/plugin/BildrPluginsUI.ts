@@ -5,10 +5,10 @@ Node.prototype.appendAfter = function (element: HTMLElement) {
     element.parentNode?.insertBefore(this, element.nextSibling);
 }
 
-class BildrPlugins extends BildrPluginLeftSide {
+class BildrPluginsUI extends BildrPluginLeftSide {
 
     constructor() {
-        super("plugins", "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/")
+        super(BildrPluginsUI.name, "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/")
         this.addAction("hidePlugin", () => { this.hide() });
         this.addActionObject(new LoadPluginScriptAction(document));
     }
@@ -27,13 +27,19 @@ class LoadPluginScriptAction {
     };
 
     execFunc(args: any) {
+        // Hide the visible plugin(s) (except me=BildrPluginsUI)
+        BildrPluginManager.getVisiblePlugins().forEach(plugin => {
+            if (plugin.name != BildrPluginsUI.name) {
+                plugin.hide();
+            }
+        });
         if (!BildrPluginManager.isRegistered(args.pluginName)) {
-                var script = this._document.createElement("script");
-                script.src = args.src;
-                script.onload = () => {
-                    BildrPluginManager.showPlugin(args.pluginName);
-                };
-                this._document.head.appendChild(script);
+            var script = this._document.createElement("script");
+            script.src = args.src;
+            script.onload = () => {
+                BildrPluginManager.showPlugin(args.pluginName);
+            };
+            this._document.head.appendChild(script);
         } else {
             BildrPluginManager.showPlugin(args.pluginName)
         }
@@ -52,14 +58,14 @@ class PluginToolBarButton {
     static create() {
         if (!document.getElementById(PluginToolBarButton.pluginsMenuItemDivId)) {
             // init page for smooth sliding in and not seeing the page load
-            let bildrPlugins = new BildrPlugins();
+            let bildrPlugins = new BildrPluginsUI();
             BildrPluginManager.register(bildrPlugins)
 
             // CREATE menu bar item
             var elem = document.createElement("div");
             elem.id = PluginToolBarButton.pluginsMenuItemDivId;
             elem.className = "css_0Bn06MSFX0Oj13pgDAho9g ";
-            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r778fd6080b694ebc8451a3af0b77b028/doc/tool.5hBAqSf0U0aFZAloVaMjBw.svg' class='css_0EWldTyzqU60XwJWKjRXog' draggable='false' width='240'><div innerhtml='Plugins' class='css_ css_23185 css_22538 css_23641 ' style='white-space:nowrap;'>Plugins</div>";
+            elem.innerHTML = "<img src='https://documents-weu.bildr.com/r778fd6080b694ebc8451a3af0b77b028/doc/tool.5hBAqSf0U0aFZAloVaMjBw.svg' class='css_40tBJ8HulEaFxBAoX32hBQ' draggable='false' width='240'><div innerhtml='Community Plugins' class='css_ css_23185 css_22538 css_23641' style='white-space:nowrap;'>Community Plugins</div>";
 
             // add to side menu bar
             var sideMenuBar = document.querySelector(`.${PluginToolBarButton.sideMenuBarDivCss}`);

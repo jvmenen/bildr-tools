@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom';
-import { BildrPluginManager } from './../src/plugin/BildrPluginManager';
+import { BildrPluginManager } from '../../src/plugin/BildrPluginManager';
 import { myTestPlugin } from './myTestPlugin';
 import { myTestPluginManager } from './myTestPluginManager';
 
@@ -111,6 +111,32 @@ describe('BildrPluginManager', () => {
         expect(plugin.recentActionName).toEqual("saySomething")
         expect(plugin.recentActionData.uMsgId).toEqual("123456789")
         expect(plugin.recentActionData.param1).toEqual("Hello World!")
+    });
+
+    it('should throw an exception if pluginName is unknown', () => {
+        // GIVEN
+        // set up to get a reference to the callback function that
+        // will be triggered by the "message" event handler on window
+        let messageFunc: Function;
+
+        let addEventListenerSpy = jest.fn((event: any, callback: any) => {
+            messageFunc = callback as Function;
+        })
+        testBrowser.window.addEventListener = addEventListenerSpy
+
+        // one plugin needs to beregistered otherwise the message event handler will not be registered
+        BildrPluginManager.register(plugin)
+
+        let actionData = {
+            pluginName: "unknown-zauihafdhbebbebassdh",
+            command: "saySomething",
+            uMsgId: "123456789",
+            data: { "param1": "Hello World!" }
+        }
+        let eventData = { "data": actionData }
+
+        // WHEN / THEN
+        expect(() => messageFunc!(eventData, "*")).toThrowError(`Plugin with name 'unknown-zauihafdhbebbebassdh' is not registered.`)
     });
 
     it('should add msgId to data even if data is initially undefined', () => {

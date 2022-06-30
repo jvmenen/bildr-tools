@@ -1,7 +1,7 @@
-import { nameSort, CacheHelper, BildrCacheHelper } from '../src/tools/Helpers';
-import { actionsJson } from "./data/actions";
-import { elementsJson } from "./data/elements";
-import { actionTypesJson } from "./data/actionsTypes";
+import { nameSort, CacheHelper, BildrCacheHelper } from '../../src/tools/Helpers';
+import { actionsJson } from "../data/actions";
+import { elementsJson } from "../data/elements";
+import { actionTypesJson } from "../data/actionsTypes";
 
 describe("nameSort", () => {
     it("should be sorted", () => {
