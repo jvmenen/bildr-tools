@@ -12,10 +12,10 @@ describe("BildrPlugin", () => {
         <body>
             <div name="bildr_canvas"></div>
         </body>
-        </html>`);
+        </html>`, { url: "https://www.bildr.com/studio?projectName=12345667" });
     });
 
-    it('should be hidden be hidden after renderPage', () => {
+    it('should be hidden after renderPage', () => {
         // GIVEN
         let plugin = new myTestPlugin("test", "", testBrowser)
 
@@ -143,19 +143,19 @@ describe("BildrPlugin", () => {
 
     })
 
-    it('should cal senOutgGoinMessage when triggerAction returns a value', () => {
+    it('should call sendOutgGoinMessage when triggerAction returns a value', () => {
         let plugin = new myTestPlugin("", "", testBrowser);
-        plugin.triggerActionShouldCallSuper=true;
-        plugin.addAction("saySomething", ()=> { return "awesome"})
+        plugin.triggerActionShouldCallSuper = true;
+        plugin.addAction("saySomething", () => { return "awesome" })
 
         // WHEN
-        plugin.triggerAction("saySomething", {uMsgId:"123", something : "else"})
+        plugin.triggerAction("saySomething", { uMsgId: "123", something: "else" })
 
         // THEN
         expect(plugin.recentOutgoingMessageMsgId).toEqual("123");
         expect(plugin.recentOutgoingMessageData).toEqual("awesome")
-        
-        
+
+
     });
 });
 

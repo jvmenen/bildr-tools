@@ -1,5 +1,7 @@
 import { BildrPluginManager } from './BildrPluginManager';
-import { BildrPluginAction, BildrPluginRightSide, SimplePluginAction } from './BildrPluginRightSide';
+import { BildrPluginRightSide } from './BildrPluginRightSide';
+import { BildrPluginAction } from "./BildrPluginAction";
+import { SimplePluginAction } from "./SimplePluginAction";
 import { BildrPluginLeftSide } from './BildrPluginLeftSide';
 import { initPluginManagerUI } from './BildrPluginsUI';
 

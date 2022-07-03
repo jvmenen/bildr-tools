@@ -108,13 +108,12 @@ class BildrToolsActions {
                 let logFlowName = true;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
-                        var _a;
                         // check usage path on variable or element argument
                         checkVariableOrElementPathUsage(arg);
                         // Check usage of path in Data Collection filters
                         if (arg.argumentType == "filterset") {
                             let argFilterset = arg;
-                            (_a = argFilterset.filters) === null || _a === void 0 ? void 0 : _a.forEach(filter => {
+                            argFilterset.filters?.forEach(filter => {
                                 filter.fieldsToFilterArray.forEach(field => {
                                     field.valueToFilterWith.forEach(value => {
                                         checkVariableOrElementPathUsage(value);
@@ -198,7 +197,6 @@ class BildrToolsActions {
                 let logFlowName = true;
                 flow.Actions.forEach(action => {
                     action.Arguments.forEach(arg => {
-                        var _a;
                         if (setValue && arg.argumentType == "static.text" && arg.thisIsAVariableName == true) {
                             let argVariable = arg;
                             if (argVariable.value && matcher(argVariable.value)) {
@@ -215,7 +213,7 @@ class BildrToolsActions {
                         // Check usage of variable in Data Collection filters
                         if (readValue && arg.argumentType == "filterset") {
                             let argFilterset = arg;
-                            (_a = argFilterset.filters) === null || _a === void 0 ? void 0 : _a.forEach(filter => {
+                            argFilterset.filters?.forEach(filter => {
                                 filter.fieldsToFilterArray.forEach(field => {
                                     field.valueToFilterWith.forEach(value => {
                                         ({ pageNameLogged: logPageName, flowNameLogged: logFlowName } = handleArgVariable(value, action, logPageName, page, logFlowName, flow));
@@ -416,7 +414,6 @@ class BildrToolsFlows {
         }
         // check flow usage per active page
         bildrCache.activePages.forEach(page => {
-            var _a, _b, _c, _d, _e, _f;
             let logPageName = logToConsole;
             // Check usage of Flow in Actions of page.Flows         
             (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.nameSort)(page.ActiveFlows).forEach(flow => {
@@ -433,10 +430,9 @@ class BildrToolsFlows {
                     // or referenced by an action type argument
                     {
                         action.Arguments.forEach(arg => {
-                            var _a;
                             if (arg.argumentType == "static.actions") {
                                 let argumentStatic = arg;
-                                if (argumentStatic.type == "static.actions" && ((_a = argumentStatic.value) === null || _a === void 0 ? void 0 : _a.endsWith(strFlowId))) {
+                                if (argumentStatic.type == "static.actions" && argumentStatic.value?.endsWith(strFlowId)) {
                                     isUsed = true;
                                     logPageName = (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)("Page : " + page.name, logPageName);
                                     (0,_Helpers__WEBPACK_IMPORTED_MODULE_0__.ConsoleLog)(`  Flow : ${flow.name} (id: ${flow.id})`, logToConsole);
@@ -460,23 +456,23 @@ class BildrToolsFlows {
             // Check usage of flow in Page Events (Page Flows and Root Page Flows attributes)
             let inPageEvents = [];
             // Page Flows
-            if ((_a = page.opts.autoSaveActionID) === null || _a === void 0 ? void 0 : _a.toString().endsWith(strFlowId)) {
+            if (page.opts.autoSaveActionID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Auto-Save Flow");
             }
-            if ((_b = page.opts.onLoadAct) === null || _b === void 0 ? void 0 : _b.toString().endsWith(strFlowId)) {
+            if (page.opts.onLoadAct?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Page Load Flow");
             }
             // Root Page Flows
-            if ((_c = page.opts.notConnectedActID) === null || _c === void 0 ? void 0 : _c.toString().endsWith(strFlowId)) {
+            if (page.opts.notConnectedActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to run when connection is lost");
             }
-            if ((_d = page.opts.reConnectedActID) === null || _d === void 0 ? void 0 : _d.toString().endsWith(strFlowId)) {
+            if (page.opts.reConnectedActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to run when connection is re-established");
             }
-            if ((_e = page.opts.notAuthenticatedActID) === null || _e === void 0 ? void 0 : _e.toString().endsWith(strFlowId)) {
+            if (page.opts.notAuthenticatedActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to run when authentication is lost");
             }
-            if ((_f = page.opts.newRevisionActID) === null || _f === void 0 ? void 0 : _f.toString().endsWith(strFlowId)) {
+            if (page.opts.newRevisionActID?.toString().endsWith(strFlowId)) {
                 inPageEvents.push("Flow to Run When Revision is Out of Date");
             }
             if (inPageEvents.length > 0) {
@@ -509,12 +505,11 @@ class BildrToolsFlows {
         }
         // Check usage of Flow in Actions of Flows as nested flow or referenced by an action type argument
         bildrCache.activeFlows.forEach(flow => {
-            var _a;
             if (flow.opts && flow.opts.arguments) {
                 let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray"; });
                 if (actionsArray) {
                     let argumentStaticArray = actionsArray;
-                    (_a = argumentStaticArray.value) === null || _a === void 0 ? void 0 : _a.forEach(actionRef => {
+                    argumentStaticArray.value?.forEach(actionRef => {
                         // Nested flow?
                         if (actionRef.id && isDeletedFlow(actionRef.id)) {
                             let page = bildrCache.pages.find(item => { return item.id == flow.formID; });
@@ -619,7 +614,6 @@ class BildrToolsFlows {
         console.log("THAT'S IT!");
     }
     static getFlowWithActions(flowId) {
-        var _a;
         let cache = _Helpers__WEBPACK_IMPORTED_MODULE_0__.BildrCacheHelper.createInstance();
         let flow = cache.activeFlows.find(flow => {
             return (flow.id && flow.id.toString() == flowId);
@@ -635,7 +629,7 @@ class BildrToolsFlows {
             let actionsArray = flow.opts.arguments.find(item => { return item.name == "actionsArray"; });
             if (actionsArray) {
                 let argumentActionsArray = actionsArray;
-                (_a = argumentActionsArray.value) === null || _a === void 0 ? void 0 : _a.forEach(actionRef => {
+                argumentActionsArray.value?.forEach(actionRef => {
                     // Used in an argument of an action type?
                     let action = cache.actions.find(item => { return (item.id.toString() == actionRef.id.toString()); });
                     if (action) {

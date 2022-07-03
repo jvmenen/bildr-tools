@@ -1,11 +1,5 @@
-
-/**
- * @public
- */
-export type BildrPluginAction = {
-    get name(): string;
-    execFunc(args: any): any;
-}
+import { BildrPluginAction } from "./BildrPluginAction";
+import { SimplePluginAction } from "./SimplePluginAction";
 
 /**
  * @public
@@ -29,20 +23,25 @@ export class BildrPluginRightSide {
         return this._name;
     }
 
-    protected get divElem(): HTMLDivElement {
-        return this._divElem;
-    }
     public isSameDivElem(divElem: HTMLElement) {
         return this._divElem === divElem;
     }
 
+    protected get divElem(): HTMLDivElement {
+        return this._divElem;
+    }
+
     protected sendOutgoingMessage(msgId: string, result: any) {
+        // if sendOutgoingMessage is passed as function reference _frameId migth not be
+        // set, so we check for it to help debugging the issue (locking the Studio)
+        if (this._frameId == undefined || this._frameId == null || this._frameId == "") {
+            throw new Error("this._frameId should be set in the context of sendOutgoingMessage");
+        }
         var window = (document.getElementById(this._frameId) as HTMLIFrameElement).contentWindow;
         window!.postMessage({
             "msgId": msgId,
             "result": result
         }, "*");
-
     }
 
     public triggerAction(actionName: string, actionData: any) {
@@ -92,7 +91,7 @@ export class BildrPluginRightSide {
             let elem = this.document.createElement('div');
             elem.id = this._divId;
             elem.style.cssText = "width:0px;height:100vh;top:0px;left:unset;right:-400px;bottom:unset;border:none;background:#ffffff;position: fixed;z-index: 100010;overflow: hidden;position:absolute;transition: right 300ms ease-in-out 0s;";
-            elem.innerHTML = `<iframe id='${this._frameId}' src='${this._pageUrl}' style='all:unset;width:100%;height:100%'></iframe>`;
+            elem.innerHTML = `<iframe id='${this._frameId}' src='${this.pageUrl}' style='all:unset;width:100%;height:100%'></iframe>`;
             // add to document (right side)
             this.document.body.appendChild(elem);
 
@@ -107,6 +106,10 @@ export class BildrPluginRightSide {
         }
     }
 
+    public get pageUrl(): string {
+        return this._pageUrl;
+    }
+
     public remove(): void {
         this.document.body.removeChild(this._divElem);
     }
@@ -117,22 +120,5 @@ export class BildrPluginRightSide {
 
     public addAction(actionName: string, execFnc: Function): void {
         this.addActionObject(new SimplePluginAction(actionName, execFnc));
-    }
-}
-
-export class SimplePluginAction implements BildrPluginAction {
-    private _name: string;
-    private _execFunc: Function;
-
-    constructor(actionName: string, execFunc: Function) {
-        this._name = actionName;
-        this._execFunc = execFunc;
-    }
-
-    get name(): string {
-        return this._name;
-    }
-    execFunc(args: any): any {
-        return this._execFunc(args);
     }
 }

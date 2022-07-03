@@ -5,10 +5,20 @@ Node.prototype.appendAfter = function (element: HTMLElement) {
     element.parentNode?.insertBefore(this, element.nextSibling);
 }
 
+declare var WEBPACKDEFINE_PRODUCTION: boolean
+
 class BildrPluginsUI extends BildrPluginLeftSide {
 
     constructor() {
-        super(BildrPluginsUI.name, "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/")
+        let scriptUrl = ""
+        if (WEBPACKDEFINE_PRODUCTION) {
+            scriptUrl = "https://communityplugins.bildr.com/";
+        }
+        else {
+            scriptUrl = "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/"
+        }
+
+        super(BildrPluginsUI.name, scriptUrl)
         this.addAction("hidePlugin", () => { this.hide() });
         this.addActionObject(new LoadPluginScriptAction(document));
     }

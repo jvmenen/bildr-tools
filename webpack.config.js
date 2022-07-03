@@ -40,7 +40,10 @@ module.exports = (env) => {
             new DeclarationBundlerPlugin({
                 moduleName: 'Bildr.plugins',
                 out: './dist/bildr-plugins.d.ts',
-            })
+            }),
+            new webpack.DefinePlugin({
+                WEBPACKDEFINE_PRODUCTION: JSON.stringify(environment==="production"),
+              })
         ],
         resolve: {
             extensions: ['.ts', '.js']

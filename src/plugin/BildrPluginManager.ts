@@ -1,3 +1,4 @@
+import { BildrPluginData } from "./BildrPluginData";
 import { BildrPluginRightSide } from "./BildrPluginRightSide";
 
 /**
@@ -63,6 +64,7 @@ export class BildrPluginManager {
         let dataJson = e.data as BildrPluginData;
         if (!dataJson.uMsgId) throw new Error("Required property e.data.uMsgId is missing.");
         if (!dataJson.command) throw new Error("Required property e.data.command is missing.");
+        if (!dataJson.pluginName) throw new Error("Required property e.data.pluginName is missing.");
 
         let plugin = this._registeredPlugins.find(item => dataJson.pluginName && item.name == dataJson.pluginName);
 
@@ -107,12 +109,5 @@ export class BildrPluginManager {
         this.getInstance().showPlugin(pluginName)
     }
 
-}
-
-type BildrPluginData = {
-    pluginName: string,
-    command: string,
-    uMsgId: string,
-    data: any
 }
 
