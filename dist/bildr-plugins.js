@@ -49,7 +49,7 @@ class BildrPluginLeftSide extends _BildrPluginRightSide__WEBPACK_IMPORTED_MODULE
             let elem = this.document.createElement('div');
             elem.id = this._divId;
             elem.style.cssText = "width:0px;height:100vh;top:0px;left:-350px;right:unset;bottom:unset;border:none;background:#ffffff;position: fixed;z-index: 100004;overflow: hidden;position:absolute;transition: left 300ms ease-in-out 0s;";
-            elem.innerHTML = `<iframe id='${this._frameId}' src='${this.pageUrl}' style='all:unset;width:100%;height:100%'></iframe>`;
+            elem.innerHTML = `<iframe id='${this._frameId}' src='${this.pageUrl}' style='all:unset;width:100%;height:100%';background-color:#292c33></iframe>`;
             // add to document (right side)
             this.document.body.appendChild(elem);
             // Animation end handler
@@ -139,12 +139,12 @@ class BildrPluginManager {
         if (!e.data)
             throw new Error("e.data property is missing.");
         let dataJson = e.data;
-        if (!dataJson.uMsgId)
-            throw new Error("Required property e.data.uMsgId is missing.");
-        if (!dataJson.command)
-            throw new Error("Required property e.data.command is missing.");
         if (!dataJson.pluginName)
             throw new Error("Required property e.data.pluginName is missing.");
+        if (!dataJson.command)
+            throw new Error("Required property e.data.command is missing.");
+        if (!dataJson.uMsgId)
+            throw new Error("Required property e.data.uMsgId is missing.");
         let plugin = this._registeredPlugins.find(item => dataJson.pluginName && item.name == dataJson.pluginName);
         if (plugin == undefined) {
             throw new Error(`Plugin with name '${dataJson.pluginName}' is not registered.`);
@@ -230,15 +230,15 @@ class BildrPluginRightSide {
         }, "*");
     }
     triggerAction(actionName, actionData) {
-        if (actionData.uMsgId == undefined || actionData.uMsgId == null || actionData.uMsgId == "") {
-            throw new Error("uMsgId should be set on argument actionData");
-        }
         let action = this._actions.find(item => item.name == actionName);
         if (action == undefined) {
             throw new Error(`Unknown action '${actionName}' on plugin '${this.name}'`);
         }
         let result = action.execFunc(actionData);
         if (result) {
+            if (actionData.uMsgId == undefined || actionData.uMsgId == null || actionData.uMsgId == "") {
+                throw new Error("uMsgId is required and should be set on Data");
+            }
             this.sendOutgoingMessage(actionData.uMsgId, result);
         }
         return result;
@@ -270,7 +270,7 @@ class BildrPluginRightSide {
             let elem = this.document.createElement('div');
             elem.id = this._divId;
             elem.style.cssText = "width:0px;height:100vh;top:0px;left:unset;right:-400px;bottom:unset;border:none;background:#ffffff;position: fixed;z-index: 100010;overflow: hidden;position:absolute;transition: right 300ms ease-in-out 0s;";
-            elem.innerHTML = `<iframe id='${this._frameId}' src='${this.pageUrl}' style='all:unset;width:100%;height:100%'></iframe>`;
+            elem.innerHTML = `<iframe id='${this._frameId}' src='${this.pageUrl}' style='all:unset;width:100%;height:100%;background-color:#292c33'></iframe>`;
             // add to document (right side)
             this.document.body.appendChild(elem);
             // Animation end handler
@@ -325,7 +325,7 @@ class BildrPluginsUI extends _BildrPluginLeftSide__WEBPACK_IMPORTED_MODULE_0__.B
         else {
             scriptUrl = "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/";
         }
-        super(BildrPluginsUI.name, scriptUrl);
+        super("BildrPluginsUI", scriptUrl);
         this.addAction("hidePlugin", () => { this.hide(); });
         this.addActionObject(new LoadPluginScriptAction(document));
     }
@@ -341,7 +341,7 @@ class LoadPluginScriptAction {
     execFunc(args) {
         // Hide the visible plugin(s) (except me=BildrPluginsUI)
         _BildrPluginManager__WEBPACK_IMPORTED_MODULE_1__.BildrPluginManager.getVisiblePlugins().forEach(plugin => {
-            if (plugin.name != BildrPluginsUI.name) {
+            if (plugin.name != "BildrPluginsUI") {
                 plugin.hide();
             }
         });
@@ -380,7 +380,8 @@ class PluginToolBarButton {
             // after the 5th seperator
             let seperator = sideMenuBar.querySelectorAll(".css_jMrwOmSGxUezs1sr6VSoNQ  ")[5];
             if (seperator) {
-                elem.appendAfter(seperator);
+                seperator.before(elem);
+                //elem.appendAfter(seperator);
             }
             else {
                 sideMenuBar.appendChild(elem);
