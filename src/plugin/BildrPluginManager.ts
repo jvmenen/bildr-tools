@@ -62,9 +62,9 @@ export class BildrPluginManager {
         if (!e.data) throw new Error("e.data property is missing.");
 
         let dataJson = e.data as BildrPluginData;
-        if (!dataJson.uMsgId) throw new Error("Required property e.data.uMsgId is missing.");
-        if (!dataJson.command) throw new Error("Required property e.data.command is missing.");
         if (!dataJson.pluginName) throw new Error("Required property e.data.pluginName is missing.");
+        if (!dataJson.command) throw new Error("Required property e.data.command is missing.");
+        if (!dataJson.uMsgId) throw new Error("Required property e.data.uMsgId is missing.");
 
         let plugin = this._registeredPlugins.find(item => dataJson.pluginName && item.name == dataJson.pluginName);
 
