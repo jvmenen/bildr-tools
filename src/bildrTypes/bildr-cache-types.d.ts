@@ -1,8 +1,10 @@
 declare interface BildrDBCache {
     actions: group<action>,
+    actionsTypes: group<actionType>
     elements: group<element>,
     forms: group<form>,
-    actionsTypes: group<actionType>
+    functions: group<functon>,
+    pageHeader: group<pageHeader>,
 }
 
 declare interface group<T> extends nameId {
@@ -153,4 +155,13 @@ declare interface brwObj {
     brwFrm: brwForm,
     childBrwFrm: brwForm,
     of: any
+}
+
+declare interface pageHeader extends nameIdDeleted {
+    opts: {
+        loadInStudio?: boolean,
+        systemCreated?: boolean,
+        systemType: string
+    }
+    value: string
 }
