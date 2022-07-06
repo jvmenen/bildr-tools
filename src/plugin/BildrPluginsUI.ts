@@ -18,7 +18,7 @@ class BildrPluginsUI extends BildrPluginLeftSide {
             scriptUrl = "https://p1a6bee8b69e94699b5845bcfc8906d9b.bildr.com/"
         }
 
-        super(BildrPluginsUI.name, scriptUrl)
+        super("BildrPluginsUI", scriptUrl)
         this.addAction("hidePlugin", () => { this.hide() });
         this.addActionObject(new LoadPluginScriptAction(document));
     }
@@ -39,7 +39,7 @@ class LoadPluginScriptAction {
     execFunc(args: any) {
         // Hide the visible plugin(s) (except me=BildrPluginsUI)
         BildrPluginManager.getVisiblePlugins().forEach(plugin => {
-            if (plugin.name != BildrPluginsUI.name) {
+            if (plugin.name != "BildrPluginsUI") {
                 plugin.hide();
             }
         });
@@ -86,7 +86,8 @@ class PluginToolBarButton {
             // after the 5th seperator
             let seperator = sideMenuBar.querySelectorAll(".css_jMrwOmSGxUezs1sr6VSoNQ  ")[5]
             if (seperator) {
-                elem.appendAfter(seperator);
+                seperator.before(elem);
+                //elem.appendAfter(seperator);
             } else {
                 sideMenuBar.appendChild(elem);
             }
