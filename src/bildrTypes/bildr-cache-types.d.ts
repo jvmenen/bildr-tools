@@ -152,7 +152,7 @@ declare interface brwForm {
 
 declare interface brwObj {
     HTML: HTMLElement,
-    brwFrm: brwForm,
+    brwForm: brwForm,
     childBrwFrm: brwForm,
     of: any
 }
