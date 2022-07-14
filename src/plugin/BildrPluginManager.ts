@@ -72,7 +72,7 @@ export class BildrPluginManager {
             throw new Error(`Plugin with name '${dataJson.pluginName}' is not registered.`);
         };
 
-        if (dataJson.data == undefined) dataJson.data = {};
+        if (dataJson.data === undefined || dataJson.data === null || dataJson.data === "") dataJson.data = {};
         dataJson.data.uMsgId = dataJson.uMsgId;
 
         plugin.triggerAction(dataJson.command, dataJson.data);
