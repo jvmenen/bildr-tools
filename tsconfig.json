@@ -11,6 +11,6 @@
         "strict": true,
         "types": []
     },
-    "include": ["src/**/*.ts", "src/bildrTypes/bildr-cache-types.d ts"],
+    "include": ["src/**/*.ts", "src/bildr-type-defs/bildr-cache-types.d ts"],
     "moduleResolution":"node", 
 }
