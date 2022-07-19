@@ -18,7 +18,8 @@ declare interface actionType extends nameIdDeleted {
         marketplace?: {
             actionTypeID: string,
             checksum: string
-        }
+        };
+        sharedID?: string;
     };
 }
 
