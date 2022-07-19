@@ -1,6 +1,8 @@
 import { BildrPluginAction } from "./BildrPluginAction";
 
-
+/**
+ * @public
+ */
 export class SimplePluginAction implements BildrPluginAction {
     private _name: string;
     private _execFunc: Function;

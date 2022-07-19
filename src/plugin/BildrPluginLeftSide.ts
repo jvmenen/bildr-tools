@@ -1,5 +1,8 @@
 import { BildrPluginRightSide } from "./BildrPluginRightSide";
 
+/**
+ * @public
+ */
 export class BildrPluginLeftSide extends BildrPluginRightSide {
     constructor(name: string, pageUrl: string) {
         super(name, pageUrl);
