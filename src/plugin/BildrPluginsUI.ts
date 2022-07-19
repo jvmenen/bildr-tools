@@ -16,12 +16,13 @@ class BildrPluginsUI extends BildrPluginLeftSide {
 
         super("BildrPluginsUI", scriptUrl)
         this.addAction("hidePlugin", () => { this.hide() });
+        this.addActionObject(new LoadPluginScriptAndShowAction(document));
         this.addActionObject(new LoadPluginScriptAction(document));
     }
 
 }
 
-class LoadPluginScriptAction {
+class LoadPluginScriptAndShowAction {
     private _document: Document;
 
     constructor(document: Document) {
@@ -29,7 +30,7 @@ class LoadPluginScriptAction {
     }
 
     get name() {
-        return "loadPluginScript"
+        return "loadPluginScriptAndShow"
     };
 
     execFunc(args: any) {
@@ -48,6 +49,29 @@ class LoadPluginScriptAction {
             this._document.head.appendChild(script);
         } else {
             BildrPluginManager.showPlugin(args.pluginName)
+        }
+
+    }
+}
+
+// Use this Action to load a plugin script and to run actions
+// from the plugin on page load without showing the plugin.
+class LoadPluginScriptAction {
+    private _document: Document;
+
+    constructor(document: Document) {
+        this._document = document
+    }
+
+    get name() {
+        return "loadPluginScript"
+    };
+
+    execFunc(args: any) {
+        if (!BildrPluginManager.isRegistered(args.pluginName)) {
+            var script = this._document.createElement("script");
+            script.src = args.src;
+            this._document.head.appendChild(script);
         }
 
     }
@@ -141,6 +165,9 @@ function initializeMutationObservers() {
     return onStudioLoadObservers;
 }
 
+/**
+ * @public
+ */
 export function initPluginManagerUI() {
 
     // prevent running this script when not in Bildr Studio
