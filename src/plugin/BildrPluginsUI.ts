@@ -1,10 +1,6 @@
 import { BildrPluginLeftSide } from "./BildrPluginLeftSide";
 import { BildrPluginManager } from "./BildrPluginManager";
 
-Node.prototype.appendAfter = function (element: HTMLElement) {
-    element.parentNode?.insertBefore(this, element.nextSibling);
-}
-
 declare var WEBPACKDEFINE_PRODUCTION: boolean
 
 class BildrPluginsUI extends BildrPluginLeftSide {
@@ -87,7 +83,6 @@ class PluginToolBarButton {
             let seperator = sideMenuBar.querySelectorAll(".css_jMrwOmSGxUezs1sr6VSoNQ  ")[5]
             if (seperator) {
                 seperator.before(elem);
-                //elem.appendAfter(seperator);
             } else {
                 sideMenuBar.appendChild(elem);
             }
